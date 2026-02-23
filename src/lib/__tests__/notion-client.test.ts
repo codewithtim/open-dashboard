@@ -4,7 +4,7 @@ jest.mock('@notionhq/client', () => {
     return {
         Client: jest.fn().mockImplementation(() => {
             return {
-                dataSources: {
+                databases: {
                     query: jest.fn(),
                 },
             };
@@ -12,7 +12,8 @@ jest.mock('@notionhq/client', () => {
     };
 });
 
-const mockQuery = notion.dataSources.query as jest.Mock;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockQuery = (notion.databases as any).query as jest.Mock;
 
 describe('NotionClient', () => {
     let client: NotionClient;
@@ -49,8 +50,8 @@ describe('NotionClient', () => {
                 status: 'Active',
             });
             expect(mockQuery).toHaveBeenCalledWith({
-                data_source_id: process.env.NOTION_PROJECTS_DB_ID || '',
-                filter: { property: 'status', status: { equals: 'active' } },
+                database_id: process.env.NOTION_PROJECTS_DB_ID || '',
+                filter: { property: 'status', select: { equals: 'active' } },
             });
         });
     });
@@ -99,8 +100,8 @@ describe('NotionClient', () => {
                 .mockResolvedValueOnce({
                     results: [{
                         properties: {
-                            'metric name': { title: [{ plain_text: 'MRR' }] },
-                            'value': { number: 50 }
+                            name: { title: [{ plain_text: 'MRR' }] },
+                            value: { number: 50 }
                         }
                     }] // Metrics
                 });

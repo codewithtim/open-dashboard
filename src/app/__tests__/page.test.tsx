@@ -54,7 +54,7 @@ describe('Dashboard Home Page', () => {
         render(page);
 
         expect(screen.getByText('Total Revenue')).toBeInTheDocument();
-        expect(screen.getByText('$5,000')).toBeInTheDocument();
+        expect(screen.getAllByText('$5,000').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Net Profit')).toBeInTheDocument();
         expect(screen.getByText('$4,000')).toBeInTheDocument();
         expect(screen.getByText('Active Projects')).toBeInTheDocument();
@@ -74,5 +74,9 @@ describe('Dashboard Home Page', () => {
         expect(screen.getByText('$2,400')).toBeInTheDocument(); // Profit
         expect(screen.getByText('Subscribers')).toBeInTheDocument();
         expect(screen.getByText('15,000')).toBeInTheDocument();
+
+        // Progress bar renders with totalRevenue against $1M goal
+        expect(screen.getByTestId('progress-filler')).toBeInTheDocument();
+        expect(screen.getByText('Goal: $1,000,000')).toBeInTheDocument();
     });
 });

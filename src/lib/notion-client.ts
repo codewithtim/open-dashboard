@@ -23,8 +23,8 @@ function isPageObject(
 }
 
 type NotionQueryArgs = {
-    data_source_id: string;
-    filter?: object;
+    database_id: string;
+    filter?: any;
 };
 
 type DbQueryResponse = {
@@ -32,15 +32,14 @@ type DbQueryResponse = {
 };
 
 export async function queryNotionDb(args: NotionQueryArgs): Promise<DbQueryResponse> {
-    // @ts-expect-error SDK is missing type definition for query
-    return notion.dataSources.query(args);
+    return notion.databases.query(args);
 }
 
 export class NotionClient implements DataClient {
     async getProjects(): Promise<Project[]> {
         const response = await queryNotionDb({
-            data_source_id: process.env.NOTION_PROJECTS_DB_ID || '',
-            filter: { property: 'status', status: { equals: 'active' } },
+            database_id: process.env.NOTION_PROJECTS_DB_ID || '',
+            filter: { property: 'status', select: { equals: 'active' } },
         });
 
         const projects: Project[] = [];
@@ -60,8 +59,8 @@ export class NotionClient implements DataClient {
 
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
         const [revenueResponse, costsResponse] = await Promise.all([
-            queryNotionDb({ data_source_id: process.env.NOTION_REVENUE_DB_ID || '' }),
-            queryNotionDb({ data_source_id: process.env.NOTION_COSTS_DB_ID || '' }),
+            queryNotionDb({ database_id: process.env.NOTION_REVENUE_DB_ID || '' }),
+            queryNotionDb({ database_id: process.env.NOTION_COSTS_DB_ID || '' }),
         ]);
 
         let totalRevenue = 0;
@@ -86,20 +85,20 @@ export class NotionClient implements DataClient {
     async getProjectDetails(projectId: string): Promise<ProjectDetails | null> {
         const [projectRes, costsRes, revenueRes, metricsRes] = await Promise.all([
             queryNotionDb({
-                data_source_id: process.env.NOTION_PROJECTS_DB_ID || ''
+                database_id: process.env.NOTION_PROJECTS_DB_ID || ''
                 // We'll filter for the exact page inside the DB to grab its properties
             }),
             queryNotionDb({
-                data_source_id: process.env.NOTION_COSTS_DB_ID || '',
-                filter: { property: 'project', relation: { contains: projectId } }
+                database_id: process.env.NOTION_COSTS_DB_ID || '',
+                filter: { property: 'projects', relation: { contains: projectId } }
             }),
             queryNotionDb({
-                data_source_id: process.env.NOTION_REVENUE_DB_ID || '',
-                filter: { property: 'project', relation: { contains: projectId } }
+                database_id: process.env.NOTION_REVENUE_DB_ID || '',
+                filter: { property: 'projects', relation: { contains: projectId } }
             }),
             queryNotionDb({
-                data_source_id: process.env.NOTION_METRICS_DB_ID || '',
-                filter: { property: 'project', relation: { contains: projectId } }
+                database_id: process.env.NOTION_METRICS_DB_ID || '',
+                filter: { property: 'projects', relation: { contains: projectId } }
             })
         ]);
 
@@ -137,7 +136,7 @@ export class NotionClient implements DataClient {
         for (const page of metricsRes.results) {
             if (isPageObject(page)) {
                 const props = page.properties as Record<string, NotionProp>;
-                const name = props['metric name']?.title?.[0]?.plain_text || '';
+                const name = props.name?.title?.[0]?.plain_text || '';
                 const value = props.value?.number || 0;
                 if (name) metrics.push({ name, value });
             }

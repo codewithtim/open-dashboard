@@ -1,9 +1,11 @@
 import { getDataClient } from '@/lib/client-factory';
 import { DashboardCard } from '@/components/dashboard-card';
+import { ProgressBar } from '@/components/progress-bar';
 import Link from 'next/link';
 import React from 'react';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function DashboardPage() {
   const client = getDataClient();
@@ -14,6 +16,10 @@ export default async function DashboardPage() {
 
   return (
     <main className="space-y-8">
+      <section>
+        <ProgressBar currentValue={stats.totalRevenue} targetValue={1000000} />
+      </section>
+
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <DashboardCard title="Total Revenue" value={`$${stats.totalRevenue.toLocaleString()}`} />
         <DashboardCard title="Total Costs" value={`$${stats.totalCosts.toLocaleString()}`} />
