@@ -1,0 +1,54 @@
+import { LocalMockClient } from '../local-mock-client';
+
+describe('LocalMockClient', () => {
+    let client: LocalMockClient;
+
+    beforeEach(() => {
+        client = new LocalMockClient();
+    });
+
+    describe('getProjects', () => {
+        it('returns only active projects', async () => {
+            const projects = await client.getProjects();
+            expect(projects.length).toBeGreaterThan(0);
+            projects.forEach(p => expect(p.status).toBe('Active'));
+        });
+    });
+
+    describe('getAggregatedDashboardStats', () => {
+        it('returns predefined dashboard stats', async () => {
+            const stats = await client.getAggregatedDashboardStats();
+            expect(stats.totalRevenue).toBe(125000);
+            expect(stats.totalCosts).toBe(18400);
+            expect(stats.netProfit).toBe(106600);
+        });
+    });
+
+    describe('getProjectDetails', () => {
+        it('returns details for an existing project', async () => {
+            const details = await client.getProjectDetails('saas-starter');
+            expect(details).not.toBeNull();
+            expect(details!.id).toBe('saas-starter');
+            expect(details!.metrics.length).toBeGreaterThan(0);
+        });
+
+        it('returns null for a non-existent project', async () => {
+            const details = await client.getProjectDetails('invalid-id');
+            expect(details).toBeNull();
+        });
+    });
+
+    describe('getMultipleProjectDetails', () => {
+        it('returns available project details and filters out nulls', async () => {
+            const details = await client.getMultipleProjectDetails(['saas-starter', 'invalid', 'youtube-main']);
+            expect(details).toHaveLength(2);
+            expect(details[0].id).toBe('saas-starter');
+            expect(details[1].id).toBe('youtube-main');
+        });
+
+        it('returns an empty array if all ids are invalid', async () => {
+            const details = await client.getMultipleProjectDetails(['nope', 'nah']);
+            expect(details).toHaveLength(0);
+        });
+    });
+});

@@ -1,65 +1,58 @@
-import Image from "next/image";
+import { getDataClient } from '@/lib/client-factory';
+import { DashboardCard } from '@/components/dashboard-card';
+import Link from 'next/link';
+import React from 'react';
 
-export default function Home() {
+export const revalidate = 3600;
+
+export default async function DashboardPage() {
+  const client = getDataClient();
+  const stats = await client.getAggregatedDashboardStats();
+  const lightweightProjects = await client.getProjects();
+  const activeIds = lightweightProjects.map(p => p.id);
+  const detailedProjects = await client.getMultipleProjectDetails(activeIds);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="space-y-8">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <DashboardCard title="Total Revenue" value={`$${stats.totalRevenue.toLocaleString()}`} />
+        <DashboardCard title="Total Costs" value={`$${stats.totalCosts.toLocaleString()}`} />
+        <DashboardCard title="Net Profit" value={`$${stats.netProfit.toLocaleString()}`} featured />
+      </section>
+
+      <section>
+        <h2 className="text-xl font-semibold mb-4 text-neutral-800 dark:text-neutral-200">Active Projects</h2>
+        <div className="space-y-4">
+          {detailedProjects.map((p) => (
+            <Link key={p.id} href={`/projects/${p.id}`} className="block p-5 border border-neutral-200 dark:border-neutral-800 rounded-xl bg-white dark:bg-neutral-900 shadow-sm hover:shadow hover:border-neutral-300 dark:hover:border-neutral-700 transition flex justify-between items-center group">
+              <div>
+                <h3 className="font-medium text-lg text-neutral-900 dark:text-white">{p.name}</h3>
+                <p className="text-sm text-neutral-500 capitalize mt-1">{p.type}</p>
+              </div>
+
+              <div className="hidden md:flex items-center gap-8 text-sm">
+                <div className="flex flex-col text-right">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider">Revenue</span>
+                  <span className="font-medium text-neutral-900 dark:text-neutral-100">${p.totalRevenue.toLocaleString()}</span>
+                </div>
+                <div className="flex flex-col text-right">
+                  <span className="text-neutral-500 text-xs uppercase tracking-wider">Profit</span>
+                  <span className="font-medium text-emerald-600 dark:text-emerald-400">${p.netProfit.toLocaleString()}</span>
+                </div>
+
+                {p.metrics.slice(0, 2).map((m, idx) => (
+                  <div key={idx} className="flex flex-col text-right">
+                    <span className="text-neutral-500 text-xs uppercase tracking-wider">{m.name}</span>
+                    <span className="font-medium text-neutral-900 dark:text-neutral-100">{m.value.toLocaleString()}</span>
+                  </div>
+                ))}
+
+                <span className="ml-4 text-neutral-300 dark:text-neutral-600 group-hover:text-neutral-900 dark:group-hover:text-white transition transform group-hover:translate-x-1">→</span>
+              </div>
+            </Link>
+          ))}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </main>
   );
 }
