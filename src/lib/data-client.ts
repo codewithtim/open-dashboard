@@ -3,6 +3,7 @@ export interface Project {
     name: string;
     type: string;
     status: string;
+    platform?: string;
 }
 
 export interface Metric {

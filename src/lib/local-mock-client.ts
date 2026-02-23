@@ -1,7 +1,7 @@
 import { DataClient, Project, DashboardStats, ProjectDetails } from './data-client';
 
 const mockProjects: Project[] = [
-    { id: 'youtube-main', name: 'Main YouTube Channel', type: 'Content', status: 'Active' },
+    { id: 'youtube-main', name: 'Main YouTube Channel', type: 'Content', status: 'Active', platform: 'youtube' },
     { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'Software', status: 'Active' },
     { id: 'consulting', name: 'Dev Consulting', type: 'Service', status: 'Active' },
     { id: 'failed-app', name: 'Old Crypto App', type: 'Software', status: 'Archived' },

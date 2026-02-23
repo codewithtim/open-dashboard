@@ -51,6 +51,7 @@ export class NotionClient implements DataClient {
                     name: props.name?.title?.[0]?.plain_text || '',
                     type: props.type?.select?.name || '',
                     status: props.status?.select?.name || '',
+                    platform: props.platform?.select?.name || undefined,
                 });
             }
         }
@@ -105,7 +106,7 @@ export class NotionClient implements DataClient {
         const projectPage = projectRes.results.find(p => p.id === projectId);
         if (!projectPage) return null;
 
-        let project = { id: '', name: '', type: '', status: '' };
+        let project: Project = { id: '', name: '', type: '', status: '' };
         if (isPageObject(projectPage)) {
             const props = projectPage.properties as Record<string, NotionProp>;
             project = {
@@ -113,6 +114,7 @@ export class NotionClient implements DataClient {
                 name: props.name?.title?.[0]?.plain_text || '',
                 type: props.type?.select?.name || '',
                 status: props.status?.select?.name || '',
+                platform: props.platform?.select?.name || undefined,
             };
         }
 

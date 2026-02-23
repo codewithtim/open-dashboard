@@ -13,6 +13,20 @@ describe('LocalMockClient', () => {
             expect(projects.length).toBeGreaterThan(0);
             projects.forEach(p => expect(p.status).toBe('Active'));
         });
+
+        it('includes platform on projects that have one', async () => {
+            const projects = await client.getProjects();
+            const youtube = projects.find(p => p.name === 'Main YouTube Channel');
+            expect(youtube).toBeDefined();
+            expect(youtube!.platform).toBe('youtube');
+        });
+
+        it('has undefined platform on projects without one', async () => {
+            const projects = await client.getProjects();
+            const consulting = projects.find(p => p.name === 'Dev Consulting');
+            expect(consulting).toBeDefined();
+            expect(consulting!.platform).toBeUndefined();
+        });
     });
 
     describe('getAggregatedDashboardStats', () => {

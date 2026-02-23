@@ -36,6 +36,7 @@ describe('NotionClient', () => {
                             name: { title: [{ plain_text: 'Project 1' }] },
                             type: { select: { name: 'Software' } },
                             status: { select: { name: 'Active' } },
+                            platform: { select: { name: 'youtube' } },
                         }
                     }
                 ]
@@ -48,11 +49,30 @@ describe('NotionClient', () => {
                 name: 'Project 1',
                 type: 'Software',
                 status: 'Active',
+                platform: 'youtube',
             });
             expect(mockQuery).toHaveBeenCalledWith({
                 database_id: process.env.NOTION_PROJECTS_DB_ID || '',
                 filter: { property: 'status', select: { equals: 'active' } },
             });
+        });
+
+        it('returns undefined platform when not set', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'proj-2',
+                        properties: {
+                            name: { title: [{ plain_text: 'No Platform' }] },
+                            type: { select: { name: 'Service' } },
+                            status: { select: { name: 'Active' } },
+                        }
+                    }
+                ]
+            });
+
+            const projects = await client.getProjects();
+            expect(projects[0].platform).toBeUndefined();
         });
     });
 
