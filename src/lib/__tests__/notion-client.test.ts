@@ -4,7 +4,7 @@ jest.mock('@notionhq/client', () => {
     return {
         Client: jest.fn().mockImplementation(() => {
             return {
-                databases: {
+                dataSources: {
                     query: jest.fn(),
                 },
             };
@@ -12,8 +12,7 @@ jest.mock('@notionhq/client', () => {
     };
 });
 
-// @ts-expect-error Notion SDK is missing type definition for query
-const mockQuery = notion.databases.query as jest.Mock;
+const mockQuery = notion.dataSources.query as jest.Mock;
 
 describe('NotionClient', () => {
     let client: NotionClient;
@@ -31,11 +30,11 @@ describe('NotionClient', () => {
             mockQuery.mockResolvedValueOnce({
                 results: [
                     {
+                        id: 'proj-1',
                         properties: {
-                            ID: { rich_text: [{ plain_text: 'proj-1' }] },
-                            Name: { title: [{ plain_text: 'Project 1' }] },
-                            Type: { select: { name: 'Software' } },
-                            Status: { status: { name: 'Active' } },
+                            name: { title: [{ plain_text: 'Project 1' }] },
+                            type: { select: { name: 'Software' } },
+                            status: { select: { name: 'Active' } },
                         }
                     }
                 ]
@@ -50,8 +49,8 @@ describe('NotionClient', () => {
                 status: 'Active',
             });
             expect(mockQuery).toHaveBeenCalledWith({
-                database_id: process.env.NOTION_PROJECTS_DB_ID || '',
-                filter: { property: 'Status', status: { equals: 'Active' } },
+                data_source_id: process.env.NOTION_PROJECTS_DB_ID || '',
+                filter: { property: 'status', status: { equals: 'active' } },
             });
         });
     });
@@ -61,13 +60,13 @@ describe('NotionClient', () => {
             mockQuery
                 .mockResolvedValueOnce({
                     results: [
-                        { properties: { Amount: { number: 100 } } },
-                        { properties: { Amount: { number: 200 } } },
+                        { properties: { amount: { number: 100 } } },
+                        { properties: { amount: { number: 200 } } },
                     ]
                 })
                 .mockResolvedValueOnce({
                     results: [
-                        { properties: { Amount: { number: 50 } } },
+                        { properties: { amount: { number: 50 } } },
                     ]
                 });
 
@@ -84,24 +83,24 @@ describe('NotionClient', () => {
                 .mockResolvedValueOnce({
                     results: [
                         {
+                            id: 'p-1',
                             properties: {
-                                ID: { rich_text: [{ plain_text: 'p-1' }] },
-                                Name: { title: [{ plain_text: 'App' }] },
+                                name: { title: [{ plain_text: 'App' }] },
                             }
                         }
                     ]
                 })
                 .mockResolvedValueOnce({
-                    results: [{ properties: { Amount: { number: 20 } } }] // Costs
+                    results: [{ properties: { amount: { number: 20 } } }] // Costs
                 })
                 .mockResolvedValueOnce({
-                    results: [{ properties: { Amount: { number: 100 } } }] // Revenue
+                    results: [{ properties: { amount: { number: 100 } } }] // Revenue
                 })
                 .mockResolvedValueOnce({
                     results: [{
                         properties: {
-                            'Metric Name': { title: [{ plain_text: 'MRR' }] },
-                            'Value': { number: 50 }
+                            'metric name': { title: [{ plain_text: 'MRR' }] },
+                            'value': { number: 50 }
                         }
                     }] // Metrics
                 });
@@ -123,7 +122,7 @@ describe('NotionClient', () => {
             // First call: Project DB
             mockQuery.mockResolvedValueOnce({
                 results: [
-                    { properties: { ID: { rich_text: [{ plain_text: 'proj-1' }] }, Name: { title: [{ plain_text: 'A' }] }, Type: { select: { name: 't' } }, Status: { select: { name: 'Active' } } } }
+                    { id: 'p-1', properties: { name: { title: [{ plain_text: 'A' }] }, type: { select: { name: 't' } }, status: { select: { name: 'Active' } } } }
                 ]
             });
             // Second call: Costs DB
@@ -141,7 +140,7 @@ describe('NotionClient', () => {
 
             const results = await client.getMultipleProjectDetails(['p-1', 'invalid']);
             expect(results).toHaveLength(1);
-            expect(results[0].id).toBe('proj-1');
+            expect(results[0].id).toBe('p-1');
             expect(results[0].name).toBe('A');
             expect(mockQuery).toHaveBeenCalledTimes(8); // 4 queries per project ID
         });
