@@ -64,4 +64,31 @@ describe('Cron API Route GET', () => {
         expect(data.success).toBe(true);
         expect(notion.pages.create).toHaveBeenCalled();
     });
+
+    it('uses correct Notion property names matching the Metrics DB schema', async () => {
+        process.env.NOTION_METRICS_DB_ID = 'metrics-db-id';
+
+        const req = {
+            headers: { get: (name: string) => name === 'authorization' ? 'Bearer test_secret' : null }
+        };
+
+        (notion.pages.create as jest.Mock).mockResolvedValueOnce({});
+
+        await GET(req as any);
+
+        const call = (notion.pages.create as jest.Mock).mock.calls[0][0];
+        expect(call.parent.database_id).toBe('metrics-db-id');
+
+        const propKeys = Object.keys(call.properties);
+        expect(propKeys).toContain('name');
+        expect(propKeys).toContain('value');
+        expect(propKeys).toContain('projects');
+        expect(propKeys).not.toContain('date');
+        expect(propKeys).not.toContain('project_ID');
+
+        // Verify property types match DB schema
+        expect(call.properties.name).toHaveProperty('title');
+        expect(call.properties.value).toHaveProperty('number');
+        expect(call.properties.projects).toHaveProperty('relation');
+    });
 });

@@ -40,9 +40,9 @@ Set these in Vercel project settings (Settings > Environment Variables) for **Pr
 Values are in `.env.local` (gitignored). `CRON_SECRET` should be regenerated to a strong random value.
 
 ### 4. Post-Deploy Verification
-- [ ] Production URL loads the dashboard
-- [ ] Progress bar renders with `$0` / `Goal: $1,000,000` (databases are currently empty)
-- [ ] Cron job registered: Vercel Dashboard > Project > Settings > Cron Jobs shows `/api/cron` at `0 0 * * *`
+- [X] Production URL loads the dashboard
+- [X] Progress bar renders with `$0` / `Goal: $1,000,000` (databases are currently empty)
+- [X] Cron job registered: Vercel Dashboard > Project > Settings > Cron Jobs shows `/api/cron` at `0 0 * * *`
 - [ ] Dynamic routes work: `/projects/[id]` returns 404 gracefully for nonexistent IDs
 - [ ] GitHub Actions: confirm test failure blocks deploy
 

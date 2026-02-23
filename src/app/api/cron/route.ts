@@ -13,10 +13,9 @@ export async function GET(request: Request) {
         await notion.pages.create({
             parent: { database_id: process.env.NOTION_METRICS_DB_ID || '' },
             properties: {
-                'Metric Name': { title: [{ text: { content: 'Subscribers' } }] },
-                'Value': { number: fakeYoutubeSubscribers },
-                'Date': { date: { start: new Date().toISOString().split('T')[0] } },
-                'Project_ID': { rich_text: [{ text: { content: 'youtube-main' } }] },
+                'name': { title: [{ text: { content: 'Subscribers' } }] },
+                'value': { number: fakeYoutubeSubscribers },
+                'projects': { relation: [{ id: process.env.YOUTUBE_PROJECT_ID || '' }] },
             },
         });
 
