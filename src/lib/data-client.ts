@@ -24,6 +24,9 @@ export interface DashboardStats {
     totalRevenue: number;
     totalCosts: number;
     netProfit: number;
+    totalSubscribers: number;
+    totalViews: number;
+    totalActiveUsers: number;
 }
 
 export interface DataClient {

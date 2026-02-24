@@ -69,10 +69,17 @@ export class NotionClient implements DataClient {
     }
 
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
-        const [revenueResponse, costsResponse] = await Promise.all([
+        const [projectsResponse, revenueResponse, costsResponse, metricsResponse] = await Promise.all([
+            queryNotionDb({
+                database_id: process.env.NOTION_PROJECTS_DB_ID || '',
+                filter: { property: 'status', select: { equals: 'active' } },
+            }),
             queryNotionDb({ database_id: process.env.NOTION_REVENUE_DB_ID || '' }),
             queryNotionDb({ database_id: process.env.NOTION_COSTS_DB_ID || '' }),
+            queryNotionDb({ database_id: process.env.NOTION_METRICS_DB_ID || '' }),
         ]);
+
+        const activeProjectIds = new Set(projectsResponse.results.map(p => p.id));
 
         let totalRevenue = 0;
         for (const page of revenueResponse.results) {
@@ -90,7 +97,35 @@ export class NotionClient implements DataClient {
             }
         }
 
-        return { totalRevenue, totalCosts, netProfit: totalRevenue - totalCosts };
+        let totalSubscribers = 0;
+        let totalViews = 0;
+        let totalActiveUsers = 0;
+
+        for (const page of metricsResponse.results) {
+            if (isPageObject(page)) {
+                const props = page.properties as any;
+                const relations = props.projects?.relation as Array<{ id: string }>;
+
+                // Only aggregate metrics that belong to an Active project
+                if (relations?.some(r => activeProjectIds.has(r.id))) {
+                    const name = props.name?.title?.[0]?.plain_text?.toLowerCase() || '';
+                    const value = props.value?.number || 0;
+
+                    if (name.includes('subscriber')) totalSubscribers += value;
+                    if (name.includes('view')) totalViews += value;
+                    if (name.includes('user') || name.includes('active')) totalActiveUsers += value;
+                }
+            }
+        }
+
+        return {
+            totalRevenue,
+            totalCosts,
+            netProfit: totalRevenue - totalCosts,
+            totalSubscribers,
+            totalViews,
+            totalActiveUsers
+        };
     }
 
     async getProjectDetails(projectId: string): Promise<ProjectDetails | null> {

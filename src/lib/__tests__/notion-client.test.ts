@@ -80,17 +80,58 @@ describe('NotionClient', () => {
     });
 
     describe('getAggregatedDashboardStats', () => {
-        it('returns total revenue, costs, and profit', async () => {
+        it('returns total revenue, costs, profit, and aggregated social stats for active projects only', async () => {
             mockQuery
+                // 1. Mock Projects DB (1 Active, 1 Inactive just to test filtering conceptually, though query might filter natively)
+                .mockResolvedValueOnce({
+                    results: [
+                        { id: 'active-1', properties: {} },
+                    ]
+                })
+                // 2. Mock Revenue DB
                 .mockResolvedValueOnce({
                     results: [
                         { properties: { amount: { number: 100 } } },
                         { properties: { amount: { number: 200 } } },
                     ]
                 })
+                // 3. Mock Costs DB
                 .mockResolvedValueOnce({
                     results: [
                         { properties: { amount: { number: 50 } } },
+                    ]
+                })
+                // 4. Mock Metrics DB
+                .mockResolvedValueOnce({
+                    results: [
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'Subscribers' }] },
+                                value: { number: 1500 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'Active Users' }] },
+                                value: { number: 300 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'Views' }] },
+                                value: { number: 5000 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'Subscribers' }] },
+                                value: { number: 100 },
+                                projects: { relation: [{ id: 'inactive-99' }] } // Should be ignored
+                            }
+                        },
                     ]
                 });
 
@@ -98,6 +139,9 @@ describe('NotionClient', () => {
             expect(stats.totalRevenue).toBe(300);
             expect(stats.totalCosts).toBe(50);
             expect(stats.netProfit).toBe(250);
+            expect(stats.totalSubscribers).toBe(1500);
+            expect(stats.totalViews).toBe(5000);
+            expect(stats.totalActiveUsers).toBe(300);
         });
     });
 

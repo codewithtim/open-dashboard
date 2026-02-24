@@ -26,6 +26,12 @@ export default async function DashboardPage() {
         <DashboardCard title="Net Profit" value={`$${stats.netProfit.toLocaleString()}`} featured />
       </section>
 
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <DashboardCard title="Total Subscribers" value={stats.totalSubscribers.toLocaleString()} />
+        <DashboardCard title="Total Views" value={stats.totalViews.toLocaleString()} />
+        <DashboardCard title="Active Users" value={stats.totalActiveUsers.toLocaleString()} />
+      </section>
+
       <section>
         <h2 className="text-xl font-bold mb-5 text-[#2B3674] dark:text-white tracking-tight">Active Projects</h2>
         <div className="space-y-4">

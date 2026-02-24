@@ -20,6 +20,9 @@ describe('Dashboard Home Page', () => {
                 totalRevenue: 5000,
                 totalCosts: 1000,
                 netProfit: 4000,
+                totalSubscribers: 25000,
+                totalViews: 200000,
+                totalActiveUsers: 350
             }),
             getProjects: jest.fn().mockResolvedValue([
                 { id: '1', name: 'Software App', type: 'software', status: 'Active' },
@@ -57,6 +60,14 @@ describe('Dashboard Home Page', () => {
         expect(screen.getAllByText('$5,000').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('Net Profit')).toBeInTheDocument();
         expect(screen.getByText('$4,000')).toBeInTheDocument();
+
+        expect(screen.getByText('Total Subscribers')).toBeInTheDocument();
+        expect(screen.getByText('25,000')).toBeInTheDocument();
+        expect(screen.getByText('Total Views')).toBeInTheDocument();
+        expect(screen.getByText('200,000')).toBeInTheDocument();
+        expect(screen.getByText('Active Users')).toBeInTheDocument();
+        expect(screen.getByText('350')).toBeInTheDocument();
+
         expect(screen.getByText('Active Projects')).toBeInTheDocument();
         expect(screen.getByText('Software App')).toBeInTheDocument();
         expect(screen.getByText('YouTube Channel')).toBeInTheDocument();
