@@ -19,7 +19,7 @@ Create a new standalone, reusable React component for the progress bar.
 ## Validation & TDD Plan
 
 ### To-Do List
-- [ ] Create `src/components/__tests__/progress-bar.test.tsx` asserting that calculations hold (e.g., $500k = 50% width) and edge cases (prevent >100% bleeding).
-- [ ] Implement `src/components/progress-bar.tsx` prioritizing Tailwind CSS v4 styling for the bar's internal `<div className="w-[X%]">` width.
-- [ ] Update `src/app/__tests__/page.test.tsx` to assert that the `<ProgressBar />` renders the mocked `totalRevenue` from the global stats.
-- [ ] Mount `<ProgressBar currentValue={stats.totalRevenue} targetValue={1000000} />` inside `src/app/page.tsx`.
+- [X] Create `src/components/__tests__/progress-bar.test.tsx` asserting that calculations hold (e.g., $500k = 50% width) and edge cases (prevent >100% bleeding).
+- [X] Implement `src/components/progress-bar.tsx` prioritizing Tailwind CSS v4 styling for the bar's internal `<div className="w-[X%]">` width.
+- [X] Update `src/app/__tests__/page.test.tsx` to assert that the `<ProgressBar />` renders the mocked `totalRevenue` from the global stats.
+- [X] Mount `<ProgressBar currentValue={stats.totalRevenue} targetValue={1000000} />` inside `src/app/page.tsx`.
