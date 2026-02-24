@@ -160,12 +160,9 @@ describe('NotionClient', () => {
             expect(stats.totalRevenue).toBe(300);
             expect(stats.totalCosts).toBe(50);
             expect(stats.netProfit).toBe(250);
-            expect(stats.totalSubscribers).toBe(1500);
+            expect(stats.totalSubscribers).toBe(1500 + 1200 + 3400 + 800); // 1500 + Twitter + TikTok + Twitch
             expect(stats.totalViews).toBe(5000);
             expect(stats.totalActiveUsers).toBe(300);
-            expect(stats.totalTwitterFollowers).toBe(1200);
-            expect(stats.totalTiktokFollowers).toBe(3400);
-            expect(stats.totalTwitchFollowers).toBe(800);
         });
     });
 

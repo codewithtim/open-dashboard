@@ -27,9 +27,6 @@ export interface DashboardStats {
     totalSubscribers: number;
     totalViews: number;
     totalActiveUsers: number;
-    totalTwitterFollowers: number;
-    totalTiktokFollowers: number;
-    totalTwitchFollowers: number;
 }
 
 export interface DataClient {
