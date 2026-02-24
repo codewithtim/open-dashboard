@@ -127,6 +127,27 @@ describe('NotionClient', () => {
                         },
                         {
                             properties: {
+                                name: { title: [{ plain_text: 'Twitter Followers' }] },
+                                value: { number: 1200 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'TikTok Followers' }] },
+                                value: { number: 3400 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
+                                name: { title: [{ plain_text: 'Twitch Followers' }] },
+                                value: { number: 800 },
+                                projects: { relation: [{ id: 'active-1' }] }
+                            }
+                        },
+                        {
+                            properties: {
                                 name: { title: [{ plain_text: 'Subscribers' }] },
                                 value: { number: 100 },
                                 projects: { relation: [{ id: 'inactive-99' }] } // Should be ignored
@@ -142,6 +163,9 @@ describe('NotionClient', () => {
             expect(stats.totalSubscribers).toBe(1500);
             expect(stats.totalViews).toBe(5000);
             expect(stats.totalActiveUsers).toBe(300);
+            expect(stats.totalTwitterFollowers).toBe(1200);
+            expect(stats.totalTiktokFollowers).toBe(3400);
+            expect(stats.totalTwitchFollowers).toBe(800);
         });
     });
 

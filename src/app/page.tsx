@@ -30,6 +30,9 @@ export default async function DashboardPage() {
         <DashboardCard title="Total Subscribers" value={stats.totalSubscribers.toLocaleString()} />
         <DashboardCard title="Total Views" value={stats.totalViews.toLocaleString()} />
         <DashboardCard title="Active Users" value={stats.totalActiveUsers.toLocaleString()} />
+        <DashboardCard title="X (Twitter) Followers" value={stats.totalTwitterFollowers.toLocaleString()} />
+        <DashboardCard title="TikTok Followers" value={stats.totalTiktokFollowers.toLocaleString()} />
+        <DashboardCard title="Twitch Followers" value={stats.totalTwitchFollowers.toLocaleString()} />
       </section>
 
       <section>

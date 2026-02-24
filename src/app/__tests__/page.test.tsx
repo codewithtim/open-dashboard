@@ -22,7 +22,10 @@ describe('Dashboard Home Page', () => {
                 netProfit: 4000,
                 totalSubscribers: 25000,
                 totalViews: 200000,
-                totalActiveUsers: 350
+                totalActiveUsers: 350,
+                totalTwitterFollowers: 1200,
+                totalTiktokFollowers: 3400,
+                totalTwitchFollowers: 800
             }),
             getProjects: jest.fn().mockResolvedValue([
                 { id: '1', name: 'Software App', type: 'software', status: 'Active' },
@@ -67,6 +70,13 @@ describe('Dashboard Home Page', () => {
         expect(screen.getByText('200,000')).toBeInTheDocument();
         expect(screen.getByText('Active Users')).toBeInTheDocument();
         expect(screen.getByText('350')).toBeInTheDocument();
+
+        expect(screen.getByText('X (Twitter) Followers')).toBeInTheDocument();
+        expect(screen.getByText('1,200')).toBeInTheDocument();
+        expect(screen.getByText('TikTok Followers')).toBeInTheDocument();
+        expect(screen.getByText('3,400')).toBeInTheDocument();
+        expect(screen.getByText('Twitch Followers')).toBeInTheDocument();
+        expect(screen.getByText('800')).toBeInTheDocument();
 
         expect(screen.getByText('Active Projects')).toBeInTheDocument();
         expect(screen.getByText('Software App')).toBeInTheDocument();

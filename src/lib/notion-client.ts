@@ -100,6 +100,9 @@ export class NotionClient implements DataClient {
         let totalSubscribers = 0;
         let totalViews = 0;
         let totalActiveUsers = 0;
+        let totalTwitterFollowers = 0;
+        let totalTiktokFollowers = 0;
+        let totalTwitchFollowers = 0;
 
         for (const page of metricsResponse.results) {
             if (isPageObject(page)) {
@@ -114,6 +117,9 @@ export class NotionClient implements DataClient {
                     if (name.includes('subscriber')) totalSubscribers += value;
                     if (name.includes('view')) totalViews += value;
                     if (name.includes('user') || name.includes('active')) totalActiveUsers += value;
+                    if (name.includes('twitter') || name.includes(' x ')) totalTwitterFollowers += value;
+                    if (name.includes('tiktok')) totalTiktokFollowers += value;
+                    if (name.includes('twitch')) totalTwitchFollowers += value;
                 }
             }
         }
@@ -124,7 +130,10 @@ export class NotionClient implements DataClient {
             netProfit: totalRevenue - totalCosts,
             totalSubscribers,
             totalViews,
-            totalActiveUsers
+            totalActiveUsers,
+            totalTwitterFollowers,
+            totalTiktokFollowers,
+            totalTwitchFollowers
         };
     }
 
