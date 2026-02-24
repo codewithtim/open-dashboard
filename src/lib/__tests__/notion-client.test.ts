@@ -140,30 +140,25 @@ describe('NotionClient', () => {
 
     describe('getMultipleProjectDetails', () => {
         it('fetches multiple project details and filters missing ones', async () => {
-            // First call: Project DB
+            // Bulk call 1: Project DB
             mockQuery.mockResolvedValueOnce({
                 results: [
                     { id: 'p-1', properties: { name: { title: [{ plain_text: 'A' }] }, type: { select: { name: 't' } }, status: { select: { name: 'Active' } } } }
                 ]
             });
-            // Second call: Costs DB
+            // Bulk call 2: Costs DB (Empty)
             mockQuery.mockResolvedValueOnce({ results: [] });
-            // Third call: Revenue DB
+            // Bulk call 3: Revenue DB (Empty)
             mockQuery.mockResolvedValueOnce({ results: [] });
-            // Fourth call: Metrics DB
-            mockQuery.mockResolvedValueOnce({ results: [] });
-
-            // Next batch for invalid ID (simulated by returning empty project DB)
-            mockQuery.mockResolvedValueOnce({ results: [] });
-            mockQuery.mockResolvedValueOnce({ results: [] });
-            mockQuery.mockResolvedValueOnce({ results: [] });
+            // Bulk call 4: Metrics DB (Empty)
             mockQuery.mockResolvedValueOnce({ results: [] });
 
             const results = await client.getMultipleProjectDetails(['p-1', 'invalid']);
             expect(results).toHaveLength(1);
             expect(results[0].id).toBe('p-1');
             expect(results[0].name).toBe('A');
-            expect(mockQuery).toHaveBeenCalledTimes(8); // 4 queries per project ID
+            // Since it is an O(1) bulk fetch now, it should exactly be 4 combined queries
+            expect(mockQuery).toHaveBeenCalledTimes(4);
         });
     });
 });

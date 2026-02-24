@@ -63,15 +63,18 @@ describe('Dashboard Home Page', () => {
 
         // Assert deeply nested metrics from getMultipleProjectDetails reflect
         expect(mockClient.getMultipleProjectDetails).toHaveBeenCalledWith(['1', '2']);
-        // Project 1 Metrics
+
+        // Project 1 Metrics & Costs
         expect(screen.getByText('$2,000')).toBeInTheDocument(); // Revenue
         expect(screen.getByText('$1,600')).toBeInTheDocument(); // Profit
+        expect(screen.getByText('$400')).toBeInTheDocument(); // Total Costs
         expect(screen.getByText('MRR')).toBeInTheDocument();
         expect(screen.getByText('300')).toBeInTheDocument();
 
-        // Project 2 Metrics
+        // Project 2 Metrics & Costs
         expect(screen.getByText('$3,000')).toBeInTheDocument(); // Revenue
         expect(screen.getByText('$2,400')).toBeInTheDocument(); // Profit
+        expect(screen.getByText('$600')).toBeInTheDocument(); // Total Costs
         expect(screen.getByText('Subscribers')).toBeInTheDocument();
         expect(screen.getByText('15,000')).toBeInTheDocument();
 

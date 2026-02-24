@@ -6,6 +6,10 @@ jest.mock('@/lib/notion-client', () => ({
     notion: {
         pages: {
             create: jest.fn(),
+            update: jest.fn(),
+        },
+        databases: {
+            query: jest.fn(),
         }
     }
 }));
@@ -60,49 +64,68 @@ describe('Cron API Route GET', () => {
         expect(await response.text()).toBe('Unauthorized');
     });
 
-    it('looks up the YouTube project by platform and uses its ID', async () => {
+    it('looks up the YouTube project and creates a new metric if it does not exist', async () => {
         const mockClient = {
             getProjects: jest.fn().mockResolvedValue([
                 { id: 'yt-123', name: 'My Channel', platform: 'youtube' },
-                { id: 'other-1', name: 'SaaS App' },
             ]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
+
+        // Mock query returning no results (i.e., metric doesn't exist)
+        (notion.databases.query as jest.Mock).mockResolvedValueOnce({ results: [] });
         (notion.pages.create as jest.Mock).mockResolvedValueOnce({});
 
         const response = await GET(authReq as any);
         expect(response.status).toBe(200);
 
-        expect(mockClient.getProjects).toHaveBeenCalled();
+        expect(notion.databases.query).toHaveBeenCalledWith(expect.objectContaining({
+            database_id: 'metrics-db-id',
+            filter: expect.objectContaining({
+                and: expect.arrayContaining([
+                    { property: 'name', title: { equals: 'Subscribers' } },
+                    { property: 'projects', relation: { contains: 'yt-123' } }
+                ])
+            })
+        }));
 
-        const call = (notion.pages.create as jest.Mock).mock.calls[0][0];
-        expect(call.properties.projects.relation[0].id).toBe('yt-123');
+        expect(notion.pages.create).toHaveBeenCalled();
+        expect(notion.pages.update).not.toHaveBeenCalled();
+
+        const createCall = (notion.pages.create as jest.Mock).mock.calls[0][0];
+        expect(createCall.properties.projects.relation[0].id).toBe('yt-123');
+        expect(createCall.parent.database_id).toBe('metrics-db-id');
+
+        const propKeys = Object.keys(createCall.properties);
+        expect(propKeys).toContain('name');
+        expect(propKeys).toContain('value');
+        expect(propKeys).toContain('projects');
     });
 
-    it('uses correct Notion property names matching the Metrics DB schema', async () => {
+    it('updates the metric row if it already exists for the project', async () => {
         const mockClient = {
             getProjects: jest.fn().mockResolvedValue([
                 { id: 'yt-123', name: 'My Channel', platform: 'youtube' },
             ]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
-        (notion.pages.create as jest.Mock).mockResolvedValueOnce({});
 
-        await GET(authReq as any);
+        // Mock query returning an existing page
+        (notion.databases.query as jest.Mock).mockResolvedValueOnce({
+            results: [{ id: 'existing-page-id-456' }]
+        });
+        (notion.pages.update as jest.Mock).mockResolvedValueOnce({});
 
-        const call = (notion.pages.create as jest.Mock).mock.calls[0][0];
-        expect(call.parent.database_id).toBe('metrics-db-id');
+        const response = await GET(authReq as any);
+        expect(response.status).toBe(200);
 
-        const propKeys = Object.keys(call.properties);
-        expect(propKeys).toContain('name');
-        expect(propKeys).toContain('value');
-        expect(propKeys).toContain('projects');
-        expect(propKeys).not.toContain('date');
-        expect(propKeys).not.toContain('project_ID');
-
-        expect(call.properties.name).toHaveProperty('title');
-        expect(call.properties.value).toHaveProperty('number');
-        expect(call.properties.projects).toHaveProperty('relation');
+        expect(notion.pages.create).not.toHaveBeenCalled();
+        expect(notion.pages.update).toHaveBeenCalledWith({
+            page_id: 'existing-page-id-456',
+            properties: {
+                'value': { number: 15000 }
+            }
+        });
     });
 
     it('returns 404 when no YouTube project exists', async () => {
