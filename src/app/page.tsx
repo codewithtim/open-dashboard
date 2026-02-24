@@ -7,17 +7,15 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { BsBoxSeam } from 'react-icons/bs';
 import { ChevronDown } from 'lucide-react';
 
-function getProjectIcon(type: string, name: string) {
-  const t = type.toLowerCase();
-  const n = name.toLowerCase();
+function getProjectIcon(platform?: string) {
+  if (!platform) return <BsBoxSeam className="w-5 h-5 text-[#4318FF]" />;
 
-  // Check both type and name to ensure "YouTube" never misses the logo
-  if (t.includes('youtube') || t.includes('content') || t.includes('channel') || n.includes('youtube')) {
-    return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
-  }
-  if (t.includes('saas') || t.includes('software')) return <FaLaptopCode className="w-5 h-5 text-[#4318FF]" />;
-  if (t.includes('tiktok') || t.includes('video')) return <FaTiktok className="w-5 h-5 text-[#2B3674] dark:text-white" />;
-  if (t.includes('twitter') || t.includes('x')) return <FaXTwitter className="w-5 h-5 text-[#2B3674] dark:text-white" />;
+  const p = platform.toLowerCase();
+
+  if (p.includes('youtube')) return <FaYoutube className="w-6 h-6 text-[#FF0000]" />;
+  if (p.includes('saas') || p.includes('software')) return <FaLaptopCode className="w-5 h-5 text-[#4318FF]" />;
+  if (p.includes('tiktok') || p.includes('video')) return <FaTiktok className="w-5 h-5 text-[#2B3674] dark:text-white" />;
+  if (p.includes('twitter') || p.includes('x')) return <FaXTwitter className="w-5 h-5 text-[#2B3674] dark:text-white" />;
 
   return <BsBoxSeam className="w-5 h-5 text-[#4318FF]" />;
 }
@@ -52,7 +50,7 @@ export default async function DashboardPage() {
               <summary className="p-6 flex justify-between items-center outline-none">
                 <div className="flex items-center gap-5">
                   <div className="p-3 bg-[#F4F7FE] dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12">
-                    {getProjectIcon(p.type, p.name)}
+                    {getProjectIcon(p.platform)}
                   </div>
                   <div>
                     <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{p.name}</h3>
