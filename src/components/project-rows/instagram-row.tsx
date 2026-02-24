@@ -1,5 +1,6 @@
 import { ProjectDetails } from '@/lib/data-client';
-import { FiInstagram } from 'react-icons/fi';
+import { FaInstagram } from 'react-icons/fa6';
+
 
 export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
     const followerMetric = project.metrics?.find(m => m.name.toLowerCase().includes('follower'));
@@ -12,7 +13,7 @@ export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
             {/* Left: Identity */}
             <div className="flex items-center gap-5 min-w-[250px]">
                 <div className="p-3 bg-pink-500/10 dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12 border border-pink-500/30">
-                    <FiInstagram className="w-6 h-6 text-[#E1306C]" />
+                    <FaInstagram className="w-6 h-6 text-[#FF0000]" />
                 </div>
                 <div>
                     {project.link ? (

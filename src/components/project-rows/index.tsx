@@ -20,6 +20,9 @@ export function renderProjectRow(project: ProjectDetails) {
             return <TikTokProjectRow key={project.id} project={project} />;
         case 'twitch':
             return <TwitchProjectRow key={project.id} project={project} />;
+        case 'instagram':
+        case 'ig':
+            return <InstagramProjectRow key={project.id} project={project} />;
         default:
             return <DefaultProjectRow key={project.id} project={project} />;
     }
