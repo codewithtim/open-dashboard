@@ -50,8 +50,11 @@ export class NotionClient implements DataClient {
                 const platform = props.platform?.select?.name || undefined;
                 const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
                 let link = props.Link?.url || undefined;
-                if (!link && platform === 'youtube' && platformAccountId) {
-                    link = `https://youtube.com/channel/${platformAccountId}`;
+                if (!link && platformAccountId) {
+                    if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
+                    else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
+                    else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
+                    else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                 }
 
                 projects.push({
@@ -166,8 +169,11 @@ export class NotionClient implements DataClient {
             const platform = props.platform?.select?.name || undefined;
             const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
             let link = props.Link?.url || undefined;
-            if (!link && platform === 'youtube' && platformAccountId) {
-                link = `https://youtube.com/channel/${platformAccountId}`;
+            if (!link && platformAccountId) {
+                if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
+                else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
+                else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
+                else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
             }
 
             project = {
@@ -242,8 +248,11 @@ export class NotionClient implements DataClient {
                 const platform = props.platform?.select?.name || undefined;
                 const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
                 let link = props.Link?.url || undefined;
-                if (!link && platform === 'youtube' && platformAccountId) {
-                    link = `https://youtube.com/channel/${platformAccountId}`;
+                if (!link && platformAccountId) {
+                    if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
+                    else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
+                    else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
+                    else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                 }
 
                 project = {
