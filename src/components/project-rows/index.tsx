@@ -5,6 +5,7 @@ import { SoftwareProjectRow } from './software-row';
 import { TwitterProjectRow } from './twitter-row';
 import { TikTokProjectRow } from './tiktok-row';
 import { TwitchProjectRow } from './twitch-row';
+import { InstagramProjectRow } from './instagram-row';
 
 export function renderProjectRow(project: ProjectDetails) {
     switch (project.platform?.toLowerCase()) {
