@@ -18,15 +18,46 @@ export async function GET(request: Request) {
         }
 
         const fakeYoutubeSubscribers = 15000;
+        const metricsDbId = process.env.NOTION_METRICS_DB_ID || '';
 
-        await notion.pages.create({
-            parent: { database_id: process.env.NOTION_METRICS_DB_ID || '' },
-            properties: {
-                'name': { title: [{ text: { content: 'Subscribers' } }] },
-                'value': { number: fakeYoutubeSubscribers },
-                'projects': { relation: [{ id: youtubeProject.id }] },
-            },
+        // Query Notion to see if this project already has a "Subscribers" metric
+        const existingMetrics = await notion.databases.query({
+            database_id: metricsDbId,
+            filter: {
+                and: [
+                    {
+                        property: 'name',
+                        title: { equals: 'Subscribers' }
+                    },
+                    {
+                        property: 'projects',
+                        relation: { contains: youtubeProject.id }
+                    }
+                ]
+            }
         });
+
+        // Upsert Logic
+        if (existingMetrics.results.length > 0) {
+            // Update the existing metric row
+            const existingPageId = existingMetrics.results[0].id;
+            await notion.pages.update({
+                page_id: existingPageId,
+                properties: {
+                    'value': { number: fakeYoutubeSubscribers }
+                }
+            });
+        } else {
+            // Create a new metric row if one didn't exist
+            await notion.pages.create({
+                parent: { database_id: metricsDbId },
+                properties: {
+                    'name': { title: [{ text: { content: 'Subscribers' } }] },
+                    'value': { number: fakeYoutubeSubscribers },
+                    'projects': { relation: [{ id: youtubeProject.id }] },
+                },
+            });
+        }
 
         return NextResponse.json({ success: true, message: 'Updated metrics successfully.' });
     } catch (error) {
