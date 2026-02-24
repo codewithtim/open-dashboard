@@ -14,6 +14,7 @@ type NotionProp = {
     select?: { name: string } | null;
     status?: { name: string } | null;
     number?: number | null;
+    url?: string | null;
 };
 
 function isPageObject(
@@ -46,13 +47,21 @@ export class NotionClient implements DataClient {
         for (const page of response.results) {
             if (isPageObject(page)) {
                 const props = page.properties as Record<string, NotionProp>;
+                const platform = props.platform?.select?.name || undefined;
+                const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
+                let link = props.Link?.url || undefined;
+                if (!link && platform === 'youtube' && platformAccountId) {
+                    link = `https://youtube.com/channel/${platformAccountId}`;
+                }
+
                 projects.push({
                     id: page.id || '',
                     name: props.name?.title?.[0]?.plain_text || '',
                     type: props.type?.select?.name || '',
                     status: props.status?.select?.name || '',
-                    platform: props.platform?.select?.name || undefined,
-                    platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
+                    platform,
+                    platformAccountId,
+                    link,
                 });
             }
         }
@@ -110,13 +119,21 @@ export class NotionClient implements DataClient {
         let project: Project = { id: '', name: '', type: '', status: '' };
         if (isPageObject(projectPage)) {
             const props = projectPage.properties as Record<string, NotionProp>;
+            const platform = props.platform?.select?.name || undefined;
+            const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
+            let link = props.Link?.url || undefined;
+            if (!link && platform === 'youtube' && platformAccountId) {
+                link = `https://youtube.com/channel/${platformAccountId}`;
+            }
+
             project = {
                 id: projectPage.id,
                 name: props.name?.title?.[0]?.plain_text || '',
                 type: props.type?.select?.name || '',
                 status: props.status?.select?.name || '',
-                platform: props.platform?.select?.name || undefined,
-                platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
+                platform,
+                platformAccountId,
+                link,
             };
         }
 
@@ -178,13 +195,21 @@ export class NotionClient implements DataClient {
             let project: Project = { id: '', name: '', type: '', status: '' };
             if (isPageObject(projectPage)) {
                 const props = projectPage.properties as Record<string, NotionProp>;
+                const platform = props.platform?.select?.name || undefined;
+                const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
+                let link = props.Link?.url || undefined;
+                if (!link && platform === 'youtube' && platformAccountId) {
+                    link = `https://youtube.com/channel/${platformAccountId}`;
+                }
+
                 project = {
                     id: projectPage.id,
                     name: props.name?.title?.[0]?.plain_text || '',
                     type: props.type?.select?.name || '',
                     status: props.status?.select?.name || '',
-                    platform: props.platform?.select?.name || undefined,
-                    platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
+                    platform,
+                    platformAccountId,
+                    link,
                 };
             }
 

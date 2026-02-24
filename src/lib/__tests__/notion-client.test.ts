@@ -51,7 +51,8 @@ describe('NotionClient', () => {
                 type: 'Software',
                 status: 'Active',
                 platform: 'youtube',
-                platformAccountId: 'UC123ABC'
+                platformAccountId: 'UC123ABC',
+                link: 'https://youtube.com/channel/UC123ABC'
             });
             expect(mockQuery).toHaveBeenCalledWith({
                 database_id: process.env.NOTION_PROJECTS_DB_ID || '',

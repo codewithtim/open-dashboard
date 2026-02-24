@@ -15,29 +15,19 @@ export function SoftwareProjectRow({ project }: { project: ProjectDetails }) {
                     <FaLaptopCode className="w-5 h-5 text-[#4318FF]" />
                 </div>
                 <div>
-                    <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
+                    {project.link ? (
+                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
+                        </a>
+                    ) : (
+                        <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
+                    )}
                     <p className="text-sm font-medium text-[#A3AED0] capitalize">{project.type}</p>
                 </div>
             </div>
 
             {/* Right: Inline Metrics Flex Container */}
             <div className="flex flex-wrap items-center gap-x-8 gap-y-4 xl:justify-end flex-grow">
-                {/* Standard Financials */}
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Revenue</span>
-                    <span className="font-bold text-[#2B3674] dark:text-white text-base">${project.totalRevenue.toLocaleString()}</span>
-                </div>
-
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Profit</span>
-                    <span className="font-bold text-emerald-500 dark:text-emerald-400 text-base">${project.netProfit.toLocaleString()}</span>
-                </div>
-
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Total Costs</span>
-                    <span className="font-bold text-rose-500 dark:text-rose-400 text-base">${project.totalCosts.toLocaleString()}</span>
-                </div>
-
                 {/* Specific Software Stats */}
                 {mrrMetric && (
                     <div className="flex flex-col text-left xl:text-right">
@@ -60,6 +50,22 @@ export function SoftwareProjectRow({ project }: { project: ProjectDetails }) {
                         <span className="font-bold text-[#2B3674] dark:text-white text-base">{m.value.toLocaleString()}</span>
                     </div>
                 ))}
+
+                {/* Standard Financials */}
+                <div className="flex flex-col text-left xl:text-right">
+                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Revenue</span>
+                    <span className="font-bold text-[#2B3674] dark:text-white text-base">${project.totalRevenue.toLocaleString()}</span>
+                </div>
+
+                <div className="flex flex-col text-left xl:text-right">
+                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Profit</span>
+                    <span className="font-bold text-emerald-500 dark:text-emerald-400 text-base">${project.netProfit.toLocaleString()}</span>
+                </div>
+
+                <div className="flex flex-col text-left xl:text-right">
+                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Total Costs</span>
+                    <span className="font-bold text-rose-500 dark:text-rose-400 text-base">${project.totalCosts.toLocaleString()}</span>
+                </div>
             </div>
         </div>
     );

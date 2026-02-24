@@ -5,6 +5,7 @@ export interface Project {
     status: string;
     platform?: string;
     platformAccountId?: string;
+    link?: string;
 }
 
 export interface Metric {
