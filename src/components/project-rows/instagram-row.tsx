@@ -1,5 +1,5 @@
 import { ProjectDetails } from '@/lib/data-client';
-import { Instagram } from 'lucide-react';
+import { FiInstagram } from 'react-icons/fi';
 
 export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
     const followerMetric = project.metrics?.find(m => m.name.toLowerCase().includes('follower'));
@@ -12,7 +12,7 @@ export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
             {/* Left: Identity */}
             <div className="flex items-center gap-5 min-w-[250px]">
                 <div className="p-3 bg-pink-500/10 dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12 border border-pink-500/30">
-                    <Instagram className="w-6 h-6 text-[#E1306C]" />
+                    <FiInstagram className="w-6 h-6 text-[#E1306C]" />
                 </div>
                 <div>
                     {project.link ? (
