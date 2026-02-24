@@ -4,6 +4,7 @@ export interface Project {
     type: string;
     status: string;
     platform?: string;
+    platformAccountId?: string;
 }
 
 export interface Metric {

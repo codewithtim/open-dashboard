@@ -37,6 +37,7 @@ describe('NotionClient', () => {
                             type: { select: { name: 'Software' } },
                             status: { select: { name: 'Active' } },
                             platform: { select: { name: 'youtube' } },
+                            'Platform Account ID': { rich_text: [{ plain_text: 'UC123ABC' }] }
                         }
                     }
                 ]
@@ -50,6 +51,7 @@ describe('NotionClient', () => {
                 type: 'Software',
                 status: 'Active',
                 platform: 'youtube',
+                platformAccountId: 'UC123ABC'
             });
             expect(mockQuery).toHaveBeenCalledWith({
                 database_id: process.env.NOTION_PROJECTS_DB_ID || '',

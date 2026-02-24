@@ -52,6 +52,7 @@ export class NotionClient implements DataClient {
                     type: props.type?.select?.name || '',
                     status: props.status?.select?.name || '',
                     platform: props.platform?.select?.name || undefined,
+                    platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
                 });
             }
         }
@@ -115,6 +116,7 @@ export class NotionClient implements DataClient {
                 type: props.type?.select?.name || '',
                 status: props.status?.select?.name || '',
                 platform: props.platform?.select?.name || undefined,
+                platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
             };
         }
 
@@ -182,6 +184,7 @@ export class NotionClient implements DataClient {
                     type: props.type?.select?.name || '',
                     status: props.status?.select?.name || '',
                     platform: props.platform?.select?.name || undefined,
+                    platformAccountId: props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined,
                 };
             }
 
