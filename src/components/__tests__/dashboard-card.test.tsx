@@ -16,6 +16,6 @@ describe('DashboardCard', () => {
     it('applies featured styling when featured prop is true', () => {
         const { container } = render(<DashboardCard title="Test" value="100" featured />);
         // Check for some distinct featured class, matching plan.md specification
-        expect(container.firstChild).toHaveClass('bg-neutral-900');
+        expect(container.firstChild).toHaveClass('bg-gradient-to-br');
     });
 });

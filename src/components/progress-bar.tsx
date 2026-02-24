@@ -23,7 +23,7 @@ export function ProgressBar({ currentValue, targetValue = 1000000 }: ProgressBar
             <div className="h-4 w-full bg-neutral-200 dark:bg-neutral-800 rounded-full overflow-hidden">
                 <div
                     data-testid="progress-filler"
-                    className="h-full bg-neutral-900 dark:bg-neutral-100 transition-all duration-1000 ease-out rounded-full"
+                    className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 transition-all duration-1000 ease-out rounded-full"
                     style={{ width: `${boundedPercentage}%` }}
                 />
             </div>

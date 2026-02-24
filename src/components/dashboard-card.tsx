@@ -14,13 +14,13 @@ export function DashboardCard({ title, value, trend, featured }: DashboardCardPr
             className={clsx(
                 "p-6 rounded-2xl border transition-all duration-200 ease-in-out",
                 featured
-                    ? "bg-neutral-900 border-neutral-800 text-white dark:bg-white dark:text-neutral-900 dark:border-neutral-200 shadow-lg"
-                    : "bg-white border-neutral-200 text-neutral-900 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-50 shadow-sm hover:shadow-md"
+                    ? "bg-gradient-to-br from-indigo-600 to-purple-700 text-white border-transparent shadow-lg shadow-indigo-500/20"
+                    : "bg-white border-neutral-200 hover:border-indigo-500/30 text-neutral-900 dark:bg-neutral-900 dark:border-neutral-800 dark:hover:border-indigo-400/30 dark:text-neutral-50 shadow-sm hover:shadow-md"
             )}
         >
             <h3 className={clsx(
                 "text-sm font-medium mb-2",
-                featured ? "text-neutral-400 dark:text-neutral-500" : "text-neutral-500 dark:text-neutral-400"
+                featured ? "text-indigo-100" : "text-neutral-500 dark:text-neutral-400"
             )}>
                 {title}
             </h3>
