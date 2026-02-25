@@ -56,6 +56,7 @@ export class NotionClient implements DataClient {
                     else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
                     else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                     else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
+                    else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
                 }
 
                 projects.push({
@@ -171,6 +172,7 @@ export class NotionClient implements DataClient {
                 else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
                 else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                 else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
+                else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
             }
 
             project = {
@@ -251,6 +253,7 @@ export class NotionClient implements DataClient {
                     else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
                     else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                     else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
+                    else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
                 }
 
                 project = {

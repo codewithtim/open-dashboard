@@ -6,6 +6,7 @@ import { TwitterProjectRow } from './twitter-row';
 import { TikTokProjectRow } from './tiktok-row';
 import { TwitchProjectRow } from './twitch-row';
 import { InstagramProjectRow } from './instagram-row';
+import { GithubProjectRow } from './github-row';
 
 export function renderProjectRow(project: ProjectDetails) {
     switch (project.platform?.toLowerCase()) {
@@ -23,6 +24,8 @@ export function renderProjectRow(project: ProjectDetails) {
         case 'instagram':
         case 'ig':
             return <InstagramProjectRow key={project.id} project={project} />;
+        case 'github':
+            return <GithubProjectRow key={project.id} project={project} />;
         default:
             return <DefaultProjectRow key={project.id} project={project} />;
     }
