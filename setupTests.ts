@@ -2,6 +2,19 @@ import '@testing-library/jest-dom';
 import { TextEncoder, TextDecoder } from 'util';
 Object.assign(global, { TextDecoder, TextEncoder });
 
+// Mock IntersectionObserver which isn't available in JSDOM
+class IntersectionObserverMock {
+    observe = jest.fn();
+    disconnect = jest.fn();
+    unobserve = jest.fn();
+}
+
+Object.defineProperty(window, 'IntersectionObserver', {
+    writable: true,
+    configurable: true,
+    value: IntersectionObserverMock,
+});
+
 global.Request = class Request {
     url: string;
     init: any;

@@ -1,12 +1,13 @@
 import { ProjectDetails } from '@/lib/data-client';
 import { BsBoxSeam } from 'react-icons/bs';
+import { AnimatedCounter } from '../animated-counter';
 
 export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
     return (
-        <div className="group bg-white dark:bg-[#111C44] rounded-[20px] shadow-[0_18px_40px_-12px_rgba(112,144,176,0.12)] hover:shadow-[0_20px_45px_-10px_rgba(112,144,176,0.2)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.5)] transition-all duration-300 font-sans p-6 flex flex-col xl:flex-row justify-between xl:items-center gap-6">
+        <div className="group bg-white dark:bg-[#111C44] rounded-[20px] shadow-[0_18px_40px_-12px_rgba(112,144,176,0.12)] hover:shadow-[0_20px_45px_-10px_rgba(112,144,176,0.2)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.5)] transition-all duration-300 font-sans p-6 flex flex-col gap-6 h-full">
 
-            {/* Left: Identity */}
-            <div className="flex items-center gap-5 min-w-[250px]">
+            {/* Top: Identity */}
+            <div className="flex items-center gap-5">
                 <div className="p-3 bg-[#F4F7FE] dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12">
                     <BsBoxSeam className="w-5 h-5 text-[#4318FF]" />
                 </div>
@@ -22,31 +23,39 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
                 </div>
             </div>
 
-            {/* Right: Inline Metrics Flex Container */}
-            <div className="flex flex-wrap items-center gap-x-8 gap-y-4 xl:justify-end flex-grow">
+            {/* Middle: Financials (3 Columns) */}
+            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col text-left">
+                    <span className="text-[#A3AED0] text-[10px] font-semibold uppercase tracking-wider mb-1">Revenue</span>
+                    <span className="font-bold text-[#2B3674] dark:text-white text-sm">
+                        <AnimatedCounter value={project.totalRevenue} prefix="$" />
+                    </span>
+                </div>
+                <div className="flex flex-col text-left">
+                    <span className="text-[#A3AED0] text-[10px] font-semibold uppercase tracking-wider mb-1">Profit</span>
+                    <span className="font-bold text-emerald-500 dark:text-emerald-400 text-sm">
+                        <AnimatedCounter value={project.netProfit} prefix="$" />
+                    </span>
+                </div>
+                <div className="flex flex-col text-left">
+                    <span className="text-[#A3AED0] text-[10px] font-semibold uppercase tracking-wider mb-1">Costs</span>
+                    <span className="font-bold text-rose-500 dark:text-rose-400 text-sm">
+                        <AnimatedCounter value={project.totalCosts} prefix="$" />
+                    </span>
+                </div>
+            </div>
+
+            {/* Bottom: Metrics Grid */}
+            <div className="grid grid-cols-2 gap-y-4 gap-x-4 mt-auto">
                 {/* Optional Fallback Metrics */}
                 {project.metrics && project.metrics.map(m => (
-                    <div key={m.name} className="flex flex-col text-left xl:text-right">
+                    <div key={m.name} className="flex flex-col text-left">
                         <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">{m.name}</span>
-                        <span className="font-bold text-[#2B3674] dark:text-white text-base">{m.value.toLocaleString()}</span>
+                        <span className="font-bold text-[#2B3674] dark:text-white text-base">
+                            <AnimatedCounter value={m.value} />
+                        </span>
                     </div>
                 ))}
-
-                {/* Standard Financials */}
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Revenue</span>
-                    <span className="font-bold text-[#2B3674] dark:text-white text-base">${project.totalRevenue.toLocaleString()}</span>
-                </div>
-
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Profit</span>
-                    <span className="font-bold text-emerald-500 dark:text-emerald-400 text-base">${project.netProfit.toLocaleString()}</span>
-                </div>
-
-                <div className="flex flex-col text-left xl:text-right">
-                    <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Total Costs</span>
-                    <span className="font-bold text-rose-500 dark:text-rose-400 text-base">${project.totalCosts.toLocaleString()}</span>
-                </div>
             </div>
 
         </div>

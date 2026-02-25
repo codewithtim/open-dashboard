@@ -17,7 +17,6 @@ export function Header() {
     }, []);
 
     const navItems = [
-        { name: 'Dashboard', path: '/' },
         { name: 'Projects', path: '/projects' },
         { name: 'Blog', path: '/blog' }
     ];

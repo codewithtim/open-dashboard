@@ -16,6 +16,7 @@ export default async function DashboardPage() {
   const lightweightProjects = await client.getProjects();
   const activeIds = lightweightProjects.map(p => p.id);
   const detailedProjects = await client.getMultipleProjectDetails(activeIds);
+  const softwareProjectsCount = detailedProjects.filter(p => p.type.toLowerCase() === 'software' || p.platform?.toLowerCase() === 'software').length;
 
   return (
     <main className="min-h-screen py-10 px-4 flex flex-col items-center relative overflow-hidden">
@@ -29,7 +30,7 @@ export default async function DashboardPage() {
       {/* Network Visualizer Container */}
       <section className="relative w-full max-w-6xl mx-auto min-h-[550px] md:min-h-0 md:h-[450px] flex items-center justify-center my-6 z-10">
         <NetworkLines projects={detailedProjects}>
-          <CentralStatsHub stats={stats} />
+          <CentralStatsHub stats={stats} softwareProjectsCount={softwareProjectsCount} />
         </NetworkLines>
       </section>
 
@@ -42,7 +43,7 @@ export default async function DashboardPage() {
           <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {detailedProjects.map((p) => (
             <React.Fragment key={p.id}>
               {renderProjectRow(p)}
