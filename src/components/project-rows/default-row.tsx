@@ -1,5 +1,6 @@
 import { ProjectDetails } from '@/lib/data-client';
 import { BsBoxSeam } from 'react-icons/bs';
+import { FaGithub } from 'react-icons/fa';
 import { AnimatedCounter } from '../animated-counter';
 
 export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
@@ -7,20 +8,34 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
         <div className="group bg-white dark:bg-[#111C44] rounded-[20px] shadow-[0_18px_40px_-12px_rgba(112,144,176,0.12)] hover:shadow-[0_20px_45px_-10px_rgba(112,144,176,0.2)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.5)] transition-all duration-300 font-sans p-6 flex flex-col gap-6 h-full">
 
             {/* Top: Identity */}
-            <div className="flex items-center gap-5">
-                <div className="p-3 bg-[#F4F7FE] dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12">
-                    <BsBoxSeam className="w-5 h-5 text-[#4318FF]" />
-                </div>
-                <div>
-                    {project.link ? (
-                        <a href={project.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            <div className="flex items-center justify-between gap-5">
+                <div className="flex items-center gap-5">
+                    <div className="p-3 bg-[#F4F7FE] dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12">
+                        <BsBoxSeam className="w-5 h-5 text-[#4318FF]" />
+                    </div>
+                    <div>
+                        {project.link ? (
+                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                                <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
+                            </a>
+                        ) : (
                             <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
-                        </a>
-                    ) : (
-                        <h3 className="font-bold text-lg text-[#2B3674] dark:text-white mb-0.5">{project.name}</h3>
-                    )}
-                    <p className="text-sm font-medium text-[#A3AED0] capitalize">{project.type}</p>
+                        )}
+                        <p className="text-sm font-medium text-[#A3AED0] capitalize">{project.type}</p>
+                    </div>
                 </div>
+                {/* Optional GitHub Repo Link */}
+                {project.link?.includes('github.com') && (
+                    <a
+                        href={project.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+                        title="View GitHub Repository"
+                    >
+                        <FaGithub size={18} />
+                    </a>
+                )}
             </div>
 
             {/* Middle: Financials (3 Columns) */}
