@@ -6,7 +6,7 @@ describe('ProgressBar', () => {
     it('renders the current and target values correctly formatted', () => {
         render(<ProgressBar currentValue={500000} targetValue={1000000} />);
         expect(screen.getByText('$500,000')).toBeInTheDocument();
-        expect(screen.getByText('Goal: $1,000,000')).toBeInTheDocument();
+        expect(screen.getByText('50.0% to $1M Goal')).toBeInTheDocument();
     });
 
     it('calculates the exact 50% width correctly', () => {
@@ -25,6 +25,6 @@ describe('ProgressBar', () => {
     it('defaults out to a $1,000,000 target base if targetValue is omitted', () => {
         render(<ProgressBar currentValue={250000} />);
         expect(screen.getByText('$250,000')).toBeInTheDocument();
-        expect(screen.getByText('Goal: $1,000,000')).toBeInTheDocument();
+        expect(screen.getByText('25.0% to $1M Goal')).toBeInTheDocument();
     });
 });

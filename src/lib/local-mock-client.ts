@@ -10,7 +10,10 @@ const mockProjects: Project[] = [
 const mockGlobalStats: DashboardStats = {
     totalRevenue: 125000,
     totalCosts: 18400,
-    netProfit: 106600
+    netProfit: 106600,
+    totalSubscribers: 125000,
+    totalViews: 850000,
+    totalActiveUsers: 340
 };
 
 const mockProjectDetails: Record<string, ProjectDetails> = {

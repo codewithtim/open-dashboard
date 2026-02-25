@@ -56,21 +56,23 @@ describe('Dashboard Home Page', () => {
         const page = await DashboardPage();
         render(page);
 
+        // Assert central stats hub metrics are rendered
         expect(screen.getByText('Total Revenue')).toBeInTheDocument();
         expect(screen.getAllByText('$5,000').length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('Net Profit')).toBeInTheDocument();
-        expect(screen.getByText('$4,000')).toBeInTheDocument();
 
-        expect(screen.getByText('Total Subscribers')).toBeInTheDocument();
+        // Net Profit, Costs, and generic DashboardCards are no longer used on the main screen in the new redesign
+        // Replaced by CentralStatsHub specific stats
+        expect(screen.getAllByText(/Subscribers/i).length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('25,000')).toBeInTheDocument();
-        expect(screen.getByText('Total Views')).toBeInTheDocument();
-        expect(screen.getByText('200,000')).toBeInTheDocument();
-        expect(screen.getByText('Active Users')).toBeInTheDocument();
-        expect(screen.getByText('350')).toBeInTheDocument();
 
-        expect(screen.getByText('Active Projects')).toBeInTheDocument();
-        expect(screen.getByText('Software App')).toBeInTheDocument();
-        expect(screen.getByText('YouTube Channel')).toBeInTheDocument();
+        expect(screen.getAllByText('Views').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('200,000')).toBeInTheDocument();
+
+        // Active Users no longer in top shelf, it's specific to the project row metrics
+
+        expect(screen.getByText('Active Projects Activity')).toBeInTheDocument();
+        expect(screen.getAllByText('Software App').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('YouTube Channel').length).toBeGreaterThanOrEqual(1);
 
         // Assert deeply nested metrics from getMultipleProjectDetails reflect
         expect(mockClient.getMultipleProjectDetails).toHaveBeenCalledWith(['1', '2']);
@@ -86,11 +88,9 @@ describe('Dashboard Home Page', () => {
         expect(screen.getByText('$3,000')).toBeInTheDocument(); // Revenue
         expect(screen.getByText('$2,400')).toBeInTheDocument(); // Profit
         expect(screen.getByText('$600')).toBeInTheDocument(); // Total Costs
-        expect(screen.getByText('Subscribers')).toBeInTheDocument();
+        expect(screen.getAllByText(/Subscribers/i).length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('15,000')).toBeInTheDocument();
 
-        // Progress bar renders with totalRevenue against $1M goal
-        expect(screen.getByTestId('progress-filler')).toBeInTheDocument();
-        expect(screen.getByText('Goal: $1,000,000')).toBeInTheDocument();
+        // Progress bar is no longer rendered in the hero section
     });
 });
