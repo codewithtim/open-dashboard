@@ -33,20 +33,45 @@ export default async function DashboardPage() {
 
       {/* Detailed Projects List */}
       <section className="w-full max-w-5xl mx-auto z-10 mt-16">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-[#2B3674] dark:text-white tracking-tight">
-            Active Projects Activity
-          </h2>
-          <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
-        </div>
+        {/* Software Projects */}
+        {detailedProjects.some(p => p.type === 'software') && (
+        <>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-[#2B3674] dark:text-white tracking-tight">
+              Software
+            </h2>
+            <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
-          {detailedProjects.map((p) => (
-            <React.Fragment key={p.id}>
-              {renderProjectRow(p)}
-            </React.Fragment>
-          ))}
-        </div>
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            {detailedProjects.filter(p => p.type === 'software').map((p) => (
+              <div key={p.id} className="break-inside-avoid">
+                {renderProjectRow(p)}
+              </div>
+            ))}
+          </div>
+        </>
+        )}
+
+        {/* Social Projects */}
+        {detailedProjects.some(p => p.type !== 'software') && (
+        <>
+          <div className="flex items-center justify-between mb-8 mt-16">
+            <h2 className="text-2xl font-bold text-[#2B3674] dark:text-white tracking-tight">
+              Social
+            </h2>
+            <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
+          </div>
+
+          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+            {detailedProjects.filter(p => p.type !== 'software').map((p) => (
+              <div key={p.id} className="break-inside-avoid">
+                {renderProjectRow(p)}
+              </div>
+            ))}
+          </div>
+        </>
+        )}
       </section>
     </main>
   );

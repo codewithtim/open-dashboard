@@ -70,7 +70,8 @@ describe('Dashboard Home Page', () => {
 
         // Active Users no longer in top shelf, it's specific to the project row metrics
 
-        expect(screen.getByText('Active Projects Activity')).toBeInTheDocument();
+        expect(screen.getByText('Software')).toBeInTheDocument();
+        expect(screen.getByText('Social')).toBeInTheDocument();
         expect(screen.getAllByText('Software App').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('YouTube Channel').length).toBeGreaterThanOrEqual(1);
 
