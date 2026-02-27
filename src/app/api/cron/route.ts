@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { notion } from '@/lib/notion-client';
 import { getDataClient } from '@/lib/client-factory';
 import { getMetricsProvider } from '@/lib/providers';
@@ -65,6 +66,8 @@ export async function GET(request: Request) {
                 console.error(`Failed to process metrics for project ${project.name}:`, err);
             }
         }
+
+        revalidatePath('/');
 
         return NextResponse.json({ success: true, message: 'Updated metrics successfully.' });
     } catch (error) {

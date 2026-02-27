@@ -7,9 +7,6 @@ import { NetworkLines } from '@/components/network-lines';
 import { NodeIcon } from '@/components/node-icon';
 import { FiYoutube, FiTwitter, FiGithub, FiBox } from 'react-icons/fi';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 export default async function DashboardPage() {
   const client = getDataClient();
   const stats = await client.getAggregatedDashboardStats();
