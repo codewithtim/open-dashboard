@@ -24,7 +24,7 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
             </div>
 
             {/* Middle: Financials (3 Columns) */}
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className={`grid grid-cols-3 gap-4 ${project.metrics?.length ? 'pb-4 border-b border-slate-100 dark:border-slate-800' : ''}`}>
                 <div className="flex flex-col text-left">
                     <span className="text-[#A3AED0] text-[10px] font-semibold uppercase tracking-wider mb-1">Revenue</span>
                     <span className="font-bold text-[#2B3674] dark:text-white text-sm">
@@ -46,9 +46,9 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
             </div>
 
             {/* Bottom: Metrics Grid */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-4 mt-auto">
-                {/* Optional Fallback Metrics */}
-                {project.metrics && project.metrics.map(m => (
+            {project.metrics && project.metrics.length > 0 && (
+            <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                {project.metrics.map(m => (
                     <div key={m.name} className="flex flex-col text-left">
                         <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">{m.name}</span>
                         <span className="font-bold text-[#2B3674] dark:text-white text-base">
@@ -57,6 +57,7 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
                     </div>
                 ))}
             </div>
+            )}
 
         </div>
     );

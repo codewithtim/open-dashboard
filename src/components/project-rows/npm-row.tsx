@@ -27,7 +27,7 @@ export function NpmProjectRow({ project, icon }: { project: ProjectDetails; icon
             </div>
 
             {/* Middle: Financials (3 Columns) */}
-            <div className="grid grid-cols-3 gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+            <div className={`grid grid-cols-3 gap-4 ${project.metrics?.length ? 'pb-4 border-b border-slate-100 dark:border-slate-800' : ''}`}>
                 <div className="flex flex-col text-left">
                     <span className="text-[#A3AED0] text-[10px] font-semibold uppercase tracking-wider mb-1">Revenue</span>
                     <span className="font-bold text-[#2B3674] dark:text-white text-sm">
@@ -49,8 +49,8 @@ export function NpmProjectRow({ project, icon }: { project: ProjectDetails; icon
             </div>
 
             {/* Bottom: Metrics Grid */}
-            <div className="grid grid-cols-2 gap-y-4 gap-x-4 mt-auto">
-                {/* Specific npm Stats */}
+            {project.metrics && project.metrics.length > 0 && (
+            <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                 {downloadMetric && (
                     <div className="flex flex-col text-left">
                         <span className="text-[#A3AED0] text-xs font-semibold uppercase tracking-wider mb-1">Downloads</span>
@@ -82,6 +82,7 @@ export function NpmProjectRow({ project, icon }: { project: ProjectDetails; icon
                     </div>
                 ))}
             </div>
+            )}
         </div>
     );
 }
