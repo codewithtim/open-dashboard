@@ -8,6 +8,7 @@ import { TikTokProjectRow } from './tiktok-row';
 import { TwitchProjectRow } from './twitch-row';
 import { InstagramProjectRow } from './instagram-row';
 import { GithubProjectRow } from './github-row';
+import { NpmProjectRow } from './npm-row';
 
 const PROJECT_ICONS: Record<string, React.ReactNode> = {
     'Workflow Pilot': <Image src="/logo.png" alt="Workflow Pilot" width={24} height={24} className="object-contain" />,
@@ -18,7 +19,11 @@ export function renderProjectRow(project: ProjectDetails) {
     switch (project.platform?.toLowerCase()) {
         case 'youtube':
             return <YouTubeProjectRow key={project.id} project={project} />;
-        case 'software': // could match 'software', 'saas', 'stripe' etc
+        case 'npm':
+            return <NpmProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
+        case 'product':
+        case 'software':
+        case 'saas':
             return <SoftwareProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
         case 'twitter':
         case 'x':

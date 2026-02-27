@@ -2,7 +2,8 @@ import { DataClient, Project, DashboardStats, ProjectDetails } from './data-clie
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', type: 'Content', status: 'Active', platform: 'youtube' },
-    { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'Software', status: 'Active' },
+    { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'Software', status: 'Active', platform: 'product' },
+    { id: 'npm-pkg', name: 'open-utils', type: 'Package', status: 'Active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
     { id: 'consulting', name: 'Dev Consulting', type: 'Service', status: 'Active' },
     { id: 'failed-app', name: 'Old Crypto App', type: 'Software', status: 'Archived' },
 ];
@@ -36,6 +37,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
         name: 'SaaS Boilerplate',
         type: 'Software',
         status: 'Active',
+        platform: 'product',
         totalRevenue: 68000,
         totalCosts: 12000,
         netProfit: 56000,
@@ -43,6 +45,22 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
             { name: 'MRR', value: 8500 },
             { name: 'Active Users', value: 340 },
             { name: 'Churn Rate %', value: 2.1 }
+        ]
+    },
+    'npm-pkg': {
+        id: 'npm-pkg',
+        name: 'open-utils',
+        type: 'Package',
+        status: 'Active',
+        platform: 'npm',
+        platformAccountId: 'open-utils',
+        link: 'https://www.npmjs.com/package/open-utils',
+        totalRevenue: 0,
+        totalCosts: 5,
+        netProfit: -5,
+        metrics: [
+            { name: 'Downloads', value: 48000 },
+            { name: 'Weekly Downloads', value: 12500 }
         ]
     },
     'consulting': {

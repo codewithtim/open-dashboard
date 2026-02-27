@@ -57,6 +57,7 @@ export class NotionClient implements DataClient {
                     else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                     else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
                     else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
+                    else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
                 }
 
                 projects.push({
@@ -173,6 +174,7 @@ export class NotionClient implements DataClient {
                 else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                 else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
                 else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
+                else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
             }
 
             project = {

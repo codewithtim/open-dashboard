@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ProjectDetails } from '@/lib/data-client';
 import { NodeIcon } from './node-icon';
 import { FiYoutube, FiTwitter, FiBox, FiVideo, FiCamera, FiMonitor, FiActivity } from 'react-icons/fi';
-import { FaTiktok, FaTwitch, FaGithub } from 'react-icons/fa6';
+import { FaTiktok, FaTwitch, FaGithub, FaNpm } from 'react-icons/fa6';
 
 import { useWindowSize } from 'react-use';
 
@@ -35,6 +35,9 @@ const getPlatformConfig = (project: ProjectDetails) => {
             return { icon: <FiCamera className="w-full h-full" />, color: "text-pink-500" };
         case 'github':
             return { icon: <FaGithub className="w-full h-full p-[2px]" />, color: "text-slate-800 dark:text-white" };
+        case 'npm':
+            return { icon: <FaNpm className="w-full h-full p-[2px]" />, color: "text-red-600" };
+        case 'product':
         case 'software':
         case 'saas':
             return { icon: <FiBox className="w-full h-full" />, color: "text-indigo-500" };

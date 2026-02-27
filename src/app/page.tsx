@@ -13,7 +13,12 @@ export default async function DashboardPage() {
   const lightweightProjects = await client.getProjects();
   const activeIds = lightweightProjects.map(p => p.id);
   const detailedProjects = await client.getMultipleProjectDetails(activeIds);
-  const softwareProjectsCount = detailedProjects.filter(p => p.type.toLowerCase() === 'software' || p.platform?.toLowerCase() === 'software').length;
+  const softwareProjectsCount = detailedProjects.filter(p => {
+    const type = p.type.toLowerCase();
+    const platform = p.platform?.toLowerCase();
+    return type === 'software' || type === 'package' ||
+      platform === 'software' || platform === 'product' || platform === 'saas' || platform === 'npm';
+  }).length;
 
   return (
     <main className="min-h-screen py-10 px-4 flex flex-col items-center relative overflow-hidden">

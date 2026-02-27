@@ -21,6 +21,13 @@ describe('LocalMockClient', () => {
             expect(youtube!.platform).toBe('youtube');
         });
 
+        it('includes npm platform on npm projects', async () => {
+            const projects = await client.getProjects();
+            const npm = projects.find(p => p.name === 'open-utils');
+            expect(npm).toBeDefined();
+            expect(npm!.platform).toBe('npm');
+        });
+
         it('has undefined platform on projects without one', async () => {
             const projects = await client.getProjects();
             const consulting = projects.find(p => p.name === 'Dev Consulting');
