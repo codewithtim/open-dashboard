@@ -5,7 +5,7 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockNpmProject: ProjectDetails = {
     id: 'npm-1',
     name: 'my-awesome-package',
-    type: 'package',
+    type: 'software',
     status: 'active',
     platform: 'npm',
     platformAccountId: 'my-awesome-package',
@@ -24,7 +24,7 @@ describe('NpmProjectRow', () => {
         render(<NpmProjectRow project={mockNpmProject} />);
 
         expect(screen.getByText('my-awesome-package')).toBeInTheDocument();
-        expect(screen.getByText('package')).toBeInTheDocument();
+        expect(screen.getByText('software')).toBeInTheDocument();
 
         // Assert Financials
         expect(screen.getByText('$0')).toBeInTheDocument();

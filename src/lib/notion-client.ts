@@ -23,6 +23,13 @@ function isPageObject(
     return 'properties' in item;
 }
 
+/** Normalize type values so all code/package projects display as 'software'. */
+function normalizeType(raw: string): string {
+    const lower = raw.toLowerCase();
+    if (lower === 'package') return 'software';
+    return lower;
+}
+
 type NotionQueryArgs = {
     database_id: string;
     filter?: any;
@@ -63,7 +70,7 @@ export class NotionClient implements DataClient {
                 projects.push({
                     id: page.id || '',
                     name: props.name?.title?.[0]?.plain_text || '',
-                    type: (props.type?.select?.name || '').toLowerCase(),
+                    type: normalizeType(props.type?.select?.name || ''),
                     status: (props.status?.select?.name || '').toLowerCase(),
                     platform,
                     platformAccountId,
@@ -180,7 +187,7 @@ export class NotionClient implements DataClient {
             project = {
                 id: projectPage.id,
                 name: props.name?.title?.[0]?.plain_text || '',
-                type: (props.type?.select?.name || '').toLowerCase(),
+                type: normalizeType(props.type?.select?.name || ''),
                 status: (props.status?.select?.name || '').toLowerCase(),
                 platform,
                 platformAccountId,
@@ -262,7 +269,7 @@ export class NotionClient implements DataClient {
                 project = {
                     id: projectPage.id,
                     name: props.name?.title?.[0]?.plain_text || '',
-                    type: (props.type?.select?.name || '').toLowerCase(),
+                    type: normalizeType(props.type?.select?.name || ''),
                     status: (props.status?.select?.name || '').toLowerCase(),
                     platform,
                     platformAccountId,

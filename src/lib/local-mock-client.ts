@@ -3,7 +3,7 @@ import { DataClient, Project, DashboardStats, ProjectDetails } from './data-clie
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
     { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'software', status: 'active' },
-    { id: 'npm-pkg', name: 'open-utils', type: 'package', status: 'active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
+    { id: 'npm-pkg', name: 'open-utils', type: 'software', status: 'active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
     { id: 'consulting', name: 'Dev Consulting', type: 'service', status: 'active' },
     { id: 'failed-app', name: 'Old Crypto App', type: 'software', status: 'archived' },
 ];
@@ -49,7 +49,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'npm-pkg': {
         id: 'npm-pkg',
         name: 'open-utils',
-        type: 'package',
+        type: 'software',
         status: 'active',
         platform: 'npm',
         platformAccountId: 'open-utils',
