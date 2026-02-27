@@ -1,8 +1,9 @@
 import { ProjectDetails } from '@/lib/data-client';
 import { FaGithub } from 'react-icons/fa';
 import { AnimatedCounter } from '../animated-counter';
+import Image from 'next/image';
 
-export function GithubProjectRow({ project }: { project: ProjectDetails }) {
+export function GithubProjectRow({ project, icon }: { project: ProjectDetails; icon?: React.ReactNode }) {
     const starMetric = project.metrics?.find(m => m.name.toLowerCase().includes('star'));
     const forkMetric = project.metrics?.find(m => m.name.toLowerCase().includes('fork'));
 
@@ -12,7 +13,7 @@ export function GithubProjectRow({ project }: { project: ProjectDetails }) {
             {/* Top: Identity */}
             <div className="flex items-center gap-5">
                 <div className="p-3 bg-slate-100 dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12 border border-slate-200 dark:border-slate-800">
-                    <FaGithub className="w-6 h-6 text-slate-900 dark:text-white" />
+                    {icon || <FaGithub className="w-6 h-6 text-slate-900 dark:text-white" />}
                 </div>
                 <div>
                     {project.link ? (

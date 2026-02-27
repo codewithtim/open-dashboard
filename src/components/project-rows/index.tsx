@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { ProjectDetails } from '@/lib/data-client';
 import { DefaultProjectRow } from './default-row';
 import { YouTubeProjectRow } from './youtube-row';
@@ -7,6 +8,10 @@ import { TikTokProjectRow } from './tiktok-row';
 import { TwitchProjectRow } from './twitch-row';
 import { InstagramProjectRow } from './instagram-row';
 import { GithubProjectRow } from './github-row';
+
+const PROJECT_ICONS: Record<string, React.ReactNode> = {
+    'Workflow Pilot': <Image src="/logo.png" alt="Workflow Pilot" width={24} height={24} className="object-contain" />,
+};
 
 export function renderProjectRow(project: ProjectDetails) {
     switch (project.platform?.toLowerCase()) {
@@ -25,7 +30,7 @@ export function renderProjectRow(project: ProjectDetails) {
         case 'ig':
             return <InstagramProjectRow key={project.id} project={project} />;
         case 'github':
-            return <GithubProjectRow key={project.id} project={project} />;
+            return <GithubProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
         default:
             return <DefaultProjectRow key={project.id} project={project} />;
     }

@@ -14,6 +14,9 @@ interface NetworkLinesProps {
 }
 
 const getPlatformConfig = (project: ProjectDetails) => {
+    if (project.name === 'Workflow Pilot') {
+        return { icon: <img src="/logo.png" alt="Workflow Pilot" className="w-full h-full object-contain" />, color: "" };
+    }
     const platform = project.platform?.toLowerCase() || project.type?.toLowerCase();
     switch (platform) {
         case 'youtube':
