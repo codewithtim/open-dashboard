@@ -47,7 +47,7 @@ export class NotionClient implements DataClient {
         for (const page of response.results) {
             if (isPageObject(page)) {
                 const props = page.properties as Record<string, NotionProp>;
-                const platform = props.platform?.select?.name || undefined;
+                const platform = props.platform?.select?.name?.toLowerCase() || undefined;
                 const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
                 let link = props.Link?.url || undefined;
                 if (!link && platformAccountId) {
@@ -63,8 +63,8 @@ export class NotionClient implements DataClient {
                 projects.push({
                     id: page.id || '',
                     name: props.name?.title?.[0]?.plain_text || '',
-                    type: props.type?.select?.name || '',
-                    status: props.status?.select?.name || '',
+                    type: (props.type?.select?.name || '').toLowerCase(),
+                    status: (props.status?.select?.name || '').toLowerCase(),
                     platform,
                     platformAccountId,
                     link,
@@ -164,7 +164,7 @@ export class NotionClient implements DataClient {
         let project: Project = { id: '', name: '', type: '', status: '' };
         if (isPageObject(projectPage)) {
             const props = projectPage.properties as Record<string, NotionProp>;
-            const platform = props.platform?.select?.name || undefined;
+            const platform = props.platform?.select?.name?.toLowerCase() || undefined;
             const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
             let link = props.Link?.url || undefined;
             if (!link && platformAccountId) {
@@ -180,8 +180,8 @@ export class NotionClient implements DataClient {
             project = {
                 id: projectPage.id,
                 name: props.name?.title?.[0]?.plain_text || '',
-                type: props.type?.select?.name || '',
-                status: props.status?.select?.name || '',
+                type: (props.type?.select?.name || '').toLowerCase(),
+                status: (props.status?.select?.name || '').toLowerCase(),
                 platform,
                 platformAccountId,
                 link,
@@ -246,7 +246,7 @@ export class NotionClient implements DataClient {
             let project: Project = { id: '', name: '', type: '', status: '' };
             if (isPageObject(projectPage)) {
                 const props = projectPage.properties as Record<string, NotionProp>;
-                const platform = props.platform?.select?.name || undefined;
+                const platform = props.platform?.select?.name?.toLowerCase() || undefined;
                 const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
                 let link = props.Link?.url || undefined;
                 if (!link && platformAccountId) {
@@ -256,13 +256,14 @@ export class NotionClient implements DataClient {
                     else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
                     else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
                     else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
+                    else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
                 }
 
                 project = {
                     id: projectPage.id,
                     name: props.name?.title?.[0]?.plain_text || '',
-                    type: props.type?.select?.name || '',
-                    status: props.status?.select?.name || '',
+                    type: (props.type?.select?.name || '').toLowerCase(),
+                    status: (props.status?.select?.name || '').toLowerCase(),
                     platform,
                     platformAccountId,
                     link,

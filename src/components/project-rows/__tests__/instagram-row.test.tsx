@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockInstagramProject: ProjectDetails = {
     id: 'ig-1',
     name: 'My Instagram',
-    type: 'Social',
-    status: 'Active',
+    type: 'social',
+    status: 'active',
     totalRevenue: 800,
     totalCosts: 150,
     netProfit: 650,
@@ -22,7 +22,7 @@ describe('InstagramProjectRow', () => {
         render(<InstagramProjectRow project={mockInstagramProject} />);
 
         expect(screen.getByText('My Instagram')).toBeInTheDocument();
-        expect(screen.getByText('Social')).toBeInTheDocument();
+        expect(screen.getByText('social')).toBeInTheDocument();
 
         // Assert Financials
         expect(screen.getByText('$800')).toBeInTheDocument();

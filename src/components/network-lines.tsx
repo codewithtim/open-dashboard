@@ -19,8 +19,7 @@ const getPlatformConfig = (project: ProjectDetails) => {
         'TalkyTexty': { icon: <img src="/talkytexty-logo.png" alt="TalkyTexty" className="w-full h-full object-contain" />, color: "" },
     };
     if (customIcons[project.name]) return customIcons[project.name];
-    const platform = project.platform?.toLowerCase() || project.type?.toLowerCase();
-    switch (platform) {
+    switch (project.platform ?? project.type) {
         case 'youtube':
             return { icon: <FiYoutube className="w-full h-full" />, color: "text-red-500" };
         case 'twitter':
@@ -37,9 +36,7 @@ const getPlatformConfig = (project: ProjectDetails) => {
             return { icon: <FaGithub className="w-full h-full p-[2px]" />, color: "text-slate-800 dark:text-white" };
         case 'npm':
             return { icon: <FaNpm className="w-full h-full p-[2px]" />, color: "text-red-600" };
-        case 'product':
         case 'software':
-        case 'saas':
             return { icon: <FiBox className="w-full h-full" />, color: "text-indigo-500" };
         default:
             return { icon: <FiActivity className="w-full h-full" />, color: "text-slate-500" };

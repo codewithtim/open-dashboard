@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockGithubProject: ProjectDetails = {
     id: 'gh-1',
     name: 'open-dashboard',
-    type: 'Software',
-    status: 'Active',
+    type: 'software',
+    status: 'active',
     platform: 'github',
     platformAccountId: 'codewithtim/open-dashboard',
     link: 'https://github.com/codewithtim/open-dashboard',
@@ -24,7 +24,7 @@ describe('GithubProjectRow', () => {
         render(<GithubProjectRow project={mockGithubProject} />);
 
         expect(screen.getByText('open-dashboard')).toBeInTheDocument();
-        expect(screen.getByText('Software')).toBeInTheDocument();
+        expect(screen.getByText('software')).toBeInTheDocument();
 
         // Assert Financials
         expect(screen.getByText('$0')).toBeInTheDocument();

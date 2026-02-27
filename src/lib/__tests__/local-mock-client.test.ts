@@ -11,7 +11,7 @@ describe('LocalMockClient', () => {
         it('returns only active projects', async () => {
             const projects = await client.getProjects();
             expect(projects.length).toBeGreaterThan(0);
-            projects.forEach(p => expect(p.status).toBe('Active'));
+            projects.forEach(p => expect(p.status).toBe('active'));
         });
 
         it('includes platform on projects that have one', async () => {

@@ -48,8 +48,8 @@ describe('NotionClient', () => {
             expect(projects[0]).toEqual({
                 id: 'proj-1',
                 name: 'Project 1',
-                type: 'Software',
-                status: 'Active',
+                type: 'software',
+                status: 'active',
                 platform: 'youtube',
                 platformAccountId: 'UC123ABC',
                 link: 'https://youtube.com/channel/UC123ABC'

@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockProject: ProjectDetails = {
     id: 'test-1',
     name: 'Test Project',
-    type: 'Service',
-    status: 'Active',
+    type: 'service',
+    status: 'active',
     totalRevenue: 10000,
     totalCosts: 2000,
     netProfit: 8000,
@@ -18,7 +18,7 @@ describe('DefaultProjectRow', () => {
         render(<DefaultProjectRow project={mockProject} />);
 
         expect(screen.getByText('Test Project')).toBeInTheDocument();
-        expect(screen.getByText('Service')).toBeInTheDocument();
+        expect(screen.getByText('service')).toBeInTheDocument();
 
         // Assert Revenue, Profit, and Costs are formatted and displayed
         expect(screen.getByText('$10,000')).toBeInTheDocument();

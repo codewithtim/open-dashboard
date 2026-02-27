@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockYoutubeProject: ProjectDetails = {
     id: 'yt-1',
     name: 'My Coding Channel',
-    type: 'Content',
-    status: 'Active',
+    type: 'content',
+    status: 'active',
     platform: 'youtube',
     totalRevenue: 5000,
     totalCosts: 1000,

@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockSoftwareProject: ProjectDetails = {
     id: 'saas-1',
     name: 'SaaS App',
-    type: 'Software',
-    status: 'Active',
+    type: 'software',
+    status: 'active',
     totalRevenue: 12000,
     totalCosts: 2000,
     netProfit: 10000,

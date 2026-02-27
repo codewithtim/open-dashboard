@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockTiktokProject: ProjectDetails = {
     id: 'tt-1',
     name: 'My TikTok',
-    type: 'Social',
-    status: 'Active',
+    type: 'social',
+    status: 'active',
     totalRevenue: 1500,
     totalCosts: 200,
     netProfit: 1300,
@@ -22,7 +22,7 @@ describe('TikTokProjectRow', () => {
         render(<TikTokProjectRow project={mockTiktokProject} />);
 
         expect(screen.getByText('My TikTok')).toBeInTheDocument();
-        expect(screen.getByText('Social')).toBeInTheDocument();
+        expect(screen.getByText('social')).toBeInTheDocument();
 
         // Assert Financials
         expect(screen.getByText('$1,500')).toBeInTheDocument();

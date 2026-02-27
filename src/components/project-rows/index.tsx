@@ -16,14 +16,12 @@ const PROJECT_ICONS: Record<string, React.ReactNode> = {
 };
 
 export function renderProjectRow(project: ProjectDetails) {
-    switch (project.platform?.toLowerCase()) {
+    switch (project.platform ?? project.type) {
         case 'youtube':
             return <YouTubeProjectRow key={project.id} project={project} />;
         case 'npm':
             return <NpmProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
-        case 'product':
         case 'software':
-        case 'saas':
             return <SoftwareProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
         case 'twitter':
         case 'x':

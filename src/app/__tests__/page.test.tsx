@@ -25,15 +25,15 @@ describe('Dashboard Home Page', () => {
                 totalActiveUsers: 350
             }),
             getProjects: jest.fn().mockResolvedValue([
-                { id: '1', name: 'Software App', type: 'software', status: 'Active' },
-                { id: '2', name: 'YouTube Channel', type: 'content', status: 'Active' }
+                { id: '1', name: 'Software App', type: 'software', status: 'active' },
+                { id: '2', name: 'YouTube Channel', type: 'content', status: 'active' }
             ]),
             getMultipleProjectDetails: jest.fn().mockResolvedValue([
                 {
                     id: '1',
                     name: 'Software App',
                     type: 'software',
-                    status: 'Active',
+                    status: 'active',
                     totalRevenue: 2000,
                     totalCosts: 400,
                     netProfit: 1600,
@@ -43,7 +43,7 @@ describe('Dashboard Home Page', () => {
                     id: '2',
                     name: 'YouTube Channel',
                     type: 'content',
-                    status: 'Active',
+                    status: 'active',
                     totalRevenue: 3000,
                     totalCosts: 600,
                     netProfit: 2400,
@@ -82,7 +82,7 @@ describe('Dashboard Home Page', () => {
         expect(screen.getByText('$1,600')).toBeInTheDocument(); // Profit
         expect(screen.getByText('$400')).toBeInTheDocument(); // Total Costs
         expect(screen.getByText('MRR')).toBeInTheDocument();
-        expect(screen.getByText('300')).toBeInTheDocument();
+        expect(screen.getByText('$300')).toBeInTheDocument();
 
         // Project 2 Metrics & Costs
         expect(screen.getByText('$3,000')).toBeInTheDocument(); // Revenue

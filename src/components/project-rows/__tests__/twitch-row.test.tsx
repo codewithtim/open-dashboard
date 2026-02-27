@@ -5,8 +5,8 @@ import { ProjectDetails } from '@/lib/data-client';
 const mockTwitchProject: ProjectDetails = {
     id: 'tw-1',
     name: 'My Twitch',
-    type: 'Streaming',
-    status: 'Active',
+    type: 'streaming',
+    status: 'active',
     totalRevenue: 3000,
     totalCosts: 500,
     netProfit: 2500,
@@ -22,7 +22,7 @@ describe('TwitchProjectRow', () => {
         render(<TwitchProjectRow project={mockTwitchProject} />);
 
         expect(screen.getByText('My Twitch')).toBeInTheDocument();
-        expect(screen.getByText('Streaming')).toBeInTheDocument();
+        expect(screen.getByText('streaming')).toBeInTheDocument();
 
         // Assert Financials
         expect(screen.getByText('$3,000')).toBeInTheDocument();

@@ -14,10 +14,7 @@ export default async function DashboardPage() {
   const activeIds = lightweightProjects.map(p => p.id);
   const detailedProjects = await client.getMultipleProjectDetails(activeIds);
   const softwareProjectsCount = detailedProjects.filter(p => {
-    const type = p.type.toLowerCase();
-    const platform = p.platform?.toLowerCase();
-    return type === 'software' || type === 'package' ||
-      platform === 'software' || platform === 'product' || platform === 'saas' || platform === 'npm';
+    return p.type === 'software' || p.type === 'package' || p.platform === 'npm';
   }).length;
 
   return (

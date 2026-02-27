@@ -4,7 +4,7 @@ import { GitHubMetricsProvider } from './github-provider';
 import { NpmMetricsProvider } from './npm-provider';
 
 export function getMetricsProvider(platform: string): MetricsProvider {
-    switch (platform.toLowerCase()) {
+    switch (platform) {
         case 'youtube':
             return new YouTubeMetricsProvider();
         case 'github':

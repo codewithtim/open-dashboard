@@ -1,11 +1,11 @@
 import { DataClient, Project, DashboardStats, ProjectDetails } from './data-client';
 
 const mockProjects: Project[] = [
-    { id: 'youtube-main', name: 'Main YouTube Channel', type: 'Content', status: 'Active', platform: 'youtube' },
-    { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'Software', status: 'Active', platform: 'product' },
-    { id: 'npm-pkg', name: 'open-utils', type: 'Package', status: 'Active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
-    { id: 'consulting', name: 'Dev Consulting', type: 'Service', status: 'Active' },
-    { id: 'failed-app', name: 'Old Crypto App', type: 'Software', status: 'Archived' },
+    { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
+    { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'software', status: 'active' },
+    { id: 'npm-pkg', name: 'open-utils', type: 'package', status: 'active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
+    { id: 'consulting', name: 'Dev Consulting', type: 'service', status: 'active' },
+    { id: 'failed-app', name: 'Old Crypto App', type: 'software', status: 'archived' },
 ];
 
 const mockGlobalStats: DashboardStats = {
@@ -21,8 +21,8 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'youtube-main': {
         id: 'youtube-main',
         name: 'Main YouTube Channel',
-        type: 'Content',
-        status: 'Active',
+        type: 'content',
+        status: 'active',
         totalRevenue: 45000,
         totalCosts: 5200,
         netProfit: 39800,
@@ -35,9 +35,8 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'saas-starter': {
         id: 'saas-starter',
         name: 'SaaS Boilerplate',
-        type: 'Software',
-        status: 'Active',
-        platform: 'product',
+        type: 'software',
+        status: 'active',
         totalRevenue: 68000,
         totalCosts: 12000,
         netProfit: 56000,
@@ -50,8 +49,8 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'npm-pkg': {
         id: 'npm-pkg',
         name: 'open-utils',
-        type: 'Package',
-        status: 'Active',
+        type: 'package',
+        status: 'active',
         platform: 'npm',
         platformAccountId: 'open-utils',
         link: 'https://www.npmjs.com/package/open-utils',
@@ -66,8 +65,8 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'consulting': {
         id: 'consulting',
         name: 'Dev Consulting',
-        type: 'Service',
-        status: 'Active',
+        type: 'service',
+        status: 'active',
         totalRevenue: 12000,
         totalCosts: 1200,
         netProfit: 10800,
@@ -80,7 +79,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
 
 export class LocalMockClient implements DataClient {
     async getProjects(): Promise<Project[]> {
-        return mockProjects.filter(p => p.status === 'Active');
+        return mockProjects.filter(p => p.status === 'active');
     }
 
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
