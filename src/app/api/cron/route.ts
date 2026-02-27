@@ -27,6 +27,10 @@ export async function GET(request: Request) {
                     { name: 'Subscribers', value: metrics.subscribers },
                     { name: 'Views', value: metrics.views },
                     { name: 'Videos', value: metrics.videos },
+                    { name: 'Stars', value: metrics.stars },
+                    { name: 'Forks', value: metrics.forks },
+                    { name: 'Downloads', value: metrics.downloads },
+                    { name: 'Weekly Downloads', value: metrics.weeklyDownloads },
                 ].filter(m => m.value !== undefined) as Array<{ name: string; value: number }>;
 
                 for (const entry of metricEntries) {

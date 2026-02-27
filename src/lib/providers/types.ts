@@ -2,7 +2,10 @@ export interface SocialMetrics {
     subscribers?: number;
     views?: number;
     videos?: number;
-    // We can add generic followers, impressions, etc., later for other platforms
+    stars?: number;
+    forks?: number;
+    downloads?: number;
+    weeklyDownloads?: number;
 }
 
 export interface MetricsProvider {
