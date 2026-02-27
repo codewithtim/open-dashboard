@@ -23,6 +23,10 @@ jest.mock('@/lib/providers', () => ({
     getMetricsProvider: jest.fn(),
 }));
 
+jest.mock('next/cache', () => ({
+    revalidatePath: jest.fn(),
+}));
+
 jest.mock('next/server', () => {
     class MockNextResponse {
         status: number;
