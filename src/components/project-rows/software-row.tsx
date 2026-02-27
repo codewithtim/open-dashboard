@@ -2,7 +2,7 @@ import { ProjectDetails } from '@/lib/data-client';
 import { FaLaptopCode } from 'react-icons/fa';
 import { AnimatedCounter } from '../animated-counter';
 
-export function SoftwareProjectRow({ project }: { project: ProjectDetails }) {
+export function SoftwareProjectRow({ project, icon }: { project: ProjectDetails; icon?: React.ReactNode }) {
     // Extract specific Software metrics if they exist
     const mrrMetric = project.metrics?.find(m => m.name.toLowerCase().includes('mrr'));
     const usersMetric = project.metrics?.find(m => m.name.toLowerCase().includes('user') || m.name.toLowerCase().includes('active'));
@@ -13,7 +13,7 @@ export function SoftwareProjectRow({ project }: { project: ProjectDetails }) {
             {/* Top: Identity */}
             <div className="flex items-center gap-5">
                 <div className="p-3 bg-[#F4F7FE] dark:bg-[#0B1437] rounded-full group-hover:scale-105 transition-transform flex items-center justify-center min-w-12 min-h-12">
-                    <FaLaptopCode className="w-5 h-5 text-[#4318FF]" />
+                    {icon || <FaLaptopCode className="w-5 h-5 text-[#4318FF]" />}
                 </div>
                 <div>
                     {project.link ? (

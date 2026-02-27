@@ -14,9 +14,11 @@ interface NetworkLinesProps {
 }
 
 const getPlatformConfig = (project: ProjectDetails) => {
-    if (project.name === 'Workflow Pilot') {
-        return { icon: <img src="/logo.png" alt="Workflow Pilot" className="w-full h-full object-contain" />, color: "" };
-    }
+    const customIcons: Record<string, { icon: React.ReactNode; color: string }> = {
+        'Workflow Pilot': { icon: <img src="/logo.png" alt="Workflow Pilot" className="w-full h-full object-contain" />, color: "" },
+        'TalkyTexty': { icon: <img src="/talkytexty-logo.png" alt="TalkyTexty" className="w-full h-full object-contain" />, color: "" },
+    };
+    if (customIcons[project.name]) return customIcons[project.name];
     const platform = project.platform?.toLowerCase() || project.type?.toLowerCase();
     switch (platform) {
         case 'youtube':

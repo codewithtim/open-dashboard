@@ -11,6 +11,7 @@ import { GithubProjectRow } from './github-row';
 
 const PROJECT_ICONS: Record<string, React.ReactNode> = {
     'Workflow Pilot': <Image src="/logo.png" alt="Workflow Pilot" width={24} height={24} className="object-contain" />,
+    'TalkyTexty': <Image src="/talkytexty-logo.png" alt="TalkyTexty" width={24} height={24} className="object-contain" />,
 };
 
 export function renderProjectRow(project: ProjectDetails) {
@@ -18,7 +19,7 @@ export function renderProjectRow(project: ProjectDetails) {
         case 'youtube':
             return <YouTubeProjectRow key={project.id} project={project} />;
         case 'software': // could match 'software', 'saas', 'stripe' etc
-            return <SoftwareProjectRow key={project.id} project={project} />;
+            return <SoftwareProjectRow key={project.id} project={project} icon={PROJECT_ICONS[project.name]} />;
         case 'twitter':
         case 'x':
             return <TwitterProjectRow key={project.id} project={project} />;
