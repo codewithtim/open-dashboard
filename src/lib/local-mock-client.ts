@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
@@ -77,6 +77,67 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     }
 };
 
+const mockStreamCommits: StreamCommit[] = [
+    {
+        sha: 'abc1234',
+        message: 'feat: add user authentication',
+        author: 'timknight',
+        timestamp: '2025-01-15T14:30:00Z',
+        htmlUrl: 'https://github.com/timknight/saas-starter/commit/abc1234',
+        repo: 'timknight/saas-starter',
+        projectId: 'saas-starter',
+    },
+    {
+        sha: 'def5678',
+        message: 'fix: resolve login redirect issue',
+        author: 'timknight',
+        timestamp: '2025-01-15T15:10:00Z',
+        htmlUrl: 'https://github.com/timknight/saas-starter/commit/def5678',
+        repo: 'timknight/saas-starter',
+        projectId: 'saas-starter',
+    },
+    {
+        sha: 'ghi9012',
+        message: 'docs: update README with setup instructions',
+        author: 'timknight',
+        timestamp: '2025-01-15T15:45:00Z',
+        htmlUrl: 'https://github.com/timknight/open-utils/commit/ghi9012',
+        repo: 'timknight/open-utils',
+        projectId: 'npm-pkg',
+    },
+];
+
+const mockStreams: Stream[] = [
+    {
+        id: 'stream-1',
+        name: 'Building Auth from Scratch - Live Coding',
+        videoId: 'dQw4w9WgXcQ',
+        actualStartTime: '2025-01-15T14:00:00Z',
+        actualEndTime: '2025-01-15T17:00:00Z',
+        thumbnailUrl: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg',
+        viewCount: 1250,
+        likeCount: 89,
+        commentCount: 34,
+        duration: 'PT3H0M0S',
+        commits: mockStreamCommits,
+        projectIds: ['youtube-main'],
+    },
+    {
+        id: 'stream-2',
+        name: 'Setting Up CI/CD Pipeline',
+        videoId: 'xvFZjo5PgG0',
+        actualStartTime: '2025-01-10T18:00:00Z',
+        actualEndTime: '2025-01-10T20:30:00Z',
+        thumbnailUrl: 'https://i.ytimg.com/vi/xvFZjo5PgG0/maxresdefault.jpg',
+        viewCount: 830,
+        likeCount: 56,
+        commentCount: 18,
+        duration: 'PT2H30M0S',
+        commits: [],
+        projectIds: ['youtube-main'],
+    },
+];
+
 export class LocalMockClient implements DataClient {
     async getProjects(): Promise<Project[]> {
         return mockProjects.filter(p => p.status === 'active');
@@ -93,5 +154,22 @@ export class LocalMockClient implements DataClient {
     async getMultipleProjectDetails(ids: string[]): Promise<ProjectDetails[]> {
         const details = await Promise.all(ids.map(id => this.getProjectDetails(id)));
         return details.filter((d): d is ProjectDetails => d !== null);
+    }
+
+    async getStreams(): Promise<StreamSummary[]> {
+        return mockStreams.map(({ commits, ...rest }) => ({
+            ...rest,
+            commitCount: commits.length,
+        }));
+    }
+
+    async getStreamById(id: string): Promise<Stream | null> {
+        return mockStreams.find(s => s.id === id) || null;
+    }
+
+    async getStreamCountForProject(projectId: string): Promise<number> {
+        return mockStreams.filter(s =>
+            s.commits.some(c => c.projectId === projectId) || s.projectIds.includes(projectId)
+        ).length;
     }
 }

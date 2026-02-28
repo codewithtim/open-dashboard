@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import { PageObjectResponse, PartialPageObjectResponse, PartialDatabaseObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-import { DataClient, Project, DashboardStats, ProjectDetails, Metric } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit } from './data-client';
 
 export const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -15,6 +15,8 @@ type NotionProp = {
     status?: { name: string } | null;
     number?: number | null;
     url?: string | null;
+    date?: { start: string } | null;
+    relation?: Array<{ id: string }>;
 };
 
 function isPageObject(
@@ -323,5 +325,83 @@ export class NotionClient implements DataClient {
         }
 
         return detailsList;
+    }
+
+    async getStreams(): Promise<StreamSummary[]> {
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+        });
+
+        const streams: StreamSummary[] = [];
+        for (const page of response.results) {
+            if (isPageObject(page)) {
+                const props = page.properties as Record<string, NotionProp>;
+                const commitsJson = (props.commits?.rich_text || []).map(t => t.plain_text).join('');
+                let commitCount = 0;
+                if (commitsJson) {
+                    try {
+                        const parsed = JSON.parse(commitsJson);
+                        commitCount = Array.isArray(parsed) ? parsed.length : 0;
+                    } catch { /* ignore parse errors */ }
+                }
+
+                streams.push({
+                    id: page.id,
+                    name: props.name?.title?.[0]?.plain_text || '',
+                    videoId: (props.videoId?.rich_text || []).map(t => t.plain_text).join(''),
+                    actualStartTime: props.actualStartTime?.date?.start || '',
+                    actualEndTime: props.actualEndTime?.date?.start || '',
+                    thumbnailUrl: props.thumbnailUrl?.url || '',
+                    viewCount: props.viewCount?.number || 0,
+                    likeCount: props.likeCount?.number || 0,
+                    commentCount: props.commentCount?.number || 0,
+                    duration: (props.duration?.rich_text || []).map(t => t.plain_text).join(''),
+                    commitCount,
+                    projectIds: props.projects?.relation?.map(r => r.id) || [],
+                });
+            }
+        }
+        return streams;
+    }
+
+    async getStreamById(id: string): Promise<Stream | null> {
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+        });
+
+        const page = response.results.find(p => p.id === id);
+        if (!page || !isPageObject(page)) return null;
+
+        const props = page.properties as Record<string, NotionProp>;
+        const commitsJson = (props.commits?.rich_text || []).map(t => t.plain_text).join('');
+        let commits: StreamCommit[] = [];
+        if (commitsJson) {
+            try {
+                commits = JSON.parse(commitsJson);
+            } catch { /* ignore parse errors */ }
+        }
+
+        return {
+            id: page.id,
+            name: props.name?.title?.[0]?.plain_text || '',
+            videoId: (props.videoId?.rich_text || []).map(t => t.plain_text).join(''),
+            actualStartTime: props.actualStartTime?.date?.start || '',
+            actualEndTime: props.actualEndTime?.date?.start || '',
+            thumbnailUrl: props.thumbnailUrl?.url || '',
+            viewCount: props.viewCount?.number || 0,
+            likeCount: props.likeCount?.number || 0,
+            commentCount: props.commentCount?.number || 0,
+            duration: (props.duration?.rich_text || []).map(t => t.plain_text).join(''),
+            commits,
+            projectIds: props.projects?.relation?.map(r => r.id) || [],
+        };
+    }
+
+    async getStreamCountForProject(projectId: string): Promise<number> {
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+            filter: { property: 'projects', relation: { contains: projectId } },
+        });
+        return response.results.length;
     }
 }

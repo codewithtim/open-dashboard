@@ -2,6 +2,8 @@ import { GET } from '../route';
 import { notion } from '@/lib/notion-client';
 import { getDataClient } from '@/lib/client-factory';
 import { getMetricsProvider } from '@/lib/providers';
+import { YouTubeStreamsProvider } from '@/lib/providers/youtube-streams-provider';
+import { GitHubCommitsProvider } from '@/lib/providers/github-commits-provider';
 
 jest.mock('@/lib/notion-client', () => ({
     notion: {
@@ -22,6 +24,9 @@ jest.mock('@/lib/client-factory', () => ({
 jest.mock('@/lib/providers', () => ({
     getMetricsProvider: jest.fn(),
 }));
+
+jest.mock('@/lib/providers/youtube-streams-provider');
+jest.mock('@/lib/providers/github-commits-provider');
 
 jest.mock('next/cache', () => ({
     revalidatePath: jest.fn(),
@@ -56,7 +61,7 @@ describe('Cron API Route GET (DDD)', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        process.env = { ...originalEnv, CRON_SECRET: 'test_secret', NOTION_METRICS_DB_ID: 'metrics-db-id' };
+        process.env = { ...originalEnv, CRON_SECRET: 'test_secret', NOTION_METRICS_DB_ID: 'metrics-db-id', NOTION_STREAMS_DB_ID: 'streams-db-id' };
     });
 
     afterAll(() => {
@@ -91,7 +96,13 @@ describe('Cron API Route GET (DDD)', () => {
         // Let's say Subscribers already exists, Views does not.
         (notion.databases.query as jest.Mock)
             .mockResolvedValueOnce({ results: [{ id: 'existing-sub-page' }] }) // For Subscribers
-            .mockResolvedValueOnce({ results: [] }); // For Views
+            .mockResolvedValueOnce({ results: [] }) // For Views
+            .mockResolvedValueOnce({ results: [] }); // For processStreams existing streams lookup
+
+        // Mock YouTubeStreamsProvider to return no streams (not the focus of this test)
+        (YouTubeStreamsProvider as jest.Mock).mockImplementation(() => ({
+            getCompletedStreams: jest.fn().mockResolvedValue([]),
+        }));
 
         // 4. Run the Cron
         const response = await GET(authReq as any);
@@ -100,9 +111,6 @@ describe('Cron API Route GET (DDD)', () => {
         // Assert Provider was invoked correctly
         expect(getMetricsProvider).toHaveBeenCalledWith('youtube');
         expect(mockYouTubeProvider.getMetrics).toHaveBeenCalledWith('yt-account');
-
-        // Assert Notion DB Queries
-        expect(notion.databases.query).toHaveBeenCalledTimes(2);
 
         // Assert Notion Pages Update (Subscribers existing row)
         expect(notion.pages.update).toHaveBeenCalledWith({
@@ -121,5 +129,77 @@ describe('Cron API Route GET (DDD)', () => {
                 'projects': { relation: [{ id: 'yt-123' }] },
             })
         }));
+    });
+
+    it('discovers YouTube streams and correlates GitHub commits', async () => {
+        const mockClient = {
+            getProjects: jest.fn().mockResolvedValue([
+                { id: 'yt-1', name: 'YouTube Channel', platform: 'youtube', platformAccountId: 'UC123' },
+                { id: 'gh-1', name: 'My Repo', platform: 'github', platformAccountId: 'owner/repo' },
+            ]),
+        };
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+        (getMetricsProvider as jest.Mock).mockImplementation(() => { throw new Error('Not implemented'); });
+
+        // Mock existing streams query (no existing streams)
+        (notion.databases.query as jest.Mock)
+            .mockResolvedValueOnce({ results: [] }) // existing streams query (for since)
+            .mockResolvedValueOnce({ results: [] }); // upsert check for videoId
+
+        // Mock YouTube streams provider
+        const mockGetCompletedStreams = jest.fn().mockResolvedValue([
+            {
+                videoId: 'vid1',
+                title: 'Live Stream',
+                actualStartTime: '2025-01-15T14:00:00Z',
+                actualEndTime: '2025-01-15T17:00:00Z',
+                thumbnailUrl: 'https://thumb.jpg',
+                viewCount: 1000,
+                likeCount: 50,
+                commentCount: 10,
+                duration: 'PT3H',
+            },
+        ]);
+        (YouTubeStreamsProvider as jest.Mock).mockImplementation(() => ({
+            getCompletedStreams: mockGetCompletedStreams,
+        }));
+
+        // Mock GitHub commits provider
+        const mockGetCommitsInWindow = jest.fn().mockResolvedValue([
+            {
+                sha: 'abc123',
+                message: 'feat: add feature',
+                author: 'timknight',
+                timestamp: '2025-01-15T15:00:00Z',
+                htmlUrl: 'https://github.com/owner/repo/commit/abc123',
+            },
+        ]);
+        (GitHubCommitsProvider as jest.Mock).mockImplementation(() => ({
+            getCommitsInWindow: mockGetCommitsInWindow,
+        }));
+
+        const response = await GET(authReq as any);
+        expect(response.status).toBe(200);
+
+        // Verify streams provider was called
+        expect(mockGetCompletedStreams).toHaveBeenCalledWith('UC123', undefined);
+
+        // Verify commits provider was called with stream time window
+        expect(mockGetCommitsInWindow).toHaveBeenCalledWith(
+            'owner/repo',
+            '2025-01-15T14:00:00Z',
+            '2025-01-15T17:00:00Z',
+        );
+
+        // Verify Notion page was created for the stream
+        expect(notion.pages.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                parent: { database_id: 'streams-db-id' },
+                properties: expect.objectContaining({
+                    'name': { title: [{ text: { content: 'Live Stream' } }] },
+                    'videoId': { rich_text: [{ text: { content: 'vid1' } }] },
+                }),
+            }),
+        );
     });
 });

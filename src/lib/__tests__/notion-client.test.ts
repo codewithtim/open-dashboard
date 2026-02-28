@@ -229,4 +229,122 @@ describe('NotionClient', () => {
             expect(mockQuery).toHaveBeenCalledTimes(4);
         });
     });
+
+    describe('getStreams', () => {
+        it('returns stream summaries with commit count parsed from JSON', async () => {
+            const commits = [
+                { sha: 'abc', message: 'feat', author: 'tim', timestamp: '2025-01-15T15:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p' },
+                { sha: 'def', message: 'fix', author: 'tim', timestamp: '2025-01-15T16:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p' },
+            ];
+
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'stream-1',
+                        properties: {
+                            name: { title: [{ plain_text: 'Live Stream' }] },
+                            videoId: { rich_text: [{ plain_text: 'vid1' }] },
+                            actualStartTime: { date: { start: '2025-01-15T14:00:00Z' } },
+                            actualEndTime: { date: { start: '2025-01-15T17:00:00Z' } },
+                            thumbnailUrl: { url: 'https://thumb.jpg' },
+                            viewCount: { number: 1000 },
+                            likeCount: { number: 50 },
+                            commentCount: { number: 10 },
+                            duration: { rich_text: [{ plain_text: 'PT3H' }] },
+                            commits: { rich_text: [{ plain_text: JSON.stringify(commits) }] },
+                            projects: { relation: [{ id: 'yt-1' }] },
+                        },
+                    },
+                ],
+            });
+
+            const streams = await client.getStreams();
+            expect(streams).toHaveLength(1);
+            expect(streams[0].commitCount).toBe(2);
+            expect(streams[0].name).toBe('Live Stream');
+            expect(streams[0].videoId).toBe('vid1');
+            expect(streams[0].projectIds).toEqual(['yt-1']);
+        });
+
+        it('handles empty commits JSON gracefully', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'stream-2',
+                        properties: {
+                            name: { title: [{ plain_text: 'Empty Stream' }] },
+                            videoId: { rich_text: [{ plain_text: 'vid2' }] },
+                            actualStartTime: { date: { start: '2025-01-10T18:00:00Z' } },
+                            actualEndTime: { date: { start: '2025-01-10T20:00:00Z' } },
+                            thumbnailUrl: { url: null },
+                            viewCount: { number: 0 },
+                            likeCount: { number: 0 },
+                            commentCount: { number: 0 },
+                            duration: { rich_text: [] },
+                            commits: { rich_text: [] },
+                            projects: { relation: [] },
+                        },
+                    },
+                ],
+            });
+
+            const streams = await client.getStreams();
+            expect(streams).toHaveLength(1);
+            expect(streams[0].commitCount).toBe(0);
+        });
+    });
+
+    describe('getStreamById', () => {
+        it('returns full stream with parsed commits', async () => {
+            const commits = [{ sha: 'abc', message: 'feat', author: 'tim', timestamp: '2025-01-15T15:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p' }];
+
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'stream-1',
+                        properties: {
+                            name: { title: [{ plain_text: 'Live Stream' }] },
+                            videoId: { rich_text: [{ plain_text: 'vid1' }] },
+                            actualStartTime: { date: { start: '2025-01-15T14:00:00Z' } },
+                            actualEndTime: { date: { start: '2025-01-15T17:00:00Z' } },
+                            thumbnailUrl: { url: 'https://thumb.jpg' },
+                            viewCount: { number: 1000 },
+                            likeCount: { number: 50 },
+                            commentCount: { number: 10 },
+                            duration: { rich_text: [{ plain_text: 'PT3H' }] },
+                            commits: { rich_text: [{ plain_text: JSON.stringify(commits) }] },
+                            projects: { relation: [{ id: 'yt-1' }] },
+                        },
+                    },
+                ],
+            });
+
+            const stream = await client.getStreamById('stream-1');
+            expect(stream).not.toBeNull();
+            expect(stream!.commits).toHaveLength(1);
+            expect(stream!.commits[0].sha).toBe('abc');
+        });
+
+        it('returns null for non-existent stream', async () => {
+            mockQuery.mockResolvedValueOnce({ results: [] });
+
+            const stream = await client.getStreamById('nonexistent');
+            expect(stream).toBeNull();
+        });
+    });
+
+    describe('getStreamCountForProject', () => {
+        it('returns count of streams for a project', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [{ id: 's1' }, { id: 's2' }],
+            });
+
+            const count = await client.getStreamCountForProject('proj-1');
+            expect(count).toBe(2);
+            expect(mockQuery).toHaveBeenCalledWith({
+                database_id: process.env.NOTION_STREAMS_DB_ID || '',
+                filter: { property: 'projects', relation: { contains: 'proj-1' } },
+            });
+        });
+    });
 });

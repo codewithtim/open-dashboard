@@ -72,4 +72,45 @@ describe('LocalMockClient', () => {
             expect(details).toHaveLength(0);
         });
     });
+
+    describe('getStreams', () => {
+        it('returns stream summaries with commit counts', async () => {
+            const streams = await client.getStreams();
+            expect(streams.length).toBeGreaterThan(0);
+            streams.forEach(s => {
+                expect(s).toHaveProperty('id');
+                expect(s).toHaveProperty('name');
+                expect(s).toHaveProperty('commitCount');
+                expect(s).not.toHaveProperty('commits');
+            });
+        });
+    });
+
+    describe('getStreamById', () => {
+        it('returns a stream with full commit details', async () => {
+            const stream = await client.getStreamById('stream-1');
+            expect(stream).not.toBeNull();
+            expect(stream!.name).toBe('Building Auth from Scratch - Live Coding');
+            expect(stream!.commits.length).toBeGreaterThan(0);
+            expect(stream!.commits[0]).toHaveProperty('sha');
+            expect(stream!.commits[0]).toHaveProperty('repo');
+        });
+
+        it('returns null for non-existent stream', async () => {
+            const stream = await client.getStreamById('nonexistent');
+            expect(stream).toBeNull();
+        });
+    });
+
+    describe('getStreamCountForProject', () => {
+        it('returns count of streams related to a project', async () => {
+            const count = await client.getStreamCountForProject('youtube-main');
+            expect(count).toBeGreaterThan(0);
+        });
+
+        it('returns 0 for a project with no streams', async () => {
+            const count = await client.getStreamCountForProject('nonexistent-project');
+            expect(count).toBe(0);
+        });
+    });
 });
