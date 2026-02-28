@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaNpm } from 'react-icons/fa6';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function NpmProjectRow({ project, icon }: { project: ProjectDetails; icon?: React.ReactNode }) {
+export function NpmProjectRow({ project, icon, tools }: { project: ProjectDetails; icon?: React.ReactNode; tools?: Tool[] }) {
     const downloadMetric = project.metrics?.find(m => m.name.toLowerCase().includes('download') && !m.name.toLowerCase().includes('weekly'));
     const weeklyDownloadMetric = project.metrics?.find(m => m.name.toLowerCase().includes('weekly'));
 
@@ -83,6 +84,8 @@ export function NpmProjectRow({ project, icon }: { project: ProjectDetails; icon
                 ))}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

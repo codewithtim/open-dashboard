@@ -9,8 +9,11 @@ import { FiYoutube, FiTwitter, FiGithub, FiBox } from 'react-icons/fi';
 
 export default async function DashboardPage() {
   const client = getDataClient();
-  const stats = await client.getAggregatedDashboardStats();
-  const lightweightProjects = await client.getProjects();
+  const [stats, lightweightProjects, tools] = await Promise.all([
+    client.getAggregatedDashboardStats(),
+    client.getProjects(),
+    client.getTools(),
+  ]);
   const activeIds = lightweightProjects.map(p => p.id);
   const detailedProjects = await client.getMultipleProjectDetails(activeIds);
   const softwareProjectsCount = detailedProjects.filter(p => p.type === 'software').length;
@@ -46,7 +49,7 @@ export default async function DashboardPage() {
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {detailedProjects.filter(p => p.type === 'software').map((p) => (
               <div key={p.id} className="break-inside-avoid">
-                {renderProjectRow(p)}
+                {renderProjectRow(p, tools)}
               </div>
             ))}
           </div>
@@ -66,7 +69,7 @@ export default async function DashboardPage() {
           <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
             {detailedProjects.filter(p => p.type !== 'software').map((p) => (
               <div key={p.id} className="break-inside-avoid">
-                {renderProjectRow(p)}
+                {renderProjectRow(p, tools)}
               </div>
             ))}
           </div>

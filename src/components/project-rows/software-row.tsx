@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaLaptopCode } from 'react-icons/fa';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function SoftwareProjectRow({ project, icon }: { project: ProjectDetails; icon?: React.ReactNode }) {
+export function SoftwareProjectRow({ project, icon, tools }: { project: ProjectDetails; icon?: React.ReactNode; tools?: Tool[] }) {
     // Extract specific Software metrics if they exist
     const mrrMetric = project.metrics?.find(m => m.name.toLowerCase().includes('mrr'));
     const usersMetric = project.metrics?.find(m => m.name.toLowerCase().includes('user') || m.name.toLowerCase().includes('active'));
@@ -81,6 +82,8 @@ export function SoftwareProjectRow({ project, icon }: { project: ProjectDetails;
                 ))}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

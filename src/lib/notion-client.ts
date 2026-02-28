@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import { PageObjectResponse, PartialPageObjectResponse, PartialDatabaseObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-import { DataClient, Project, DashboardStats, ProjectDetails, Metric } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Metric, Tool } from './data-client';
 
 export const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -15,6 +15,8 @@ type NotionProp = {
     status?: { name: string } | null;
     number?: number | null;
     url?: string | null;
+    checkbox?: boolean;
+    relation?: Array<{ id: string }>;
 };
 
 function isPageObject(
@@ -323,5 +325,38 @@ export class NotionClient implements DataClient {
         }
 
         return detailsList;
+    }
+
+    async getTools(): Promise<Tool[]> {
+        if (!process.env.NOTION_TOOLS_DB_ID) return [];
+
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_TOOLS_DB_ID,
+        });
+
+        const tools: Tool[] = [];
+        for (const page of response.results) {
+            if (isPageObject(page)) {
+                const props = page.properties as Record<string, NotionProp>;
+                const projectRelations = props.projects?.relation ?? [];
+                tools.push({
+                    id: page.id,
+                    name: props.name?.title?.[0]?.plain_text || '',
+                    slug: props.slug?.rich_text?.[0]?.plain_text || '',
+                    category: props.category?.select?.name || '',
+                    description: props.description?.rich_text?.[0]?.plain_text || '',
+                    iconKey: props.icon_key?.rich_text?.[0]?.plain_text || '',
+                    recommended: props.recommended?.checkbox ?? false,
+                    referralUrl: props.referral_url?.url || undefined,
+                    projectIds: projectRelations.map(r => r.id),
+                });
+            }
+        }
+        return tools;
+    }
+
+    async getToolBySlug(slug: string): Promise<Tool | null> {
+        const tools = await this.getTools();
+        return tools.find(t => t.slug === slug) ?? null;
     }
 }

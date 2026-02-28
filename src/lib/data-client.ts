@@ -20,6 +20,18 @@ export interface ProjectDetails extends Project {
     metrics: Metric[];
 }
 
+export interface Tool {
+    id: string;
+    name: string;
+    slug: string;
+    category: string;
+    description: string;
+    iconKey: string;
+    recommended: boolean;
+    referralUrl?: string;
+    projectIds: string[];
+}
+
 export interface DashboardStats {
     totalRevenue: number;
     totalCosts: number;
@@ -34,4 +46,6 @@ export interface DataClient {
     getAggregatedDashboardStats(): Promise<DashboardStats>;
     getProjectDetails(projectId: string): Promise<ProjectDetails | null>;
     getMultipleProjectDetails(ids: string[]): Promise<ProjectDetails[]>;
+    getTools(): Promise<Tool[]>;
+    getToolBySlug(slug: string): Promise<Tool | null>;
 }

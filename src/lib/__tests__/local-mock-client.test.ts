@@ -59,6 +59,38 @@ describe('LocalMockClient', () => {
         });
     });
 
+    describe('getTools', () => {
+        it('returns all mock tools', async () => {
+            const tools = await client.getTools();
+            expect(tools.length).toBeGreaterThan(0);
+            tools.forEach(t => {
+                expect(t.id).toBeDefined();
+                expect(t.name).toBeDefined();
+                expect(t.slug).toBeDefined();
+            });
+        });
+
+        it('includes tool with project relations', async () => {
+            const tools = await client.getTools();
+            const nextjs = tools.find(t => t.slug === 'nextjs');
+            expect(nextjs).toBeDefined();
+            expect(nextjs!.projectIds.length).toBeGreaterThan(0);
+        });
+    });
+
+    describe('getToolBySlug', () => {
+        it('returns tool matching slug', async () => {
+            const tool = await client.getToolBySlug('vercel');
+            expect(tool).not.toBeNull();
+            expect(tool!.name).toBe('Vercel');
+        });
+
+        it('returns null for non-existent slug', async () => {
+            const tool = await client.getToolBySlug('nonexistent');
+            expect(tool).toBeNull();
+        });
+    });
+
     describe('getMultipleProjectDetails', () => {
         it('returns available project details and filters out nulls', async () => {
             const details = await client.getMultipleProjectDetails(['saas-starter', 'invalid', 'youtube-main']);

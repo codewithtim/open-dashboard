@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Tool } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
@@ -77,6 +77,62 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     }
 };
 
+const mockTools: Tool[] = [
+    {
+        id: 'tool-nextjs',
+        name: 'Next.js',
+        slug: 'nextjs',
+        category: 'framework',
+        description: 'The React framework for production, providing hybrid static and server rendering.',
+        iconKey: 'SiNextdotjs',
+        recommended: true,
+        referralUrl: 'https://nextjs.org',
+        projectIds: ['saas-starter', 'npm-pkg'],
+    },
+    {
+        id: 'tool-vercel',
+        name: 'Vercel',
+        slug: 'vercel',
+        category: 'hosting',
+        description: 'Cloud platform for deploying and scaling frontend applications.',
+        iconKey: 'SiVercel',
+        recommended: true,
+        referralUrl: 'https://vercel.com',
+        projectIds: ['saas-starter'],
+    },
+    {
+        id: 'tool-tailwind',
+        name: 'Tailwind CSS',
+        slug: 'tailwindcss',
+        category: 'styling',
+        description: 'A utility-first CSS framework for rapidly building custom user interfaces.',
+        iconKey: 'SiTailwindcss',
+        recommended: true,
+        projectIds: ['saas-starter', 'npm-pkg'],
+    },
+    {
+        id: 'tool-notion',
+        name: 'Notion',
+        slug: 'notion',
+        category: 'productivity',
+        description: 'All-in-one workspace for notes, databases, and project management.',
+        iconKey: 'SiNotion',
+        recommended: false,
+        projectIds: ['saas-starter', 'youtube-main', 'consulting'],
+    },
+    {
+        id: 'tool-stripe',
+        name: 'Stripe',
+        slug: 'stripe',
+        category: 'payments',
+        description: 'Payment infrastructure for the internet, powering online transactions.',
+        iconKey: 'SiStripe',
+        recommended: true,
+        referralUrl: 'https://stripe.com',
+        projectIds: ['saas-starter'],
+    },
+];
+
 export class LocalMockClient implements DataClient {
     async getProjects(): Promise<Project[]> {
         return mockProjects.filter(p => p.status === 'active');
@@ -93,5 +149,13 @@ export class LocalMockClient implements DataClient {
     async getMultipleProjectDetails(ids: string[]): Promise<ProjectDetails[]> {
         const details = await Promise.all(ids.map(id => this.getProjectDetails(id)));
         return details.filter((d): d is ProjectDetails => d !== null);
+    }
+
+    async getTools(): Promise<Tool[]> {
+        return mockTools;
+    }
+
+    async getToolBySlug(slug: string): Promise<Tool | null> {
+        return mockTools.find(t => t.slug === slug) ?? null;
     }
 }

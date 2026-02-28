@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaXTwitter } from 'react-icons/fa6';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function TwitterProjectRow({ project }: { project: ProjectDetails }) {
+export function TwitterProjectRow({ project, tools }: { project: ProjectDetails; tools?: Tool[] }) {
     const followerMetric = project.metrics?.find(m => m.name.toLowerCase().includes('follower'));
     const impressionMetric = project.metrics?.find(m => m.name.toLowerCase().includes('impression') || m.name.toLowerCase().includes('view'));
 
@@ -70,6 +71,8 @@ export function TwitterProjectRow({ project }: { project: ProjectDetails }) {
                 )}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

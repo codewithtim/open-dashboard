@@ -16,6 +16,7 @@ jest.mock('next/link', () => {
 describe('Dashboard Home Page', () => {
     it('renders global stats and projects with deep metrics', async () => {
         const mockClient = {
+            getTools: jest.fn().mockResolvedValue([]),
             getAggregatedDashboardStats: jest.fn().mockResolvedValue({
                 totalRevenue: 5000,
                 totalCosts: 1000,

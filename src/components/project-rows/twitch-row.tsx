@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaTwitch } from 'react-icons/fa6';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function TwitchProjectRow({ project }: { project: ProjectDetails }) {
+export function TwitchProjectRow({ project, tools }: { project: ProjectDetails; tools?: Tool[] }) {
     const followerMetric = project.metrics?.find(m => m.name.toLowerCase().includes('follower'));
     const subMetric = project.metrics?.find(m => m.name.toLowerCase().includes('subscriber') || m.name.toLowerCase().includes('sub'));
     const viewMetric = project.metrics?.find(m => m.name.toLowerCase().includes('view'));
@@ -80,6 +81,8 @@ export function TwitchProjectRow({ project }: { project: ProjectDetails }) {
                 )}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

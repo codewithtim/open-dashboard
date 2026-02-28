@@ -1,9 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaInstagram } from 'react-icons/fa6';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-
-export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
+export function InstagramProjectRow({ project, tools }: { project: ProjectDetails; tools?: Tool[] }) {
     const followerMetric = project.metrics?.find(m => m.name.toLowerCase().includes('follower'));
     const likesMetric = project.metrics?.find(m => m.name.toLowerCase().includes('like'));
     const impressionMetric = project.metrics?.find(m => m.name.toLowerCase().includes('impression') || m.name.toLowerCase().includes('reach'));
@@ -81,6 +81,8 @@ export function InstagramProjectRow({ project }: { project: ProjectDetails }) {
                 )}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

@@ -1,9 +1,10 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaGithub } from 'react-icons/fa';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 import Image from 'next/image';
 
-export function GithubProjectRow({ project, icon }: { project: ProjectDetails; icon?: React.ReactNode }) {
+export function GithubProjectRow({ project, icon, tools }: { project: ProjectDetails; icon?: React.ReactNode; tools?: Tool[] }) {
     const starMetric = project.metrics?.find(m => m.name.toLowerCase().includes('star'));
     const forkMetric = project.metrics?.find(m => m.name.toLowerCase().includes('fork'));
 
@@ -81,6 +82,8 @@ export function GithubProjectRow({ project, icon }: { project: ProjectDetails; i
                 ))}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

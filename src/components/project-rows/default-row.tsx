@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { BsBoxSeam } from 'react-icons/bs';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
+export function DefaultProjectRow({ project, tools }: { project: ProjectDetails; tools?: Tool[] }) {
     return (
         <div className="group bg-white dark:bg-[#111C44] rounded-[20px] shadow-[0_18px_40px_-12px_rgba(112,144,176,0.12)] hover:shadow-[0_20px_45px_-10px_rgba(112,144,176,0.2)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.5)] transition-all duration-300 font-sans p-6 flex flex-col gap-6">
 
@@ -59,6 +60,7 @@ export function DefaultProjectRow({ project }: { project: ProjectDetails }) {
             </div>
             )}
 
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }

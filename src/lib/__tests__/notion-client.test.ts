@@ -206,6 +206,118 @@ describe('NotionClient', () => {
         });
     });
 
+    describe('getTools', () => {
+        beforeEach(() => {
+            process.env.NOTION_TOOLS_DB_ID = 'test-tools-db';
+        });
+        afterEach(() => {
+            delete process.env.NOTION_TOOLS_DB_ID;
+        });
+
+        it('returns empty array when NOTION_TOOLS_DB_ID is not set', async () => {
+            delete process.env.NOTION_TOOLS_DB_ID;
+            const tools = await client.getTools();
+            expect(tools).toEqual([]);
+            expect(mockQuery).not.toHaveBeenCalled();
+        });
+
+        it('returns mapped tools from Notion database', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'tool-1',
+                        properties: {
+                            name: { title: [{ plain_text: 'Vercel' }] },
+                            slug: { rich_text: [{ plain_text: 'vercel' }] },
+                            category: { select: { name: 'hosting' } },
+                            description: { rich_text: [{ plain_text: 'Cloud platform' }] },
+                            icon_key: { rich_text: [{ plain_text: 'SiVercel' }] },
+                            recommended: { checkbox: true },
+                            referral_url: { url: 'https://vercel.com' },
+                            projects: { relation: [{ id: 'p-1' }, { id: 'p-2' }] },
+                        },
+                    },
+                ],
+            });
+
+            const tools = await client.getTools();
+            expect(tools).toHaveLength(1);
+            expect(tools[0]).toEqual({
+                id: 'tool-1',
+                name: 'Vercel',
+                slug: 'vercel',
+                category: 'hosting',
+                description: 'Cloud platform',
+                iconKey: 'SiVercel',
+                recommended: true,
+                referralUrl: 'https://vercel.com',
+                projectIds: ['p-1', 'p-2'],
+            });
+        });
+
+        it('handles missing optional fields gracefully', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'tool-2',
+                        properties: {
+                            name: { title: [{ plain_text: 'Tailwind' }] },
+                            slug: { rich_text: [{ plain_text: 'tailwind' }] },
+                            category: { select: { name: 'styling' } },
+                            description: { rich_text: [] },
+                            icon_key: { rich_text: [{ plain_text: 'SiTailwindcss' }] },
+                            recommended: { checkbox: false },
+                        },
+                    },
+                ],
+            });
+
+            const tools = await client.getTools();
+            expect(tools[0].description).toBe('');
+            expect(tools[0].referralUrl).toBeUndefined();
+            expect(tools[0].projectIds).toEqual([]);
+        });
+    });
+
+    describe('getToolBySlug', () => {
+        beforeEach(() => {
+            process.env.NOTION_TOOLS_DB_ID = 'test-tools-db';
+        });
+        afterEach(() => {
+            delete process.env.NOTION_TOOLS_DB_ID;
+        });
+
+        it('returns tool matching slug', async () => {
+            mockQuery.mockResolvedValueOnce({
+                results: [
+                    {
+                        id: 'tool-1',
+                        properties: {
+                            name: { title: [{ plain_text: 'Vercel' }] },
+                            slug: { rich_text: [{ plain_text: 'vercel' }] },
+                            category: { select: { name: 'hosting' } },
+                            description: { rich_text: [{ plain_text: 'Cloud' }] },
+                            icon_key: { rich_text: [{ plain_text: 'SiVercel' }] },
+                            recommended: { checkbox: true },
+                            referral_url: { url: 'https://vercel.com' },
+                            projects: { relation: [] },
+                        },
+                    },
+                ],
+            });
+
+            const tool = await client.getToolBySlug('vercel');
+            expect(tool).not.toBeNull();
+            expect(tool!.name).toBe('Vercel');
+        });
+
+        it('returns null for non-existent slug', async () => {
+            mockQuery.mockResolvedValueOnce({ results: [] });
+            const tool = await client.getToolBySlug('nonexistent');
+            expect(tool).toBeNull();
+        });
+    });
+
     describe('getMultipleProjectDetails', () => {
         it('fetches multiple project details and filters missing ones', async () => {
             // Bulk call 1: Project DB

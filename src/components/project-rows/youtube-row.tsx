@@ -1,8 +1,9 @@
-import { ProjectDetails } from '@/lib/data-client';
+import { ProjectDetails, Tool } from '@/lib/data-client';
 import { FaYoutube } from 'react-icons/fa6';
 import { AnimatedCounter } from '../animated-counter';
+import { ProjectToolBadges } from '../project-tool-badges';
 
-export function YouTubeProjectRow({ project }: { project: ProjectDetails }) {
+export function YouTubeProjectRow({ project, tools }: { project: ProjectDetails; tools?: Tool[] }) {
     // Extract specific YouTube metrics if they exist
     const subMetric = project.metrics?.find(m => m.name.toLowerCase().includes('subscriber'));
     const viewMetric = project.metrics?.find(m => m.name.toLowerCase().includes('view'));
@@ -81,6 +82,8 @@ export function YouTubeProjectRow({ project }: { project: ProjectDetails }) {
                 )}
             </div>
             )}
+
+            {tools && <ProjectToolBadges tools={tools} />}
         </div>
     );
 }
