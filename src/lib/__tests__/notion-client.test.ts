@@ -19,10 +19,12 @@ describe('NotionClient', () => {
     let client: NotionClient;
 
     beforeEach(() => {
+        process.env.NOTION_STREAMS_DB_ID = 'test-streams-db';
         client = new NotionClient();
     });
 
     afterEach(() => {
+        delete process.env.NOTION_STREAMS_DB_ID;
         jest.clearAllMocks();
     });
 
@@ -347,7 +349,7 @@ describe('NotionClient', () => {
             const count = await client.getStreamCountForProject('proj-1');
             expect(count).toBe(2);
             expect(mockQuery).toHaveBeenCalledWith({
-                database_id: process.env.NOTION_STREAMS_DB_ID || '',
+                database_id: 'test-streams-db',
                 filter: { property: 'projects', relation: { contains: 'proj-1' } },
             });
         });
