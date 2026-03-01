@@ -296,8 +296,10 @@ export class NotionClient implements DataClient {
     }
 
     async getStreams(): Promise<StreamSummary[]> {
+        if (!process.env.NOTION_STREAMS_DB_ID) return [];
+
         const response = await queryNotionDb({
-            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+            database_id: process.env.NOTION_STREAMS_DB_ID,
             sorts: [{ property: 'actualStartTime', direction: 'descending' }],
         });
 
@@ -343,8 +345,10 @@ export class NotionClient implements DataClient {
     }
 
     async getStreamById(id: string): Promise<Stream | null> {
+        if (!process.env.NOTION_STREAMS_DB_ID) return null;
+
         const response = await queryNotionDb({
-            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+            database_id: process.env.NOTION_STREAMS_DB_ID,
         });
 
         const page = response.results.find(p => p.id === id);
@@ -376,8 +380,10 @@ export class NotionClient implements DataClient {
     }
 
     async getStreamCountForProject(projectId: string): Promise<number> {
+        if (!process.env.NOTION_STREAMS_DB_ID) return 0;
+
         const response = await queryNotionDb({
-            database_id: process.env.NOTION_STREAMS_DB_ID || '',
+            database_id: process.env.NOTION_STREAMS_DB_ID,
             filter: { property: 'projects', relation: { contains: projectId } },
         });
         return response.results.length;
