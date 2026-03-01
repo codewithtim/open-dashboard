@@ -11,6 +11,10 @@ jest.mock('next/link', () => {
     return ({ children, href }: any) => <a href={href}>{children}</a>;
 });
 
+const mockProjects = [
+    { id: 'yt-1', name: 'Main YouTube', type: 'content', status: 'active', platform: 'youtube' },
+];
+
 describe('Streams Page', () => {
     it('renders stream cards when streams exist', async () => {
         const mockClient = {
@@ -44,6 +48,7 @@ describe('Streams Page', () => {
                     projectIds: ['yt-1'],
                 },
             ]),
+            getProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -58,6 +63,7 @@ describe('Streams Page', () => {
     it('shows empty message when no streams exist', async () => {
         const mockClient = {
             getStreams: jest.fn().mockResolvedValue([]),
+            getProjects: jest.fn().mockResolvedValue([]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -65,5 +71,34 @@ describe('Streams Page', () => {
         render(page);
 
         expect(screen.getByText('No streams yet.')).toBeInTheDocument();
+    });
+
+    it('passes projectMap to StreamsFilteredList', async () => {
+        const mockClient = {
+            getStreams: jest.fn().mockResolvedValue([
+                {
+                    id: 'stream-1',
+                    name: 'Test Stream',
+                    videoId: 'vid1',
+                    actualStartTime: '2025-01-15T14:00:00Z',
+                    actualEndTime: '2025-01-15T17:00:00Z',
+                    thumbnailUrl: '',
+                    viewCount: 100,
+                    likeCount: 5,
+                    commentCount: 1,
+                    duration: 'PT1H',
+                    commitCount: 1,
+                    projectIds: ['yt-1'],
+                },
+            ]),
+            getProjects: jest.fn().mockResolvedValue(mockProjects),
+        };
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+
+        const page = await StreamsPage();
+        render(page);
+
+        // Project tag appears in both filter chip and stream card
+        expect(screen.getAllByText('Main YouTube').length).toBeGreaterThanOrEqual(1);
     });
 });

@@ -157,10 +157,17 @@ export class LocalMockClient implements DataClient {
     }
 
     async getStreams(): Promise<StreamSummary[]> {
-        return mockStreams.map(({ commits, ...rest }) => ({
-            ...rest,
-            commitCount: commits.length,
-        }));
+        return [...mockStreams]
+            .sort((a, b) => new Date(b.actualStartTime).getTime() - new Date(a.actualStartTime).getTime())
+            .map(({ commits, ...rest }) => {
+                const commitProjectIds = commits.map(c => c.projectId).filter(Boolean);
+                const mergedIds = [...new Set([...rest.projectIds, ...commitProjectIds])];
+                return {
+                    ...rest,
+                    commitCount: commits.length,
+                    projectIds: mergedIds,
+                };
+            });
     }
 
     async getStreamById(id: string): Promise<Stream | null> {

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { StreamCard } from '../stream-card';
-import { StreamSummary } from '@/lib/data-client';
+import { StreamSummary, Project } from '@/lib/data-client';
 import React from 'react';
 
 jest.mock('next/link', () => {
@@ -21,6 +21,11 @@ const mockStream: StreamSummary = {
     commitCount: 5,
     projectIds: ['yt-1'],
 };
+
+const mockProjects: Project[] = [
+    { id: 'yt-1', name: 'Main YouTube', type: 'content', status: 'active', platform: 'youtube' },
+    { id: 'gh-1', name: 'SaaS App', type: 'software', status: 'active', platform: 'github' },
+];
 
 describe('StreamCard', () => {
     it('renders stream title and view count', () => {
@@ -45,5 +50,16 @@ describe('StreamCard', () => {
         render(<StreamCard stream={noCommits} />);
         // View count should still be there
         expect(screen.getByText('1,250')).toBeInTheDocument();
+    });
+
+    it('renders project tags when projects are provided', () => {
+        render(<StreamCard stream={mockStream} projects={mockProjects} />);
+        expect(screen.getByText('Main YouTube')).toBeInTheDocument();
+        expect(screen.getByText('SaaS App')).toBeInTheDocument();
+    });
+
+    it('does not render project tags when no projects', () => {
+        const { container } = render(<StreamCard stream={mockStream} projects={[]} />);
+        expect(container.querySelectorAll('.rounded-full')).toHaveLength(0);
     });
 });

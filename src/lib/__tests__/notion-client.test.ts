@@ -231,10 +231,10 @@ describe('NotionClient', () => {
     });
 
     describe('getStreams', () => {
-        it('returns stream summaries with commit count parsed from JSON', async () => {
+        it('returns stream summaries with commit count and merged project IDs', async () => {
             const commits = [
-                { sha: 'abc', message: 'feat', author: 'tim', timestamp: '2025-01-15T15:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p' },
-                { sha: 'def', message: 'fix', author: 'tim', timestamp: '2025-01-15T16:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p' },
+                { sha: 'abc', message: 'feat', author: 'tim', timestamp: '2025-01-15T15:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p1' },
+                { sha: 'def', message: 'fix', author: 'tim', timestamp: '2025-01-15T16:00:00Z', htmlUrl: '', repo: 'r', projectId: 'p2' },
             ];
 
             mockQuery.mockResolvedValueOnce({
@@ -242,7 +242,7 @@ describe('NotionClient', () => {
                     {
                         id: 'stream-1',
                         properties: {
-                            name: { title: [{ plain_text: 'Live Stream' }] },
+                            Name: { title: [{ plain_text: 'Live Stream' }] },
                             videoId: { rich_text: [{ plain_text: 'vid1' }] },
                             actualStartTime: { date: { start: '2025-01-15T14:00:00Z' } },
                             actualEndTime: { date: { start: '2025-01-15T17:00:00Z' } },
@@ -263,7 +263,12 @@ describe('NotionClient', () => {
             expect(streams[0].commitCount).toBe(2);
             expect(streams[0].name).toBe('Live Stream');
             expect(streams[0].videoId).toBe('vid1');
-            expect(streams[0].projectIds).toEqual(['yt-1']);
+            expect(streams[0].projectIds).toEqual(['yt-1', 'p1', 'p2']);
+
+            // Verify sorts are passed
+            expect(mockQuery).toHaveBeenCalledWith(expect.objectContaining({
+                sorts: [{ property: 'actualStartTime', direction: 'descending' }],
+            }));
         });
 
         it('handles empty commits JSON gracefully', async () => {
@@ -272,7 +277,7 @@ describe('NotionClient', () => {
                     {
                         id: 'stream-2',
                         properties: {
-                            name: { title: [{ plain_text: 'Empty Stream' }] },
+                            Name: { title: [{ plain_text: 'Empty Stream' }] },
                             videoId: { rich_text: [{ plain_text: 'vid2' }] },
                             actualStartTime: { date: { start: '2025-01-10T18:00:00Z' } },
                             actualEndTime: { date: { start: '2025-01-10T20:00:00Z' } },
@@ -303,7 +308,7 @@ describe('NotionClient', () => {
                     {
                         id: 'stream-1',
                         properties: {
-                            name: { title: [{ plain_text: 'Live Stream' }] },
+                            Name: { title: [{ plain_text: 'Live Stream' }] },
                             videoId: { rich_text: [{ plain_text: 'vid1' }] },
                             actualStartTime: { date: { start: '2025-01-15T14:00:00Z' } },
                             actualEndTime: { date: { start: '2025-01-15T17:00:00Z' } },

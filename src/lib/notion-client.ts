@@ -25,6 +25,15 @@ function isPageObject(
     return 'properties' in item;
 }
 
+/** Normalize Notion property keys to lowercase so casing mismatches don't matter. */
+function normalizeProps(properties: Record<string, any>): Record<string, NotionProp> {
+    const normalized: Record<string, NotionProp> = {};
+    for (const [key, value] of Object.entries(properties)) {
+        normalized[key.toLowerCase()] = value;
+    }
+    return normalized;
+}
+
 /** Normalize type values so all code/package projects display as 'software'. */
 function normalizeType(raw: string): string {
     const lower = raw.toLowerCase();
@@ -35,6 +44,7 @@ function normalizeType(raw: string): string {
 type NotionQueryArgs = {
     database_id: string;
     filter?: any;
+    sorts?: any[];
 };
 
 type DbQueryResponse = {
@@ -43,6 +53,31 @@ type DbQueryResponse = {
 
 export async function queryNotionDb(args: NotionQueryArgs): Promise<DbQueryResponse> {
     return notion.databases.query(args);
+}
+
+function parseProjectFromProps(pageId: string, props: Record<string, NotionProp>): Project {
+    const platform = props.platform?.select?.name?.toLowerCase() || undefined;
+    const platformAccountId = props['platform account id']?.rich_text?.[0]?.plain_text || undefined;
+    let link = props.link?.url || undefined;
+    if (!link && platformAccountId) {
+        if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
+        else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
+        else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
+        else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
+        else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
+        else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
+        else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
+    }
+
+    return {
+        id: pageId,
+        name: props.name?.title?.[0]?.plain_text || '',
+        type: normalizeType(props.type?.select?.name || ''),
+        status: (props.status?.select?.name || '').toLowerCase(),
+        platform,
+        platformAccountId,
+        link,
+    };
 }
 
 export class NotionClient implements DataClient {
@@ -55,29 +90,8 @@ export class NotionClient implements DataClient {
         const projects: Project[] = [];
         for (const page of response.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
-                const platform = props.platform?.select?.name?.toLowerCase() || undefined;
-                const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
-                let link = props.Link?.url || undefined;
-                if (!link && platformAccountId) {
-                    if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
-                    else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
-                    else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
-                    else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
-                    else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
-                    else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
-                    else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
-                }
-
-                projects.push({
-                    id: page.id || '',
-                    name: props.name?.title?.[0]?.plain_text || '',
-                    type: normalizeType(props.type?.select?.name || ''),
-                    status: (props.status?.select?.name || '').toLowerCase(),
-                    platform,
-                    platformAccountId,
-                    link,
-                });
+                const props = normalizeProps(page.properties);
+                projects.push(parseProjectFromProps(page.id || '', props));
             }
         }
         return projects;
@@ -99,7 +113,7 @@ export class NotionClient implements DataClient {
         let totalRevenue = 0;
         for (const page of revenueResponse.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 if (props.amount?.number) totalRevenue += props.amount.number;
             }
         }
@@ -107,7 +121,7 @@ export class NotionClient implements DataClient {
         let totalCosts = 0;
         for (const page of costsResponse.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 if (props.amount?.number) totalCosts += props.amount.number;
             }
         }
@@ -118,7 +132,7 @@ export class NotionClient implements DataClient {
 
         for (const page of metricsResponse.results) {
             if (isPageObject(page)) {
-                const props = page.properties as any;
+                const props = normalizeProps(page.properties);
                 const relations = props.projects?.relation as Array<{ id: string }>;
 
                 // Only aggregate metrics that belong to an Active project
@@ -151,7 +165,6 @@ export class NotionClient implements DataClient {
         const [projectRes, costsRes, revenueRes, metricsRes] = await Promise.all([
             queryNotionDb({
                 database_id: process.env.NOTION_PROJECTS_DB_ID || ''
-                // We'll filter for the exact page inside the DB to grab its properties
             }),
             queryNotionDb({
                 database_id: process.env.NOTION_COSTS_DB_ID || '',
@@ -172,35 +185,14 @@ export class NotionClient implements DataClient {
 
         let project: Project = { id: '', name: '', type: '', status: '' };
         if (isPageObject(projectPage)) {
-            const props = projectPage.properties as Record<string, NotionProp>;
-            const platform = props.platform?.select?.name?.toLowerCase() || undefined;
-            const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
-            let link = props.Link?.url || undefined;
-            if (!link && platformAccountId) {
-                if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
-                else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
-                else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
-                else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
-                else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
-                else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
-                else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
-            }
-
-            project = {
-                id: projectPage.id,
-                name: props.name?.title?.[0]?.plain_text || '',
-                type: normalizeType(props.type?.select?.name || ''),
-                status: (props.status?.select?.name || '').toLowerCase(),
-                platform,
-                platformAccountId,
-                link,
-            };
+            const props = normalizeProps(projectPage.properties);
+            project = parseProjectFromProps(projectPage.id, props);
         }
 
         let totalCosts = 0;
         for (const page of costsRes.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 if (props.amount?.number) totalCosts += props.amount.number;
             }
         }
@@ -208,7 +200,7 @@ export class NotionClient implements DataClient {
         let totalRevenue = 0;
         for (const page of revenueRes.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 if (props.amount?.number) totalRevenue += props.amount.number;
             }
         }
@@ -216,7 +208,7 @@ export class NotionClient implements DataClient {
         const metrics: Array<{ name: string; value: number }> = [];
         for (const page of metricsRes.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 const name = props.name?.title?.[0]?.plain_text || '';
                 const value = props.value?.number || 0;
                 if (name) metrics.push({ name, value });
@@ -229,20 +221,18 @@ export class NotionClient implements DataClient {
     async getMultipleProjectDetails(ids: string[]): Promise<ProjectDetails[]> {
         if (ids.length === 0) return [];
 
-        // 1. Fetch exactly the projects we need if we don't have them globally cached, 
-        // Or in this case we'll fetch all active projects to filter them
         const [projectRes, costsRes, revenueRes, metricsRes] = await Promise.all([
             queryNotionDb({
                 database_id: process.env.NOTION_PROJECTS_DB_ID || ''
             }),
             queryNotionDb({
-                database_id: process.env.NOTION_COSTS_DB_ID || '' // Bulk fetch all costs
+                database_id: process.env.NOTION_COSTS_DB_ID || ''
             }),
             queryNotionDb({
-                database_id: process.env.NOTION_REVENUE_DB_ID || '' // Bulk fetch all revenue
+                database_id: process.env.NOTION_REVENUE_DB_ID || ''
             }),
             queryNotionDb({
-                database_id: process.env.NOTION_METRICS_DB_ID || '' // Bulk fetch all metrics
+                database_id: process.env.NOTION_METRICS_DB_ID || ''
             })
         ]);
 
@@ -254,35 +244,13 @@ export class NotionClient implements DataClient {
 
             let project: Project = { id: '', name: '', type: '', status: '' };
             if (isPageObject(projectPage)) {
-                const props = projectPage.properties as Record<string, NotionProp>;
-                const platform = props.platform?.select?.name?.toLowerCase() || undefined;
-                const platformAccountId = props['Platform Account ID']?.rich_text?.[0]?.plain_text || undefined;
-                let link = props.Link?.url || undefined;
-                if (!link && platformAccountId) {
-                    if (platform === 'youtube') link = `https://youtube.com/channel/${platformAccountId}`;
-                    else if (platform === 'twitter' || platform === 'x') link = `https://x.com/${platformAccountId}`;
-                    else if (platform === 'tiktok') link = `https://tiktok.com/@${platformAccountId}`;
-                    else if (platform === 'twitch') link = `https://twitch.tv/${platformAccountId}`;
-                    else if (platform === 'instagram' || platform === 'ig') link = `https://instagram.com/${platformAccountId}`;
-                    else if (platform === 'github') link = `https://github.com/${platformAccountId}`;
-                    else if (platform === 'npm') link = `https://www.npmjs.com/package/${platformAccountId}`;
-                }
-
-                project = {
-                    id: projectPage.id,
-                    name: props.name?.title?.[0]?.plain_text || '',
-                    type: normalizeType(props.type?.select?.name || ''),
-                    status: (props.status?.select?.name || '').toLowerCase(),
-                    platform,
-                    platformAccountId,
-                    link,
-                };
+                const props = normalizeProps(projectPage.properties);
+                project = parseProjectFromProps(projectPage.id, props);
             }
 
-            // A helper to check if a relation property contains the current Project ID
             const relatesToId = (page: PageObjectResponse | PartialPageObjectResponse | PartialDatabaseObjectResponse | DatabaseObjectResponse) => {
                 if (isPageObject(page)) {
-                    const props = page.properties as any;
+                    const props = normalizeProps(page.properties);
                     const relations = props.projects?.relation as Array<{ id: string }>;
                     return relations?.some(r => r.id === id) || false;
                 }
@@ -292,7 +260,7 @@ export class NotionClient implements DataClient {
             let totalCosts = 0;
             for (const page of costsRes.results) {
                 if (relatesToId(page) && isPageObject(page)) {
-                    const props = page.properties as Record<string, NotionProp>;
+                    const props = normalizeProps(page.properties);
                     if (props.amount?.number) totalCosts += props.amount.number;
                 }
             }
@@ -300,7 +268,7 @@ export class NotionClient implements DataClient {
             let totalRevenue = 0;
             for (const page of revenueRes.results) {
                 if (relatesToId(page) && isPageObject(page)) {
-                    const props = page.properties as Record<string, NotionProp>;
+                    const props = normalizeProps(page.properties);
                     if (props.amount?.number) totalRevenue += props.amount.number;
                 }
             }
@@ -308,7 +276,7 @@ export class NotionClient implements DataClient {
             const metrics: Array<{ name: string; value: number }> = [];
             for (const page of metricsRes.results) {
                 if (relatesToId(page) && isPageObject(page)) {
-                    const props = page.properties as Record<string, NotionProp>;
+                    const props = normalizeProps(page.properties);
                     const name = props.name?.title?.[0]?.plain_text || '';
                     const value = props.value?.number || 0;
                     if (name) metrics.push({ name, value });
@@ -330,34 +298,44 @@ export class NotionClient implements DataClient {
     async getStreams(): Promise<StreamSummary[]> {
         const response = await queryNotionDb({
             database_id: process.env.NOTION_STREAMS_DB_ID || '',
+            sorts: [{ property: 'actualStartTime', direction: 'descending' }],
         });
 
         const streams: StreamSummary[] = [];
         for (const page of response.results) {
             if (isPageObject(page)) {
-                const props = page.properties as Record<string, NotionProp>;
+                const props = normalizeProps(page.properties);
                 const commitsJson = (props.commits?.rich_text || []).map(t => t.plain_text).join('');
                 let commitCount = 0;
+                const commitProjectIds: string[] = [];
                 if (commitsJson) {
                     try {
                         const parsed = JSON.parse(commitsJson);
-                        commitCount = Array.isArray(parsed) ? parsed.length : 0;
+                        if (Array.isArray(parsed)) {
+                            commitCount = parsed.length;
+                            for (const c of parsed) {
+                                if (c.projectId) commitProjectIds.push(c.projectId);
+                            }
+                        }
                     } catch { /* ignore parse errors */ }
                 }
+
+                const relationIds = props.projects?.relation?.map(r => r.id) || [];
+                const mergedIds = [...new Set([...relationIds, ...commitProjectIds])];
 
                 streams.push({
                     id: page.id,
                     name: props.name?.title?.[0]?.plain_text || '',
-                    videoId: (props.videoId?.rich_text || []).map(t => t.plain_text).join(''),
-                    actualStartTime: props.actualStartTime?.date?.start || '',
-                    actualEndTime: props.actualEndTime?.date?.start || '',
-                    thumbnailUrl: props.thumbnailUrl?.url || '',
-                    viewCount: props.viewCount?.number || 0,
-                    likeCount: props.likeCount?.number || 0,
-                    commentCount: props.commentCount?.number || 0,
+                    videoId: (props.videoid?.rich_text || []).map(t => t.plain_text).join(''),
+                    actualStartTime: props.actualstarttime?.date?.start || '',
+                    actualEndTime: props.actualendtime?.date?.start || '',
+                    thumbnailUrl: props.thumbnailurl?.url || '',
+                    viewCount: props.viewcount?.number || 0,
+                    likeCount: props.likecount?.number || 0,
+                    commentCount: props.commentcount?.number || 0,
                     duration: (props.duration?.rich_text || []).map(t => t.plain_text).join(''),
                     commitCount,
-                    projectIds: props.projects?.relation?.map(r => r.id) || [],
+                    projectIds: mergedIds,
                 });
             }
         }
@@ -372,7 +350,7 @@ export class NotionClient implements DataClient {
         const page = response.results.find(p => p.id === id);
         if (!page || !isPageObject(page)) return null;
 
-        const props = page.properties as Record<string, NotionProp>;
+        const props = normalizeProps(page.properties);
         const commitsJson = (props.commits?.rich_text || []).map(t => t.plain_text).join('');
         let commits: StreamCommit[] = [];
         if (commitsJson) {
@@ -384,13 +362,13 @@ export class NotionClient implements DataClient {
         return {
             id: page.id,
             name: props.name?.title?.[0]?.plain_text || '',
-            videoId: (props.videoId?.rich_text || []).map(t => t.plain_text).join(''),
-            actualStartTime: props.actualStartTime?.date?.start || '',
-            actualEndTime: props.actualEndTime?.date?.start || '',
-            thumbnailUrl: props.thumbnailUrl?.url || '',
-            viewCount: props.viewCount?.number || 0,
-            likeCount: props.likeCount?.number || 0,
-            commentCount: props.commentCount?.number || 0,
+            videoId: (props.videoid?.rich_text || []).map(t => t.plain_text).join(''),
+            actualStartTime: props.actualstarttime?.date?.start || '',
+            actualEndTime: props.actualendtime?.date?.start || '',
+            thumbnailUrl: props.thumbnailurl?.url || '',
+            viewCount: props.viewcount?.number || 0,
+            likeCount: props.likecount?.number || 0,
+            commentCount: props.commentcount?.number || 0,
             duration: (props.duration?.rich_text || []).map(t => t.plain_text).join(''),
             commits,
             projectIds: props.projects?.relation?.map(r => r.id) || [],

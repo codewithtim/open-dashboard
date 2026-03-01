@@ -11,6 +11,11 @@ jest.mock('next/navigation', () => ({
     notFound: jest.fn(() => { throw new Error('NOT_FOUND'); }),
 }));
 
+const mockProjects = [
+    { id: 'yt-1', name: 'Main YouTube', type: 'content', status: 'active', platform: 'youtube' },
+    { id: 'proj-1', name: 'SaaS App', type: 'software', status: 'active', platform: 'github' },
+];
+
 const mockStream = {
     id: 'stream-1',
     name: 'Building Auth from Scratch',
@@ -46,9 +51,10 @@ const mockStream = {
 };
 
 describe('Stream Detail Page', () => {
-    it('renders stream details with embed, stats, and commits', async () => {
+    it('renders stream details with embed, stats, commits, and project tags', async () => {
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(mockStream),
+            getProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -61,6 +67,10 @@ describe('Stream Detail Page', () => {
         expect(screen.getByText('feat: add auth')).toBeInTheDocument();
         expect(screen.getByText('fix: login bug')).toBeInTheDocument();
 
+        // Project tags should render (yt-1 from projectIds + proj-1 from commits)
+        expect(screen.getByText('Main YouTube')).toBeInTheDocument();
+        expect(screen.getByText('SaaS App')).toBeInTheDocument();
+
         // Check YouTube embed iframe
         const iframe = document.querySelector('iframe');
         expect(iframe).toBeTruthy();
@@ -70,6 +80,7 @@ describe('Stream Detail Page', () => {
     it('calls notFound when stream does not exist', async () => {
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(null),
+            getProjects: jest.fn().mockResolvedValue([]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -82,6 +93,7 @@ describe('Stream Detail Page', () => {
         const noCommitsStream = { ...mockStream, commits: [] };
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(noCommitsStream),
+            getProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 

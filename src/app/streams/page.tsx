@@ -1,5 +1,6 @@
 import { getDataClient } from '@/lib/client-factory';
-import { StreamCard } from '@/components/stream-card';
+import { StreamsFilteredList } from '@/components/streams-filtered-list';
+import { Project } from '@/lib/data-client';
 import React from 'react';
 
 export const metadata = {
@@ -9,7 +10,15 @@ export const metadata = {
 
 export default async function StreamsPage() {
     const client = getDataClient();
-    const streams = await client.getStreams();
+    const [streams, allProjects] = await Promise.all([
+        client.getStreams(),
+        client.getProjects(),
+    ]);
+
+    const projectMap: Record<string, Project> = {};
+    for (const p of allProjects) {
+        projectMap[p.id] = p;
+    }
 
     return (
         <main className="min-h-[60vh] flex flex-col items-center pt-12 space-y-6">
@@ -22,15 +31,7 @@ export default async function StreamsPage() {
                 </p>
             </div>
 
-            {streams.length === 0 ? (
-                <p className="text-slate-500 dark:text-slate-400">No streams yet.</p>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
-                    {streams.map((stream) => (
-                        <StreamCard key={stream.id} stream={stream} />
-                    ))}
-                </div>
-            )}
+            <StreamsFilteredList streams={streams} projectMap={projectMap} />
         </main>
     );
 }

@@ -196,7 +196,7 @@ describe('Cron API Route GET (DDD)', () => {
             expect.objectContaining({
                 parent: { database_id: 'streams-db-id' },
                 properties: expect.objectContaining({
-                    'name': { title: [{ text: { content: 'Live Stream' } }] },
+                    'Name': { title: [{ text: { content: 'Live Stream' } }] },
                     'videoId': { rich_text: [{ text: { content: 'vid1' } }] },
                 }),
             }),

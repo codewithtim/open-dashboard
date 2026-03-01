@@ -1,9 +1,11 @@
 import Link from 'next/link';
-import { StreamSummary } from '@/lib/data-client';
+import { StreamSummary, Project } from '@/lib/data-client';
 import { Eye, GitCommitHorizontal } from 'lucide-react';
+import { ProjectTag } from './project-tag';
 
 interface StreamCardProps {
     stream: StreamSummary;
+    projects?: Project[];
 }
 
 function formatDate(dateStr: string): string {
@@ -14,7 +16,7 @@ function formatDate(dateStr: string): string {
     });
 }
 
-export function StreamCard({ stream }: StreamCardProps) {
+export function StreamCard({ stream, projects = [] }: StreamCardProps) {
     return (
         <Link href={`/streams/${stream.id}`}>
             <div className="group bg-white dark:bg-[#111C44] rounded-2xl overflow-hidden shadow-[0_18px_40px_-12px_rgba(112,144,176,0.12)] dark:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_45px_-10px_rgba(112,144,176,0.2)] transition-all duration-300">
@@ -38,6 +40,13 @@ export function StreamCard({ stream }: StreamCardProps) {
                     <h3 className="text-base font-semibold text-slate-900 dark:text-white line-clamp-2 mb-3">
                         {stream.name}
                     </h3>
+                    {projects.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                            {projects.map((project) => (
+                                <ProjectTag key={project.id} project={project} />
+                            ))}
+                        </div>
+                    )}
                     <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                         <span className="flex items-center gap-1.5">
                             <Eye size={14} />

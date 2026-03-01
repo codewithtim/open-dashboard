@@ -90,7 +90,7 @@ async function processStreams(projects: Project[]) {
                 });
 
                 const properties: any = {
-                    'name': { title: [{ text: { content: stream.title } }] },
+                    'Name': { title: [{ text: { content: stream.title } }] },
                     'videoId': { rich_text: [{ text: { content: stream.videoId } }] },
                     'actualStartTime': { date: { start: stream.actualStartTime } },
                     'actualEndTime': { date: { start: stream.actualEndTime } },
