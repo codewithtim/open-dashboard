@@ -1,6 +1,7 @@
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Header } from '@/components/header';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata = { title: 'Open Dashboard' };
 
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
