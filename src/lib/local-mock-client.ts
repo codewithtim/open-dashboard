@@ -1,11 +1,11 @@
 import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent } from './data-client';
 
 const mockProjects: Project[] = [
-    { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
-    { id: 'saas-starter', name: 'SaaS Boilerplate', type: 'software', status: 'active' },
-    { id: 'npm-pkg', name: 'open-utils', type: 'software', status: 'active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
-    { id: 'consulting', name: 'Dev Consulting', type: 'service', status: 'active' },
-    { id: 'failed-app', name: 'Old Crypto App', type: 'software', status: 'archived' },
+    { id: 'youtube-main', name: 'Main YouTube Channel', description: 'Live coding streams and tech tutorials on YouTube.', type: 'content', status: 'active', platform: 'youtube' },
+    { id: 'saas-starter', name: 'SaaS Boilerplate', description: 'A production-ready Next.js SaaS starter kit with auth, billing, and dashboards.', type: 'software', status: 'active' },
+    { id: 'npm-pkg', name: 'open-utils', description: 'A lightweight utility library for common JavaScript operations.', type: 'software', status: 'active', platform: 'npm', platformAccountId: 'open-utils', link: 'https://www.npmjs.com/package/open-utils' },
+    { id: 'consulting', name: 'Dev Consulting', description: 'Freelance development consulting for startups and small teams.', type: 'service', status: 'active' },
+    { id: 'failed-app', name: 'Old Crypto App', description: 'A crypto portfolio tracker that was retired in 2024.', type: 'software', status: 'archived' },
 ];
 
 const mockGlobalStats: DashboardStats = {
@@ -21,6 +21,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'youtube-main': {
         id: 'youtube-main',
         name: 'Main YouTube Channel',
+        description: 'Live coding streams and tech tutorials on YouTube.',
         type: 'content',
         status: 'active',
         totalRevenue: 45000,
@@ -35,6 +36,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'saas-starter': {
         id: 'saas-starter',
         name: 'SaaS Boilerplate',
+        description: 'A production-ready Next.js SaaS starter kit with auth, billing, and dashboards.',
         type: 'software',
         status: 'active',
         totalRevenue: 68000,
@@ -49,6 +51,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'npm-pkg': {
         id: 'npm-pkg',
         name: 'open-utils',
+        description: 'A lightweight utility library for common JavaScript operations.',
         type: 'software',
         status: 'active',
         platform: 'npm',
@@ -65,6 +68,7 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
     'consulting': {
         id: 'consulting',
         name: 'Dev Consulting',
+        description: 'Freelance development consulting for startups and small teams.',
         type: 'service',
         status: 'active',
         totalRevenue: 12000,
@@ -74,6 +78,17 @@ const mockProjectDetails: Record<string, ProjectDetails> = {
             { name: 'Active Clients', value: 3 },
             { name: 'Billable Hours (MTD)', value: 85 }
         ]
+    },
+    'failed-app': {
+        id: 'failed-app',
+        name: 'Old Crypto App',
+        description: 'A crypto portfolio tracker that was retired in 2024.',
+        type: 'software',
+        status: 'archived',
+        totalRevenue: 0,
+        totalCosts: 2400,
+        netProfit: -2400,
+        metrics: []
     }
 };
 

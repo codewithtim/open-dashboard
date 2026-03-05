@@ -48,6 +48,7 @@ function rowToProject(row: typeof projectsTable.$inferSelect): Project {
     return {
         id: row.id,
         name: row.name,
+        description: row.description || undefined,
         type: normalizeType(row.type),
         status: row.status.toLowerCase(),
         platform: row.platform?.toLowerCase() || undefined,

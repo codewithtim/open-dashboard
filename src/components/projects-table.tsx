@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ProjectDetails } from '@/lib/data-client';
 import { FaYoutube, FaNpm, FaTiktok, FaTwitch } from 'react-icons/fa6';
 import { FaGithub, FaLaptopCode } from 'react-icons/fa';
@@ -56,13 +57,9 @@ export function ProjectsTable({ projects, title }: ProjectsTableProps) {
                                 <td className="px-5 py-4">
                                     <div className="flex items-center gap-2.5">
                                         {getPlatformIcon(project.platform)}
-                                        {project.link ? (
-                                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-white font-medium hover:text-accent transition-colors">
-                                                {project.name}
-                                            </a>
-                                        ) : (
-                                            <span className="text-white font-medium">{project.name}</span>
-                                        )}
+                                        <Link href={`/projects/${project.id}`} className="text-white font-medium hover:text-accent transition-colors">
+                                            {project.name}
+                                        </Link>
                                     </div>
                                 </td>
                                 <td className="px-5 py-4 text-slate-400 text-sm capitalize">{project.type}</td>

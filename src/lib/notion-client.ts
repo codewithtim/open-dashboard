@@ -72,6 +72,7 @@ function parseProjectFromProps(pageId: string, props: Record<string, NotionProp>
     return {
         id: pageId,
         name: props.name?.title?.[0]?.plain_text || '',
+        description: props.description?.rich_text?.[0]?.plain_text || undefined,
         type: normalizeType(props.type?.select?.name || ''),
         status: (props.status?.select?.name || '').toLowerCase(),
         platform,

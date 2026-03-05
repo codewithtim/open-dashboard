@@ -4,6 +4,7 @@ export const projects = sqliteTable('projects', {
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     type: text('type').notNull(),
+    description: text('description'),
     status: text('status').notNull().default('active'),
     platform: text('platform'),
     platformAccountId: text('platform_account_id'),

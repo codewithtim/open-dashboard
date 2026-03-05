@@ -1,6 +1,7 @@
 export interface Project {
     id: string;
     name: string;
+    description?: string;
     type: string;
     status: string;
     platform?: string;
