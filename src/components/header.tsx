@@ -20,7 +20,7 @@ export function Header() {
             <div className="flex items-center justify-between">
                 {/* Left side: Logo & Desktop Navigation */}
                 <div className="flex items-center gap-8">
-                    <Link href="/" className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                    <Link href="/" className="text-xl font-bold tracking-tight text-white hover:text-accent transition-colors flex items-center gap-2">
                         Tim Knight
                     </Link>
 
