@@ -49,6 +49,34 @@ describe('Dashboard Home Page', () => {
                     netProfit: 2400,
                     metrics: [{ name: 'Subscribers', value: 15000 }]
                 }
+            ]),
+            getRecentActivity: jest.fn().mockResolvedValue([
+                {
+                    id: 'a1',
+                    type: 'commit',
+                    timestamp: '2025-01-15T15:00:00Z',
+                    projectName: 'SaaS App',
+                    externalId: 'commit:abc123',
+                    payload: {
+                        sha: 'abc123',
+                        message: 'feat: add auth',
+                        author: 'tim',
+                        htmlUrl: 'https://github.com/t/r/commit/abc123',
+                        repo: 't/r',
+                    },
+                },
+                {
+                    id: 'a2',
+                    type: 'tweet',
+                    timestamp: '2025-01-15T14:00:00Z',
+                    externalId: 'tweet:999',
+                    payload: {
+                        text: 'Shipped a new feature!',
+                        likeCount: 10,
+                        retweetCount: 2,
+                        replyCount: 1,
+                    },
+                },
             ])
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
@@ -56,42 +84,54 @@ describe('Dashboard Home Page', () => {
         const page = await DashboardPage();
         render(page);
 
-        // Assert central stats hub metrics are rendered
+        // Stat cards
         expect(screen.getByText('Total Revenue')).toBeInTheDocument();
         expect(screen.getAllByText('$5,000').length).toBeGreaterThanOrEqual(1);
-
-        // Net Profit, Costs, and generic DashboardCards are no longer used on the main screen in the new redesign
-        // Replaced by CentralStatsHub specific stats
+        expect(screen.getByText('Net Profit')).toBeInTheDocument();
+        expect(screen.getByText('$4,000')).toBeInTheDocument();
         expect(screen.getAllByText(/Subscribers/i).length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('25,000')).toBeInTheDocument();
-
         expect(screen.getAllByText('Views').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('200,000')).toBeInTheDocument();
 
-        // Active Users no longer in top shelf, it's specific to the project row metrics
-
-        expect(screen.getByText('Software')).toBeInTheDocument();
-        expect(screen.getByText('Social')).toBeInTheDocument();
+        // Projects table
         expect(screen.getAllByText('Software App').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('YouTube Channel').length).toBeGreaterThanOrEqual(1);
-
-        // Assert deeply nested metrics from getMultipleProjectDetails reflect
         expect(mockClient.getMultipleProjectDetails).toHaveBeenCalledWith(['1', '2']);
 
-        // Project 1 Metrics & Costs
+        // Project 1 table row data
         expect(screen.getByText('$2,000')).toBeInTheDocument(); // Revenue
         expect(screen.getByText('$1,600')).toBeInTheDocument(); // Profit
-        expect(screen.getByText('$400')).toBeInTheDocument(); // Total Costs
-        expect(screen.getByText('MRR')).toBeInTheDocument();
-        expect(screen.getByText('$300')).toBeInTheDocument();
+        expect(screen.getByText('$400')).toBeInTheDocument(); // Costs
+        expect(screen.getByText('300 MRR')).toBeInTheDocument(); // Key metric
 
-        // Project 2 Metrics & Costs
+        // Project 2 table row data
         expect(screen.getByText('$3,000')).toBeInTheDocument(); // Revenue
         expect(screen.getByText('$2,400')).toBeInTheDocument(); // Profit
-        expect(screen.getByText('$600')).toBeInTheDocument(); // Total Costs
-        expect(screen.getAllByText(/Subscribers/i).length).toBeGreaterThanOrEqual(1);
-        expect(screen.getByText('15,000')).toBeInTheDocument();
+        expect(screen.getByText('$600')).toBeInTheDocument(); // Costs
+        expect(screen.getByText('15,000 Subscribers')).toBeInTheDocument(); // Key metric
 
-        // Progress bar is no longer rendered in the hero section
+        // Activity feed
+        expect(screen.getByText('Recent Activity')).toBeInTheDocument();
+        expect(screen.getByText('feat: add auth')).toBeInTheDocument();
+        expect(screen.getByText('Shipped a new feature!')).toBeInTheDocument();
+    });
+
+    it('hides activity feed when no events', async () => {
+        const mockClient = {
+            getAggregatedDashboardStats: jest.fn().mockResolvedValue({
+                totalRevenue: 0, totalCosts: 0, netProfit: 0,
+                totalSubscribers: 0, totalViews: 0, totalActiveUsers: 0
+            }),
+            getProjects: jest.fn().mockResolvedValue([]),
+            getMultipleProjectDetails: jest.fn().mockResolvedValue([]),
+            getRecentActivity: jest.fn().mockResolvedValue([]),
+        };
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+
+        const page = await DashboardPage();
+        render(page);
+
+        expect(screen.queryByText('Recent Activity')).not.toBeInTheDocument();
     });
 });

@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', type: 'content', status: 'active', platform: 'youtube' },
@@ -107,6 +107,218 @@ const mockStreamCommits: StreamCommit[] = [
     },
 ];
 
+const mockActivityEvents: ActivityEvent[] = [
+    {
+        id: 'activity-1',
+        type: 'tweet',
+        timestamp: '2025-01-16T09:15:00Z',
+        externalId: 'tweet:100001',
+        payload: {
+            text: 'Morning grind. Shipped dark mode for the dashboard overnight, now tackling the activity feed. Building in public means showing the messy parts too.',
+            likeCount: 87,
+            retweetCount: 14,
+            replyCount: 9,
+        },
+    },
+    {
+        id: 'activity-2',
+        type: 'commit',
+        timestamp: '2025-01-16T08:42:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:f4a2e91',
+        payload: {
+            sha: 'f4a2e91',
+            message: 'feat: add activity feed component with relative timestamps',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/f4a2e91',
+            repo: 'timknight/saas-starter',
+        },
+    },
+    {
+        id: 'activity-3',
+        type: 'commit',
+        timestamp: '2025-01-16T08:20:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:b7c3d82',
+        payload: {
+            sha: 'b7c3d82',
+            message: 'refactor: extract DataClient interface for activity events',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/b7c3d82',
+            repo: 'timknight/saas-starter',
+        },
+    },
+    {
+        id: 'activity-4',
+        type: 'commit',
+        timestamp: '2025-01-16T07:55:00Z',
+        projectId: 'npm-pkg',
+        projectName: 'open-utils',
+        externalId: 'commit:c9e1f03',
+        payload: {
+            sha: 'c9e1f03',
+            message: 'fix: handle edge case in date formatting for empty strings',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/open-utils/commit/c9e1f03',
+            repo: 'timknight/open-utils',
+        },
+    },
+    {
+        id: 'activity-5',
+        type: 'stream_end',
+        timestamp: '2025-01-15T22:30:00Z',
+        projectId: 'youtube-main',
+        projectName: 'Main YouTube Channel',
+        externalId: 'stream_end:dQw4w9WgXcQ',
+        payload: {
+            streamName: 'Building Auth from Scratch - Live Coding',
+            videoId: 'dQw4w9WgXcQ',
+            viewCount: 1250,
+            duration: 'PT3H0M0S',
+        },
+    },
+    {
+        id: 'activity-6',
+        type: 'tweet',
+        timestamp: '2025-01-15T22:35:00Z',
+        externalId: 'tweet:100002',
+        payload: {
+            text: 'Stream recap: 3 hours of live coding, shipped a full auth system from scratch. JWT + refresh tokens + middleware. VOD going up tomorrow.',
+            likeCount: 142,
+            retweetCount: 23,
+            replyCount: 18,
+        },
+    },
+    {
+        id: 'activity-7',
+        type: 'commit',
+        timestamp: '2025-01-15T21:45:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:def5678',
+        payload: {
+            sha: 'def5678',
+            message: 'fix: resolve login redirect issue after token refresh',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/def5678',
+            repo: 'timknight/saas-starter',
+        },
+    },
+    {
+        id: 'activity-8',
+        type: 'commit',
+        timestamp: '2025-01-15T21:10:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:abc1234',
+        payload: {
+            sha: 'abc1234',
+            message: 'feat: add JWT authentication with refresh token rotation',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/abc1234',
+            repo: 'timknight/saas-starter',
+        },
+    },
+    {
+        id: 'activity-9',
+        type: 'commit',
+        timestamp: '2025-01-15T20:30:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:e5d4c3b',
+        payload: {
+            sha: 'e5d4c3b',
+            message: 'feat: add auth middleware for protected API routes',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/e5d4c3b',
+            repo: 'timknight/saas-starter',
+        },
+    },
+    {
+        id: 'activity-10',
+        type: 'stream_start',
+        timestamp: '2025-01-15T19:30:00Z',
+        projectId: 'youtube-main',
+        projectName: 'Main YouTube Channel',
+        externalId: 'stream_start:dQw4w9WgXcQ',
+        payload: {
+            streamName: 'Building Auth from Scratch - Live Coding',
+            videoId: 'dQw4w9WgXcQ',
+        },
+    },
+    {
+        id: 'activity-11',
+        type: 'tweet',
+        timestamp: '2025-01-15T19:25:00Z',
+        externalId: 'tweet:100003',
+        payload: {
+            text: 'Going live in 5 minutes! Building a complete auth system from scratch — JWT, refresh tokens, the whole thing. Come hang out.',
+            likeCount: 56,
+            retweetCount: 11,
+            replyCount: 7,
+        },
+    },
+    {
+        id: 'activity-12',
+        type: 'commit',
+        timestamp: '2025-01-15T16:00:00Z',
+        projectId: 'npm-pkg',
+        projectName: 'open-utils',
+        externalId: 'commit:ghi9012',
+        payload: {
+            sha: 'ghi9012',
+            message: 'docs: update README with setup instructions and examples',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/open-utils/commit/ghi9012',
+            repo: 'timknight/open-utils',
+        },
+    },
+    {
+        id: 'activity-13',
+        type: 'commit',
+        timestamp: '2025-01-15T15:20:00Z',
+        projectId: 'npm-pkg',
+        projectName: 'open-utils',
+        externalId: 'commit:a1b2c3d',
+        payload: {
+            sha: 'a1b2c3d',
+            message: 'feat: add formatCurrency and formatNumber utility functions',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/open-utils/commit/a1b2c3d',
+            repo: 'timknight/open-utils',
+        },
+    },
+    {
+        id: 'activity-14',
+        type: 'tweet',
+        timestamp: '2025-01-15T12:00:00Z',
+        externalId: 'tweet:100004',
+        payload: {
+            text: 'open-utils just hit 48k downloads on npm. Started as a helper lib for my own projects — wild to see other people actually using it.',
+            likeCount: 203,
+            retweetCount: 31,
+            replyCount: 22,
+        },
+    },
+    {
+        id: 'activity-15',
+        type: 'commit',
+        timestamp: '2025-01-15T10:30:00Z',
+        projectId: 'saas-starter',
+        projectName: 'SaaS Boilerplate',
+        externalId: 'commit:9f8e7d6',
+        payload: {
+            sha: '9f8e7d6',
+            message: 'chore: upgrade Next.js to 16.1 and update dependencies',
+            author: 'timknight',
+            htmlUrl: 'https://github.com/timknight/saas-starter/commit/9f8e7d6',
+            repo: 'timknight/saas-starter',
+        },
+    },
+];
+
 const mockStreams: Stream[] = [
     {
         id: 'stream-1',
@@ -178,5 +390,11 @@ export class LocalMockClient implements DataClient {
         return mockStreams.filter(s =>
             s.commits.some(c => c.projectId === projectId) || s.projectIds.includes(projectId)
         ).length;
+    }
+
+    async getRecentActivity(limit: number = 20): Promise<ActivityEvent[]> {
+        return [...mockActivityEvents]
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, limit);
     }
 }

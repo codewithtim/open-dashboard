@@ -39,6 +39,45 @@ export interface StreamCommit {
     projectId: string;
 }
 
+export type ActivityEventType = 'commit' | 'tweet' | 'stream_start' | 'stream_end';
+
+export interface ActivityEventCommitPayload {
+    sha: string;
+    message: string;
+    author: string;
+    htmlUrl: string;
+    repo: string;
+}
+
+export interface ActivityEventTweetPayload {
+    text: string;
+    likeCount: number;
+    retweetCount: number;
+    replyCount: number;
+}
+
+export interface ActivityEventStreamPayload {
+    streamName: string;
+    videoId: string;
+    viewCount?: number;
+    duration?: string;
+}
+
+export type ActivityEventPayload =
+    | ActivityEventCommitPayload
+    | ActivityEventTweetPayload
+    | ActivityEventStreamPayload;
+
+export interface ActivityEvent {
+    id: string;
+    type: ActivityEventType;
+    timestamp: string;
+    projectId?: string;
+    projectName?: string;
+    externalId: string;
+    payload: ActivityEventPayload;
+}
+
 export interface Stream {
     id: string;
     name: string;
@@ -77,4 +116,5 @@ export interface DataClient {
     getStreams(): Promise<StreamSummary[]>;
     getStreamById(id: string): Promise<Stream | null>;
     getStreamCountForProject(projectId: string): Promise<number>;
+    getRecentActivity(limit?: number): Promise<ActivityEvent[]>;
 }

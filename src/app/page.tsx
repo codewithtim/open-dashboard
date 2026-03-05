@@ -1,77 +1,67 @@
 import { getDataClient } from '@/lib/client-factory';
-import { DashboardCard } from '@/components/dashboard-card';
-import React from 'react';
-import { renderProjectRow } from '@/components/project-rows';
-import { CentralStatsHub } from '@/components/central-stats-hub';
-import { NetworkLines } from '@/components/network-lines';
-import { NodeIcon } from '@/components/node-icon';
-import { FiYoutube, FiTwitter, FiGithub, FiBox } from 'react-icons/fi';
+import { ProgressBar } from '@/components/progress-bar';
+import { ProjectsTable } from '@/components/projects-table';
+import { ActivityFeed } from '@/components/activity-feed';
 
 export default async function DashboardPage() {
   const client = getDataClient();
-  const stats = await client.getAggregatedDashboardStats();
-  const lightweightProjects = await client.getProjects();
+  const [stats, lightweightProjects, activityEvents] = await Promise.all([
+    client.getAggregatedDashboardStats(),
+    client.getProjects(),
+    client.getRecentActivity(15),
+  ]);
   const activeIds = lightweightProjects.map(p => p.id);
   const detailedProjects = await client.getMultipleProjectDetails(activeIds);
-  const softwareProjectsCount = detailedProjects.filter(p => p.type === 'software').length;
 
   return (
     <main className="min-h-screen py-10 px-4 flex flex-col items-center relative overflow-hidden">
       {/* Hero Header */}
-      <section className="text-center z-10 mb-2 mt-4 w-full max-w-4xl mx-auto">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-white mb-2 tracking-tight">
-          Building In <span className="text-purple-600 dark:text-purple-400">Public</span>
+      <section className="z-10 mb-6 mt-4 w-full max-w-5xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 tracking-tight">
+          Building In <span className="text-accent">Public</span>
         </h1>
+        <p className="text-slate-400 text-lg max-w-2xl">
+          Pushing the boundaries of what&apos;s possible building with AI — exploring new tools, shipping real products, and sharing every step of the journey.
+        </p>
       </section>
 
-      {/* Network Visualizer Container */}
-      <section className="relative w-full max-w-6xl mx-auto min-h-[550px] md:min-h-0 md:h-[450px] flex items-center justify-center my-6 z-10">
-        <NetworkLines projects={detailedProjects}>
-          <CentralStatsHub stats={stats} softwareProjectsCount={softwareProjectsCount} />
-        </NetworkLines>
+      {/* Progress Bar */}
+      <section className="w-full max-w-5xl mx-auto z-10 mb-8">
+        <ProgressBar currentValue={stats.totalRevenue} />
       </section>
 
-      {/* Detailed Projects List */}
-      <section className="w-full max-w-5xl mx-auto z-10 mt-16">
-        {/* Software Projects */}
-        {detailedProjects.some(p => p.type === 'software') && (
-        <>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-[#2B3674] dark:text-white tracking-tight">
-              Software
-            </h2>
-            <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
-          </div>
+      {/* Stat Cards */}
+      <section className="w-full max-w-5xl mx-auto z-10 mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-surface-raised border border-surface-border rounded-2xl p-5">
+          <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-1">Total Revenue</p>
+          <p className="text-white text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
+        </div>
+        <div className="bg-surface-raised border border-surface-border rounded-2xl p-5">
+          <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-1">Net Profit</p>
+          <p className={`text-2xl font-bold ${stats.netProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            ${stats.netProfit.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-surface-raised border border-surface-border rounded-2xl p-5">
+          <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-1">Subscribers</p>
+          <p className="text-white text-2xl font-bold">{stats.totalSubscribers.toLocaleString()}</p>
+        </div>
+        <div className="bg-surface-raised border border-surface-border rounded-2xl p-5">
+          <p className="text-slate-500 text-xs uppercase tracking-wider font-medium mb-1">Views</p>
+          <p className="text-white text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
+        </div>
+      </section>
 
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {detailedProjects.filter(p => p.type === 'software').map((p) => (
-              <div key={p.id} className="break-inside-avoid">
-                {renderProjectRow(p)}
-              </div>
-            ))}
-          </div>
-        </>
-        )}
+      {/* Activity Feed */}
+      {activityEvents.length > 0 && (
+        <section className="w-full max-w-5xl mx-auto z-10 mb-8">
+          <ActivityFeed events={activityEvents} />
+        </section>
+      )}
 
-        {/* Social Projects */}
-        {detailedProjects.some(p => p.type !== 'software') && (
-        <>
-          <div className="flex items-center justify-between mb-8 mt-16">
-            <h2 className="text-2xl font-bold text-[#2B3674] dark:text-white tracking-tight">
-              Social
-            </h2>
-            <div className="h-px bg-slate-200 dark:bg-slate-700 flex-grow ml-6" />
-          </div>
-
-          <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
-            {detailedProjects.filter(p => p.type !== 'software').map((p) => (
-              <div key={p.id} className="break-inside-avoid">
-                {renderProjectRow(p)}
-              </div>
-            ))}
-          </div>
-        </>
-        )}
+      {/* Projects Table */}
+      <section className="w-full max-w-5xl mx-auto z-10">
+        <ProjectsTable projects={detailedProjects} />
       </section>
     </main>
   );

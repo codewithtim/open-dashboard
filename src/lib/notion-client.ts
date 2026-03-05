@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import { PageObjectResponse, PartialPageObjectResponse, PartialDatabaseObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit, ActivityEvent, ActivityEventType, ActivityEventPayload } from './data-client';
 
 export const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -387,5 +387,40 @@ export class NotionClient implements DataClient {
             filter: { property: 'projects', relation: { contains: projectId } },
         });
         return response.results.length;
+    }
+
+    async getRecentActivity(limit: number = 20): Promise<ActivityEvent[]> {
+        if (!process.env.NOTION_ACTIVITY_DB_ID) return [];
+
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_ACTIVITY_DB_ID,
+            sorts: [{ property: 'timestamp', direction: 'descending' }],
+        });
+
+        const events: ActivityEvent[] = [];
+        for (const page of response.results) {
+            if (!isPageObject(page)) continue;
+
+            const props = normalizeProps(page.properties);
+            const payloadJson = (props.payload?.rich_text || []).map(t => t.plain_text).join('');
+            let payload: ActivityEventPayload;
+            try {
+                payload = JSON.parse(payloadJson);
+            } catch {
+                continue;
+            }
+
+            events.push({
+                id: page.id,
+                type: (props.type?.select?.name || '') as ActivityEventType,
+                timestamp: props.timestamp?.date?.start || '',
+                projectId: (props.projectid?.rich_text || []).map(t => t.plain_text).join('') || undefined,
+                projectName: (props.projectname?.rich_text || []).map(t => t.plain_text).join('') || undefined,
+                externalId: (props.externalid?.rich_text || []).map(t => t.plain_text).join(''),
+                payload,
+            });
+        }
+
+        return events.slice(0, limit);
     }
 }

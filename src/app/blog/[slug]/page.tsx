@@ -10,56 +10,56 @@ export const metadata = {
 
 export default function BlogPostPage() {
     return (
-        <main className="min-h-screen py-10 px-4 flex flex-col items-center bg-slate-50/50 dark:bg-[#0B1437]">
+        <main className="min-h-screen py-10 px-4 flex flex-col items-center">
             <article className="w-full max-w-3xl flex flex-col gap-8">
 
                 {/* Back Button */}
                 <div className="w-full">
-                    <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors">
+                    <Link href="/blog" className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-accent transition-colors">
                         <ArrowLeft size={16} /> Back to Blog
                     </Link>
                 </div>
 
                 {/* Header Section */}
                 <header className="space-y-6">
-                    <div className="flex items-center gap-4 text-sm font-medium text-slate-500 dark:text-slate-400">
-                        <span className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-full text-xs uppercase tracking-wider">
+                    <div className="flex items-center gap-4 text-sm font-medium text-slate-500">
+                        <span className="flex items-center gap-1.5 px-3 py-1 bg-accent-bg text-accent rounded-full text-xs uppercase tracking-wider">
                             Announcement
                         </span>
                         <span className="flex items-center gap-1.5"><Calendar size={15} /> Feb 25, 2026</span>
                         <span className="flex items-center gap-1.5"><Clock size={15} /> 5 min read</span>
                     </div>
 
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1]">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
                         Welcome to the Open Dashboard Boilerplate
                     </h1>
 
-                    <p className="text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-light">
+                    <p className="text-xl text-slate-400 leading-relaxed font-light">
                         A beautiful, typography-focused boilerplate to demonstrate how long-form content will look on the Open Dashboard. Let's explore the styling.
                     </p>
 
                     {/* Author Row */}
-                    <div className="flex justify-between items-center py-6 border-y border-slate-200 dark:border-slate-800">
+                    <div className="flex justify-between items-center py-6 border-y border-white/[0.08]">
                         <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800">
+                            <div className="w-12 h-12 rounded-full overflow-hidden">
                                 {/* Placeholder for avatar */}
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#4318FF] to-[#868CFF] text-white font-bold text-lg">
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-accent-muted to-accent-secondary text-surface font-bold text-lg">
                                     TK
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-slate-900 dark:text-white">Tim Knight</span>
-                                <span className="text-sm text-slate-500 dark:text-slate-400">Builder & Creator</span>
+                                <span className="font-bold text-white">Tim Knight</span>
+                                <span className="text-sm text-slate-500">Builder & Creator</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <button className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors">
+                            <button className="p-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-slate-400 transition-colors">
                                 <Twitter size={18} />
                             </button>
-                            <button className="p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors">
+                            <button className="p-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-slate-400 transition-colors">
                                 <Linkedin size={18} />
                             </button>
-                            <button className="hidden md:flex p-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400 transition-colors">
+                            <button className="hidden md:flex p-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.08] text-slate-400 transition-colors">
                                 <Share2 size={18} />
                             </button>
                         </div>
@@ -67,12 +67,12 @@ export default function BlogPostPage() {
                 </header>
 
                 {/* Hero Image Placeholder */}
-                <div className="w-full aspect-video rounded-3xl bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-950 dark:to-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden relative group">
-                    <span className="text-slate-400 dark:text-slate-600 font-medium">Hero Image (16:9)</span>
+                <div className="w-full aspect-video rounded-3xl bg-gradient-to-br from-accent-muted/20 to-accent-secondary/20 border border-white/[0.05] flex items-center justify-center overflow-hidden relative group">
+                    <span className="text-slate-600 font-medium">Hero Image (16:9)</span>
                 </div>
 
                 {/* Content Section (Prose) */}
-                <div className="prose prose-lg dark:prose-invert prose-indigo prose-headings:font-bold prose-headings:tracking-tight prose-a:text-[#4318FF] dark:prose-a:text-[#868CFF] hover:prose-a:text-indigo-500 max-w-none w-full">
+                <div className="prose prose-lg prose-headings:font-bold prose-headings:tracking-tight max-w-none w-full">
 
                     <h2>Building in Public</h2>
                     <p>

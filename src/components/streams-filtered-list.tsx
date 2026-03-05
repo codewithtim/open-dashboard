@@ -31,8 +31,8 @@ export function StreamsFilteredList({ streams, projectMap }: StreamsFilteredList
                         onClick={() => setActiveProjectId(null)}
                         className={`cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
                             activeProjectId === null
-                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-md scale-105'
-                                : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 opacity-60 hover:opacity-100 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                ? 'bg-accent text-surface shadow-md scale-105'
+                                : 'bg-white/[0.05] text-slate-300 opacity-60 hover:opacity-100 hover:bg-white/[0.08]'
                         }`}
                     >
                         All
@@ -56,7 +56,7 @@ export function StreamsFilteredList({ streams, projectMap }: StreamsFilteredList
             )}
 
             {filteredStreams.length === 0 ? (
-                <p className="text-slate-500 dark:text-slate-400">No streams yet.</p>
+                <p className="text-slate-500">No streams yet.</p>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-5xl">
                     {filteredStreams.map((stream) => {

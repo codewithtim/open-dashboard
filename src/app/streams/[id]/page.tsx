@@ -51,10 +51,10 @@ export default async function StreamDetailPage({ params }: StreamDetailPageProps
     return (
         <main className="min-h-[60vh] py-10 space-y-8 max-w-4xl mx-auto">
             <div>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
+                <p className="text-sm text-slate-500 mb-2">
                     {formatDate(stream.actualStartTime)}
                 </p>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
                     {stream.name}
                 </h1>
                 {projects.length > 0 && (
@@ -78,7 +78,7 @@ export default async function StreamDetailPage({ params }: StreamDetailPageProps
 
             {Object.keys(commitGroups).length > 0 && (
                 <section className="space-y-4">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                    <h2 className="text-xl font-bold text-white">
                         Commits During Stream
                     </h2>
                     {Object.entries(commitGroups).map(([repo, commits]) => (

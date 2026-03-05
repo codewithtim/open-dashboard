@@ -25,6 +25,31 @@ export class GitHubCommitsProvider {
         }
 
         const data = await res.json();
+        return this.mapCommits(data);
+    }
+
+    async getRecentCommits(repoFullName: string, since: string): Promise<GitHubCommitData[]> {
+        const url = `https://api.github.com/repos/${repoFullName}/commits?since=${since}&per_page=100`;
+        const headers: Record<string, string> = {
+            'Accept': 'application/vnd.github.v3+json',
+        };
+
+        const token = process.env.GITHUB_TOKEN;
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const res = await fetch(url, { headers });
+        if (!res.ok) {
+            if (res.status === 409) return [];
+            throw new Error(`GitHub API returned ${res.status}`);
+        }
+
+        const data = await res.json();
+        return this.mapCommits(data);
+    }
+
+    private mapCommits(data: any[]): GitHubCommitData[] {
         return (data || []).map((item: any) => ({
             sha: item.sha,
             message: item.commit?.message || '',

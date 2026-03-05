@@ -26,20 +26,20 @@ const getPlatformConfig = (project: ProjectDetails) => {
         case 'x':
             return { icon: <FiTwitter className="w-full h-full" />, color: "text-blue-400" };
         case 'tiktok':
-            return { icon: <FaTiktok className="w-full h-full p-[2px]" />, color: "text-slate-800 dark:text-white" };
+            return { icon: <FaTiktok className="w-full h-full p-[2px]" />, color: "text-white" };
         case 'twitch':
             return { icon: <FaTwitch className="w-full h-full p-[2px]" />, color: "text-purple-500" };
         case 'instagram':
         case 'ig':
             return { icon: <FiCamera className="w-full h-full" />, color: "text-pink-500" };
         case 'github':
-            return { icon: <FaGithub className="w-full h-full p-[2px]" />, color: "text-slate-800 dark:text-white" };
+            return { icon: <FaGithub className="w-full h-full p-[2px]" />, color: "text-white" };
         case 'npm':
             return { icon: <FaNpm className="w-full h-full p-[2px]" />, color: "text-red-600" };
         case 'software':
-            return { icon: <FiBox className="w-full h-full" />, color: "text-indigo-500" };
+            return { icon: <FiBox className="w-full h-full" />, color: "text-accent" };
         default:
-            return { icon: <FiActivity className="w-full h-full" />, color: "text-slate-500" };
+            return { icon: <FiActivity className="w-full h-full" />, color: "text-slate-400" };
     }
 };
 
@@ -103,9 +103,9 @@ export function NetworkLines({ projects = [], children }: NetworkLinesProps) {
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
                     <linearGradient id="gradient-line" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="100" y2="100">
-                        <stop offset="0%" stopColor="#94a3b8" stopOpacity="0.1" />
-                        <stop offset="50%" stopColor="#cbd5e1" stopOpacity="0.4" />
-                        <stop offset="100%" stopColor="#94a3b8" stopOpacity="0.1" />
+                        <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.05" />
+                        <stop offset="50%" stopColor="var(--accent)" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.05" />
                     </linearGradient>
                 </defs>
 
@@ -120,7 +120,7 @@ export function NetworkLines({ projects = [], children }: NetworkLinesProps) {
                             strokeDasharray="4 4"
                             className="opacity-60"
                         />
-                        <circle r="0.6" fill="#94a3b8" filter="url(#glow)">
+                        <circle r="0.6" fill="var(--accent)" filter="url(#glow)">
                             <animateMotion
                                 dur={`${3 + (i % 3) * 0.5}s`}
                                 repeatCount="indefinite"
