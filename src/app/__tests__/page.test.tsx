@@ -24,32 +24,50 @@ describe('Dashboard Home Page', () => {
                 totalViews: 200000,
                 totalActiveUsers: 350
             }),
+            getAllProjects: jest.fn().mockResolvedValue([
+                { id: '1', name: 'Software App', type: 'software', status: 'active' },
+                { id: '2', name: 'YouTube Channel', type: 'content', status: 'active' },
+                { id: '3', name: 'Old Crypto App', type: 'software', status: 'archived' }
+            ]),
             getProjects: jest.fn().mockResolvedValue([
                 { id: '1', name: 'Software App', type: 'software', status: 'active' },
                 { id: '2', name: 'YouTube Channel', type: 'content', status: 'active' }
             ]),
-            getMultipleProjectDetails: jest.fn().mockResolvedValue([
-                {
-                    id: '1',
-                    name: 'Software App',
-                    type: 'software',
-                    status: 'active',
-                    totalRevenue: 2000,
-                    totalCosts: 400,
-                    netProfit: 1600,
-                    metrics: [{ name: 'MRR', value: 300 }]
-                },
-                {
-                    id: '2',
-                    name: 'YouTube Channel',
-                    type: 'content',
-                    status: 'active',
-                    totalRevenue: 3000,
-                    totalCosts: 600,
-                    netProfit: 2400,
-                    metrics: [{ name: 'Subscribers', value: 15000 }]
-                }
-            ]),
+            getMultipleProjectDetails: jest.fn().mockImplementation((ids: string[]) => {
+                const all: Record<string, any> = {
+                    '1': {
+                        id: '1',
+                        name: 'Software App',
+                        type: 'software',
+                        status: 'active',
+                        totalRevenue: 2000,
+                        totalCosts: 400,
+                        netProfit: 1600,
+                        metrics: [{ name: 'MRR', value: 300 }]
+                    },
+                    '2': {
+                        id: '2',
+                        name: 'YouTube Channel',
+                        type: 'content',
+                        status: 'active',
+                        totalRevenue: 3000,
+                        totalCosts: 600,
+                        netProfit: 2400,
+                        metrics: [{ name: 'Subscribers', value: 15000 }]
+                    },
+                    '3': {
+                        id: '3',
+                        name: 'Old Crypto App',
+                        type: 'software',
+                        status: 'archived',
+                        totalRevenue: 500,
+                        totalCosts: 1800,
+                        netProfit: -1300,
+                        metrics: []
+                    }
+                };
+                return Promise.resolve(ids.map((id: string) => all[id]).filter(Boolean));
+            }),
             getRecentActivity: jest.fn().mockResolvedValue([
                 {
                     id: 'a1',
@@ -94,10 +112,16 @@ describe('Dashboard Home Page', () => {
         expect(screen.getAllByText('Views').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText('200,000')).toBeInTheDocument();
 
+        // Projects table headings
+        expect(screen.getByText('Active Projects')).toBeInTheDocument();
+        expect(screen.getByText('Inactive Projects')).toBeInTheDocument();
+
         // Projects table
         expect(screen.getAllByText('Software App').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('YouTube Channel').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText('Old Crypto App')).toBeInTheDocument();
         expect(mockClient.getMultipleProjectDetails).toHaveBeenCalledWith(['1', '2']);
+        expect(mockClient.getMultipleProjectDetails).toHaveBeenCalledWith(['3']);
 
         // Project 1 table row data
         expect(screen.getByText('$2,000')).toBeInTheDocument(); // Revenue
@@ -123,6 +147,7 @@ describe('Dashboard Home Page', () => {
                 totalRevenue: 0, totalCosts: 0, netProfit: 0,
                 totalSubscribers: 0, totalViews: 0, totalActiveUsers: 0
             }),
+            getAllProjects: jest.fn().mockResolvedValue([]),
             getProjects: jest.fn().mockResolvedValue([]),
             getMultipleProjectDetails: jest.fn().mockResolvedValue([]),
             getRecentActivity: jest.fn().mockResolvedValue([]),

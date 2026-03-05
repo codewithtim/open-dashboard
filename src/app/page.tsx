@@ -7,13 +7,17 @@ export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const client = getDataClient();
-  const [stats, lightweightProjects, activityEvents] = await Promise.all([
+  const [stats, allProjects, activityEvents] = await Promise.all([
     client.getAggregatedDashboardStats(),
-    client.getProjects(),
+    client.getAllProjects(),
     client.getRecentActivity(15),
   ]);
-  const activeIds = lightweightProjects.map(p => p.id);
-  const detailedProjects = await client.getMultipleProjectDetails(activeIds);
+  const activeProjects = allProjects.filter(p => p.status === 'active');
+  const inactiveProjects = allProjects.filter(p => p.status !== 'active');
+  const [activeDetails, inactiveDetails] = await Promise.all([
+    client.getMultipleProjectDetails(activeProjects.map(p => p.id)),
+    client.getMultipleProjectDetails(inactiveProjects.map(p => p.id)),
+  ]);
 
   return (
     <main className="min-h-screen py-10 px-4 flex flex-col items-center relative overflow-hidden">
@@ -61,9 +65,12 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {/* Projects Table */}
-      <section className="w-full max-w-5xl mx-auto z-10">
-        <ProjectsTable projects={detailedProjects} />
+      {/* Projects Tables */}
+      <section className="w-full max-w-5xl mx-auto z-10 space-y-6">
+        <ProjectsTable title="Active Projects" projects={activeDetails} />
+        {inactiveDetails.length > 0 && (
+          <ProjectsTable title="Inactive Projects" projects={inactiveDetails} />
+        )}
       </section>
     </main>
   );

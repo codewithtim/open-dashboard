@@ -97,6 +97,21 @@ export class NotionClient implements DataClient {
         return projects;
     }
 
+    async getAllProjects(): Promise<Project[]> {
+        const response = await queryNotionDb({
+            database_id: process.env.NOTION_PROJECTS_DB_ID || '',
+        });
+
+        const projects: Project[] = [];
+        for (const page of response.results) {
+            if (isPageObject(page)) {
+                const props = normalizeProps(page.properties);
+                projects.push(parseProjectFromProps(page.id || '', props));
+            }
+        }
+        return projects;
+    }
+
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
         const [projectsResponse, revenueResponse, costsResponse, metricsResponse] = await Promise.all([
             queryNotionDb({

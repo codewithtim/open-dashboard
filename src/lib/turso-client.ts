@@ -66,6 +66,12 @@ export class TursoClient implements DataClient {
         return rows.map(rowToProject);
     }
 
+    async getAllProjects(): Promise<Project[]> {
+        const db = getDb();
+        const rows = await db.select().from(projectsTable);
+        return rows.map(rowToProject);
+    }
+
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
         const db = getDb();
 

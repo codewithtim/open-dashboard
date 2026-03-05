@@ -355,6 +355,10 @@ export class LocalMockClient implements DataClient {
         return mockProjects.filter(p => p.status === 'active');
     }
 
+    async getAllProjects(): Promise<Project[]> {
+        return mockProjects;
+    }
+
     async getAggregatedDashboardStats(): Promise<DashboardStats> {
         return mockGlobalStats;
     }

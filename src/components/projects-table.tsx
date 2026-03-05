@@ -28,11 +28,15 @@ function getPlatformIcon(platform?: string) {
 
 interface ProjectsTableProps {
     projects: ProjectDetails[];
+    title?: string;
 }
 
-export function ProjectsTable({ projects }: ProjectsTableProps) {
+export function ProjectsTable({ projects, title }: ProjectsTableProps) {
     return (
         <div className="bg-surface-raised border border-surface-border rounded-2xl overflow-hidden">
+            {title && (
+                <h2 className="text-white text-lg font-semibold px-5 pt-4 pb-1">{title}</h2>
+            )}
             <table className="w-full">
                 <thead>
                     <tr className="border-b border-white/[0.05]">

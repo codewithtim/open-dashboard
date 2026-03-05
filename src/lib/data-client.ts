@@ -110,6 +110,7 @@ export interface StreamSummary {
 
 export interface DataClient {
     getProjects(): Promise<Project[]>;
+    getAllProjects(): Promise<Project[]>;
     getAggregatedDashboardStats(): Promise<DashboardStats>;
     getProjectDetails(projectId: string): Promise<ProjectDetails | null>;
     getMultipleProjectDetails(ids: string[]): Promise<ProjectDetails[]>;
