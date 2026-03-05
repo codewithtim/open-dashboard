@@ -34,7 +34,7 @@ export default async function StreamDetailPage({ params }: StreamDetailPageProps
     const client = getDataClient();
     const [stream, allProjects] = await Promise.all([
         client.getStreamById(id),
-        client.getProjects(),
+        client.getAllProjects(),
     ]);
 
     if (!stream) return notFound();

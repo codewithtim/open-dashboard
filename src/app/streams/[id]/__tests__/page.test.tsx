@@ -54,7 +54,7 @@ describe('Stream Detail Page', () => {
     it('renders stream details with embed, stats, commits, and project tags', async () => {
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(mockStream),
-            getProjects: jest.fn().mockResolvedValue(mockProjects),
+            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -80,7 +80,7 @@ describe('Stream Detail Page', () => {
     it('calls notFound when stream does not exist', async () => {
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(null),
-            getProjects: jest.fn().mockResolvedValue([]),
+            getAllProjects: jest.fn().mockResolvedValue([]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -93,7 +93,7 @@ describe('Stream Detail Page', () => {
         const noCommitsStream = { ...mockStream, commits: [] };
         const mockClient = {
             getStreamById: jest.fn().mockResolvedValue(noCommitsStream),
-            getProjects: jest.fn().mockResolvedValue(mockProjects),
+            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 

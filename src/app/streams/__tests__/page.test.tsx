@@ -48,7 +48,7 @@ describe('Streams Page', () => {
                     projectIds: ['yt-1'],
                 },
             ]),
-            getProjects: jest.fn().mockResolvedValue(mockProjects),
+            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -63,7 +63,7 @@ describe('Streams Page', () => {
     it('shows empty message when no streams exist', async () => {
         const mockClient = {
             getStreams: jest.fn().mockResolvedValue([]),
-            getProjects: jest.fn().mockResolvedValue([]),
+            getAllProjects: jest.fn().mockResolvedValue([]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -91,7 +91,7 @@ describe('Streams Page', () => {
                     projectIds: ['yt-1'],
                 },
             ]),
-            getProjects: jest.fn().mockResolvedValue(mockProjects),
+            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 

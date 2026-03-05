@@ -14,7 +14,7 @@ export default async function StreamsPage() {
     const client = getDataClient();
     const [streams, allProjects] = await Promise.all([
         client.getStreams(),
-        client.getProjects(),
+        client.getAllProjects(),
     ]);
 
     const projectMap: Record<string, Project> = {};
