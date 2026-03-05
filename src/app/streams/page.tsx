@@ -3,6 +3,8 @@ import { StreamsFilteredList } from '@/components/streams-filtered-list';
 import { Project } from '@/lib/data-client';
 import React from 'react';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
     title: 'Streams | Tim Knight',
     description: 'Live coding streams with correlated GitHub commits.',

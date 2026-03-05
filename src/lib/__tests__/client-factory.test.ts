@@ -1,11 +1,11 @@
 import { getDataClient } from '../client-factory';
-import { NotionClient } from '../notion-client';
+import { TursoClient } from '../turso-client';
 import { LocalMockClient } from '../local-mock-client';
 
-jest.mock('../notion-client', () => {
+jest.mock('../turso-client', () => {
     return {
-        NotionClient: jest.fn().mockImplementation(() => ({
-            type: 'notion'
+        TursoClient: jest.fn().mockImplementation(() => ({
+            type: 'turso'
         }))
     };
 });
@@ -39,13 +39,13 @@ describe('Client Factory', () => {
         expect(client.type).toBe('local');
     });
 
-    it('returns NotionClient when USE_LOCAL_DATA is false or undefined', () => {
+    it('returns TursoClient when USE_LOCAL_DATA is false or undefined', () => {
         delete process.env.USE_LOCAL_DATA;
         const { getDataClient, _resetCache } = require('../client-factory');
         _resetCache();
 
         const client = getDataClient() as any;
-        expect(client.type).toBe('notion');
+        expect(client.type).toBe('turso');
     });
 
     it('caches the client instance', () => {

@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { notion } from '@/lib/notion-client';
+import { eq, desc } from 'drizzle-orm';
+import { getDb } from '@/lib/db';
+import {
+    metrics as metricsTable,
+    streams as streamsTable,
+    streamProjects,
+    streamCommits,
+    activityEvents,
+} from '@/lib/db/schema';
 import { getDataClient } from '@/lib/client-factory';
 import { getMetricsProvider } from '@/lib/providers';
 import { YouTubeStreamsProvider } from '@/lib/providers/youtube-streams-provider';
@@ -9,17 +17,12 @@ import { TwitterProvider } from '@/lib/providers/twitter-provider';
 import { StreamCommit } from '@/lib/data-client';
 import { Project } from '@/lib/data-client';
 
-function chunkRichText(text: string): Array<{ text: { content: string } }> {
-    const chunks: Array<{ text: { content: string } }> = [];
-    for (let i = 0; i < text.length; i += 2000) {
-        chunks.push({ text: { content: text.slice(i, i + 2000) } });
-    }
-    return chunks;
+function generateId(): string {
+    return crypto.randomUUID();
 }
 
 async function processStreams(projects: Project[]) {
-    const streamsDbId = process.env.NOTION_STREAMS_DB_ID;
-    if (!streamsDbId) return;
+    const db = getDb();
 
     const youtubeProjects = projects.filter(p => p.platform === 'youtube' && p.platformAccountId);
     const githubProjects = projects.filter(p => p.platform === 'github' && p.platformAccountId);
@@ -29,14 +32,13 @@ async function processStreams(projects: Project[]) {
     // Find the most recent stream end time for incremental fetching
     let since: string | undefined;
     try {
-        const existingStreams = await notion.databases.query({
-            database_id: streamsDbId,
-            sorts: [{ property: 'actualEndTime', direction: 'descending' }],
-            page_size: 1,
-        });
-        if (existingStreams.results.length > 0) {
-            const page = existingStreams.results[0] as any;
-            since = page.properties?.actualEndTime?.date?.start;
+        const recent = await db
+            .select({ actualEndTime: streamsTable.actualEndTime })
+            .from(streamsTable)
+            .orderBy(desc(streamsTable.actualEndTime))
+            .limit(1);
+        if (recent.length > 0 && recent[0].actualEndTime) {
+            since = recent[0].actualEndTime;
         }
     } catch {
         // If query fails, do a full fetch
@@ -81,39 +83,61 @@ async function processStreams(projects: Project[]) {
                     }
                 }
 
-                const commitsJson = JSON.stringify(allCommits);
-                const richTextChunks = chunkRichText(commitsJson);
+                // Upsert stream by videoId
+                const existing = await db
+                    .select({ id: streamsTable.id })
+                    .from(streamsTable)
+                    .where(eq(streamsTable.videoId, stream.videoId));
 
-                // Upsert by videoId
-                const existing = await notion.databases.query({
-                    database_id: streamsDbId,
-                    filter: { property: 'videoId', rich_text: { equals: stream.videoId } },
-                });
+                const streamId = existing.length > 0 ? existing[0].id : generateId();
 
-                const properties: any = {
-                    'Name': { title: [{ text: { content: stream.title } }] },
-                    'videoId': { rich_text: [{ text: { content: stream.videoId } }] },
-                    'actualStartTime': { date: { start: stream.actualStartTime } },
-                    'actualEndTime': { date: { start: stream.actualEndTime } },
-                    'thumbnailUrl': { url: stream.thumbnailUrl || null },
-                    'viewCount': { number: stream.viewCount },
-                    'likeCount': { number: stream.likeCount },
-                    'commentCount': { number: stream.commentCount },
-                    'duration': { rich_text: [{ text: { content: stream.duration } }] },
-                    'commits': { rich_text: richTextChunks },
-                    'projects': { relation: [{ id: ytProject.id }] },
-                };
-
-                if (existing.results.length > 0) {
-                    await notion.pages.update({
-                        page_id: existing.results[0].id,
-                        properties,
-                    });
+                if (existing.length > 0) {
+                    await db.update(streamsTable).set({
+                        name: stream.title,
+                        actualStartTime: stream.actualStartTime,
+                        actualEndTime: stream.actualEndTime,
+                        thumbnailUrl: stream.thumbnailUrl || null,
+                        viewCount: stream.viewCount,
+                        likeCount: stream.likeCount,
+                        commentCount: stream.commentCount,
+                        duration: stream.duration,
+                    }).where(eq(streamsTable.id, streamId));
                 } else {
-                    await notion.pages.create({
-                        parent: { database_id: streamsDbId },
-                        properties,
+                    await db.insert(streamsTable).values({
+                        id: streamId,
+                        name: stream.title,
+                        videoId: stream.videoId,
+                        actualStartTime: stream.actualStartTime,
+                        actualEndTime: stream.actualEndTime,
+                        thumbnailUrl: stream.thumbnailUrl || null,
+                        viewCount: stream.viewCount,
+                        likeCount: stream.likeCount,
+                        commentCount: stream.commentCount,
+                        duration: stream.duration,
                     });
+                }
+
+                // Upsert stream↔project link
+                await db.insert(streamProjects).values({
+                    streamId,
+                    projectId: ytProject.id,
+                }).onConflictDoNothing();
+
+                // Replace commits for this stream
+                await db.delete(streamCommits).where(eq(streamCommits.streamId, streamId));
+                if (allCommits.length > 0) {
+                    await db.insert(streamCommits).values(
+                        allCommits.map(c => ({
+                            streamId,
+                            sha: c.sha,
+                            message: c.message,
+                            author: c.author,
+                            timestamp: c.timestamp,
+                            htmlUrl: c.htmlUrl,
+                            repo: c.repo,
+                            projectId: c.projectId,
+                        }))
+                    );
                 }
             }
         } catch (err) {
@@ -122,47 +146,20 @@ async function processStreams(projects: Project[]) {
     }
 }
 
-async function upsertActivity(
-    activityDbId: string,
-    externalId: string,
-    properties: Record<string, any>,
-) {
-    const existing = await notion.databases.query({
-        database_id: activityDbId,
-        filter: { property: 'externalId', rich_text: { equals: externalId } },
-    });
-
-    if (existing.results.length > 0) {
-        await notion.pages.update({
-            page_id: existing.results[0].id,
-            properties,
-        });
-    } else {
-        await notion.pages.create({
-            parent: { database_id: activityDbId },
-            properties,
-        });
-    }
-}
-
 async function processActivity(projects: Project[]) {
-    const activityDbId = process.env.NOTION_ACTIVITY_DB_ID;
-    if (!activityDbId) return;
+    const db = getDb();
 
     // Find the most recent activity timestamp for incremental fetching
     let since: string;
     try {
-        const existing = await notion.databases.query({
-            database_id: activityDbId,
-            sorts: [{ property: 'timestamp', direction: 'descending' }],
-            page_size: 1,
-        });
-        if (existing.results.length > 0) {
-            const page = existing.results[0] as any;
-            since = page.properties?.timestamp?.date?.start || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        } else {
-            since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-        }
+        const recent = await db
+            .select({ timestamp: activityEvents.timestamp })
+            .from(activityEvents)
+            .orderBy(desc(activityEvents.timestamp))
+            .limit(1);
+        since = recent.length > 0
+            ? recent[0].timestamp
+            : new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     } catch {
         since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     }
@@ -176,21 +173,31 @@ async function processActivity(projects: Project[]) {
             const commits = await commitsProvider.getRecentCommits(project.platformAccountId!, since);
             for (const commit of commits) {
                 const extId = `commit:${commit.sha}`;
-                const payload = JSON.stringify({
-                    sha: commit.sha,
-                    message: commit.message,
-                    author: commit.author,
-                    htmlUrl: commit.htmlUrl,
-                    repo: project.platformAccountId,
-                });
-                await upsertActivity(activityDbId, extId, {
-                    'Name': { title: [{ text: { content: commit.message.split('\n')[0].slice(0, 100) } }] },
-                    'type': { select: { name: 'commit' } },
-                    'timestamp': { date: { start: commit.timestamp } },
-                    'payload': { rich_text: chunkRichText(payload) },
-                    'projectId': { rich_text: [{ text: { content: project.id } }] },
-                    'projectName': { rich_text: [{ text: { content: project.name } }] },
-                    'externalId': { rich_text: [{ text: { content: extId } }] },
+                await db.insert(activityEvents).values({
+                    id: generateId(),
+                    type: 'commit',
+                    timestamp: commit.timestamp,
+                    projectId: project.id,
+                    projectName: project.name,
+                    externalId: extId,
+                    payload: JSON.stringify({
+                        sha: commit.sha,
+                        message: commit.message,
+                        author: commit.author,
+                        htmlUrl: commit.htmlUrl,
+                        repo: project.platformAccountId,
+                    }),
+                }).onConflictDoUpdate({
+                    target: activityEvents.externalId,
+                    set: {
+                        payload: JSON.stringify({
+                            sha: commit.sha,
+                            message: commit.message,
+                            author: commit.author,
+                            htmlUrl: commit.htmlUrl,
+                            repo: project.platformAccountId,
+                        }),
+                    },
                 });
             }
         } catch (err) {
@@ -214,14 +221,17 @@ async function processActivity(projects: Project[]) {
                         retweetCount: tweet.retweetCount,
                         replyCount: tweet.replyCount,
                     });
-                    await upsertActivity(activityDbId, extId, {
-                        'Name': { title: [{ text: { content: tweet.text.slice(0, 100) } }] },
-                        'type': { select: { name: 'tweet' } },
-                        'timestamp': { date: { start: tweet.createdAt } },
-                        'payload': { rich_text: chunkRichText(payload) },
-                        'projectId': { rich_text: [{ text: { content: project.id } }] },
-                        'projectName': { rich_text: [{ text: { content: project.name } }] },
-                        'externalId': { rich_text: [{ text: { content: extId } }] },
+                    await db.insert(activityEvents).values({
+                        id: generateId(),
+                        type: 'tweet',
+                        timestamp: tweet.createdAt,
+                        projectId: project.id,
+                        projectName: project.name,
+                        externalId: extId,
+                        payload,
+                    }).onConflictDoUpdate({
+                        target: activityEvents.externalId,
+                        set: { payload },
                     });
                 }
             } catch (err) {
@@ -232,54 +242,44 @@ async function processActivity(projects: Project[]) {
         // TwitterProvider constructor throws if no token — skip gracefully
     }
 
-    // Stream events
+    // Stream events — read from Turso streams table
     try {
-        const streamsDbId = process.env.NOTION_STREAMS_DB_ID;
-        if (streamsDbId) {
-            const recentStreams = await notion.databases.query({
-                database_id: streamsDbId,
-                sorts: [{ property: 'actualStartTime', direction: 'descending' }],
-                page_size: 20,
-            });
+        const recentStreams = await db
+            .select()
+            .from(streamsTable)
+            .orderBy(desc(streamsTable.actualStartTime))
+            .limit(20);
 
-            for (const page of recentStreams.results) {
-                const p = page as any;
-                if (!p.properties) continue;
+        for (const stream of recentStreams) {
+            if (!stream.videoId) continue;
 
-                const name = p.properties.Name?.title?.[0]?.plain_text || '';
-                const videoId = (p.properties.videoId?.rich_text || []).map((t: any) => t.plain_text).join('');
-                const startTime = p.properties.actualStartTime?.date?.start;
-                const endTime = p.properties.actualEndTime?.date?.start;
-                const viewCount = p.properties.viewCount?.number || 0;
-                const duration = (p.properties.duration?.rich_text || []).map((t: any) => t.plain_text).join('');
+            if (stream.actualStartTime) {
+                const startExtId = `stream_start:${stream.videoId}`;
+                const startPayload = JSON.stringify({ streamName: stream.name, videoId: stream.videoId });
+                await db.insert(activityEvents).values({
+                    id: generateId(),
+                    type: 'stream_start',
+                    timestamp: stream.actualStartTime,
+                    externalId: startExtId,
+                    payload: startPayload,
+                }).onConflictDoNothing();
+            }
 
-                if (!videoId) continue;
-
-                // Upsert stream_start
-                if (startTime) {
-                    const startExtId = `stream_start:${videoId}`;
-                    const startPayload = JSON.stringify({ streamName: name, videoId });
-                    await upsertActivity(activityDbId, startExtId, {
-                        'Name': { title: [{ text: { content: `Went live: ${name}`.slice(0, 100) } }] },
-                        'type': { select: { name: 'stream_start' } },
-                        'timestamp': { date: { start: startTime } },
-                        'payload': { rich_text: chunkRichText(startPayload) },
-                        'externalId': { rich_text: [{ text: { content: startExtId } }] },
-                    });
-                }
-
-                // Upsert stream_end
-                if (endTime) {
-                    const endExtId = `stream_end:${videoId}`;
-                    const endPayload = JSON.stringify({ streamName: name, videoId, viewCount, duration });
-                    await upsertActivity(activityDbId, endExtId, {
-                        'Name': { title: [{ text: { content: `Stream ended: ${name}`.slice(0, 100) } }] },
-                        'type': { select: { name: 'stream_end' } },
-                        'timestamp': { date: { start: endTime } },
-                        'payload': { rich_text: chunkRichText(endPayload) },
-                        'externalId': { rich_text: [{ text: { content: endExtId } }] },
-                    });
-                }
+            if (stream.actualEndTime) {
+                const endExtId = `stream_end:${stream.videoId}`;
+                const endPayload = JSON.stringify({
+                    streamName: stream.name,
+                    videoId: stream.videoId,
+                    viewCount: stream.viewCount ?? 0,
+                    duration: stream.duration || '',
+                });
+                await db.insert(activityEvents).values({
+                    id: generateId(),
+                    type: 'stream_end',
+                    timestamp: stream.actualEndTime,
+                    externalId: endExtId,
+                    payload: endPayload,
+                }).onConflictDoNothing();
             }
         }
     } catch (err) {
@@ -294,62 +294,39 @@ export async function GET(request: Request) {
     }
 
     try {
+        const db = getDb();
         const client = getDataClient();
         const projects = await client.getProjects();
-        const metricsDbId = process.env.NOTION_METRICS_DB_ID || '';
 
         for (const project of projects) {
             if (!project.platform || !project.platformAccountId) continue;
 
             try {
                 const provider = getMetricsProvider(project.platform);
-                const metrics = await provider.getMetrics(project.platformAccountId);
+                const fetchedMetrics = await provider.getMetrics(project.platformAccountId);
 
-                // Map the standardized SocialMetrics into an array of { name, value } for iterative upserting
                 const metricEntries = [
-                    { name: 'Subscribers', value: metrics.subscribers },
-                    { name: 'Views', value: metrics.views },
-                    { name: 'Videos', value: metrics.videos },
-                    { name: 'Stars', value: metrics.stars },
-                    { name: 'Forks', value: metrics.forks },
-                    { name: 'Downloads', value: metrics.downloads },
-                    { name: 'Weekly Downloads', value: metrics.weeklyDownloads },
+                    { name: 'Subscribers', value: fetchedMetrics.subscribers },
+                    { name: 'Views', value: fetchedMetrics.views },
+                    { name: 'Videos', value: fetchedMetrics.videos },
+                    { name: 'Stars', value: fetchedMetrics.stars },
+                    { name: 'Forks', value: fetchedMetrics.forks },
+                    { name: 'Downloads', value: fetchedMetrics.downloads },
+                    { name: 'Weekly Downloads', value: fetchedMetrics.weeklyDownloads },
                 ].filter(m => m.value !== undefined) as Array<{ name: string; value: number }>;
 
                 for (const entry of metricEntries) {
-                    // Query Notion to see if this project already has this metric row
-                    const existingMetrics = await notion.databases.query({
-                        database_id: metricsDbId,
-                        filter: {
-                            and: [
-                                { property: 'name', title: { equals: entry.name } },
-                                { property: 'projects', relation: { contains: project.id } }
-                            ]
-                        }
+                    await db.insert(metricsTable).values({
+                        id: generateId(),
+                        projectId: project.id,
+                        name: entry.name,
+                        value: entry.value,
+                    }).onConflictDoUpdate({
+                        target: [metricsTable.projectId, metricsTable.name],
+                        set: { value: entry.value },
                     });
-
-                    // Upsert Logic
-                    if (existingMetrics.results.length > 0) {
-                        const existingPageId = existingMetrics.results[0].id;
-                        await notion.pages.update({
-                            page_id: existingPageId,
-                            properties: {
-                                'value': { number: entry.value }
-                            }
-                        });
-                    } else {
-                        await notion.pages.create({
-                            parent: { database_id: metricsDbId },
-                            properties: {
-                                'name': { title: [{ text: { content: entry.name } }] },
-                                'value': { number: entry.value },
-                                'projects': { relation: [{ id: project.id }] },
-                            },
-                        });
-                    }
                 }
             } catch (err) {
-                // Log and continue to the next project without failing the entire cron
                 console.error(`Failed to process metrics for project ${project.name}:`, err);
             }
         }

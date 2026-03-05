@@ -1,0 +1,84 @@
+import { sqliteTable, text, real, integer, uniqueIndex, index, primaryKey } from 'drizzle-orm/sqlite-core';
+
+export const projects = sqliteTable('projects', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    type: text('type').notNull(),
+    status: text('status').notNull().default('active'),
+    platform: text('platform'),
+    platformAccountId: text('platform_account_id'),
+    link: text('link'),
+});
+
+export const revenue = sqliteTable('revenue', {
+    id: text('id').primaryKey(),
+    projectId: text('project_id').notNull().references(() => projects.id),
+    amount: real('amount').notNull(),
+    note: text('note'),
+}, (table) => [
+    index('idx_revenue_project').on(table.projectId),
+]);
+
+export const costs = sqliteTable('costs', {
+    id: text('id').primaryKey(),
+    projectId: text('project_id').notNull().references(() => projects.id),
+    amount: real('amount').notNull(),
+    note: text('note'),
+}, (table) => [
+    index('idx_costs_project').on(table.projectId),
+]);
+
+export const metrics = sqliteTable('metrics', {
+    id: text('id').primaryKey(),
+    projectId: text('project_id').notNull().references(() => projects.id),
+    name: text('name').notNull(),
+    value: real('value').notNull(),
+}, (table) => [
+    uniqueIndex('idx_metrics_project_name').on(table.projectId, table.name),
+]);
+
+export const streams = sqliteTable('streams', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    videoId: text('video_id').notNull().unique(),
+    actualStartTime: text('actual_start_time'),
+    actualEndTime: text('actual_end_time'),
+    thumbnailUrl: text('thumbnail_url'),
+    viewCount: integer('view_count').default(0),
+    likeCount: integer('like_count').default(0),
+    commentCount: integer('comment_count').default(0),
+    duration: text('duration'),
+});
+
+export const streamProjects = sqliteTable('stream_projects', {
+    streamId: text('stream_id').notNull().references(() => streams.id),
+    projectId: text('project_id').notNull().references(() => projects.id),
+}, (table) => [
+    primaryKey({ columns: [table.streamId, table.projectId] }),
+]);
+
+export const streamCommits = sqliteTable('stream_commits', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    streamId: text('stream_id').notNull().references(() => streams.id),
+    sha: text('sha').notNull(),
+    message: text('message'),
+    author: text('author'),
+    timestamp: text('timestamp'),
+    htmlUrl: text('html_url'),
+    repo: text('repo'),
+    projectId: text('project_id').references(() => projects.id),
+}, (table) => [
+    index('idx_stream_commits_stream').on(table.streamId),
+]);
+
+export const activityEvents = sqliteTable('activity_events', {
+    id: text('id').primaryKey(),
+    type: text('type').notNull(),
+    timestamp: text('timestamp').notNull(),
+    projectId: text('project_id').references(() => projects.id),
+    projectName: text('project_name'),
+    externalId: text('external_id').notNull().unique(),
+    payload: text('payload').notNull(),
+}, (table) => [
+    index('idx_activity_timestamp').on(table.timestamp),
+]);

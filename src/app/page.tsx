@@ -3,6 +3,8 @@ import { ProgressBar } from '@/components/progress-bar';
 import { ProjectsTable } from '@/components/projects-table';
 import { ActivityFeed } from '@/components/activity-feed';
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const client = getDataClient();
   const [stats, lightweightProjects, activityEvents] = await Promise.all([

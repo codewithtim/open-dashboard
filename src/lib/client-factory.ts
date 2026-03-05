@@ -1,4 +1,4 @@
-import { NotionClient } from './notion-client';
+import { TursoClient } from './turso-client';
 import { LocalMockClient } from './local-mock-client';
 import { DataClient } from './data-client';
 
@@ -10,7 +10,7 @@ export function getDataClient(): DataClient {
     if (process.env.USE_LOCAL_DATA === 'true') {
         clientInstance = new LocalMockClient();
     } else {
-        clientInstance = new NotionClient();
+        clientInstance = new TursoClient();
     }
 
     return clientInstance;
