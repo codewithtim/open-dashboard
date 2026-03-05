@@ -286,7 +286,7 @@ Add the `Run database migrations` step to `.github/workflows/ci.yml` as shown in
 
 New file: `scripts/migrate-from-notion.ts`
 
-A one-time script that reads all data from Notion and writes it to Turso. Run with `npx ts-node scripts/migrate-from-notion.ts`.
+A one-time script that reads all data from Notion and writes it to Turso. Run with `npx tsx scripts/migrate-from-notion.ts`.
 
 ```
 1. Read all projects from NOTION_PROJECTS_DB_ID
@@ -356,7 +356,7 @@ The `NotionClient` stays in the codebase during migration. Rolling back is a one
 
 1. Run `npx drizzle-kit generate` → migration file appears in `drizzle/migrations/`
 2. Run `npx drizzle-kit migrate` → tables created in Turso
-3. Run `npx ts-node scripts/migrate-from-notion.ts` → row counts match Notion page counts
+3. Run `npx tsx scripts/migrate-from-notion.ts` → row counts match Notion page counts
 4. `USE_LOCAL_DATA=true pnpm dev` → unchanged (mock client still works)
 5. Switch to TursoClient locally → homepage, streams pages, stream detail all render correctly
 6. Trigger cron → metrics, streams, activity events all upsert correctly
