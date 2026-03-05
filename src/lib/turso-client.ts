@@ -197,20 +197,28 @@ export class TursoClient implements DataClient {
 
         const streamIds = streamRows.map(s => s.id);
 
-        const [commitCounts, projectLinks] = await Promise.all([
+        const [commitRows, projectLinks] = await Promise.all([
             db.select({
                 streamId: streamCommits.streamId,
-                count: sql<number>`count(*)`,
+                projectId: streamCommits.projectId,
             })
                 .from(streamCommits)
-                .where(inArray(streamCommits.streamId, streamIds))
-                .groupBy(streamCommits.streamId),
+                .where(inArray(streamCommits.streamId, streamIds)),
             db.select()
                 .from(streamProjects)
                 .where(inArray(streamProjects.streamId, streamIds)),
         ]);
 
-        const commitCountMap = new Map(commitCounts.map(r => [r.streamId, r.count]));
+        const commitCountMap = new Map<string, number>();
+        const commitProjectIdsMap = new Map<string, Set<string>>();
+        for (const row of commitRows) {
+            commitCountMap.set(row.streamId, (commitCountMap.get(row.streamId) ?? 0) + 1);
+            if (row.projectId) {
+                if (!commitProjectIdsMap.has(row.streamId)) commitProjectIdsMap.set(row.streamId, new Set());
+                commitProjectIdsMap.get(row.streamId)!.add(row.projectId);
+            }
+        }
+
         const projectIdsMap = new Map<string, string[]>();
         for (const link of projectLinks) {
             if (!projectIdsMap.has(link.streamId)) projectIdsMap.set(link.streamId, []);
@@ -229,7 +237,10 @@ export class TursoClient implements DataClient {
             commentCount: row.commentCount ?? 0,
             duration: row.duration || '',
             commitCount: commitCountMap.get(row.id) ?? 0,
-            projectIds: projectIdsMap.get(row.id) ?? [],
+            projectIds: [...new Set([
+                ...(projectIdsMap.get(row.id) ?? []),
+                ...(commitProjectIdsMap.get(row.id) ?? []),
+            ])],
         }));
     }
 
