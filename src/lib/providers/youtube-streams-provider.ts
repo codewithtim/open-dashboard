@@ -2,7 +2,7 @@ export interface YouTubeStreamData {
     videoId: string;
     title: string;
     actualStartTime: string;
-    actualEndTime: string;
+    actualEndTime?: string;
     thumbnailUrl: string;
     viewCount: number;
     likeCount: number;
@@ -21,7 +21,7 @@ export class YouTubeStreamsProvider {
         this.apiKey = apiKey;
     }
 
-    async getCompletedStreams(channelId: string, since?: string): Promise<YouTubeStreamData[]> {
+    async getStreams(channelId: string, since?: string): Promise<YouTubeStreamData[]> {
         const uploadsPlaylistId = await this.getUploadsPlaylistId(channelId);
         const videoIds = await this.getPlaylistVideoIds(uploadsPlaylistId, since);
         if (videoIds.length === 0) return [];
@@ -87,13 +87,13 @@ export class YouTubeStreamsProvider {
 
             for (const item of data.items || []) {
                 const lsd = item.liveStreamingDetails;
-                if (!lsd?.actualStartTime || !lsd?.actualEndTime) continue;
+                if (!lsd?.actualStartTime) continue;
 
                 streams.push({
                     videoId: item.id,
                     title: item.snippet?.title || '',
                     actualStartTime: lsd.actualStartTime,
-                    actualEndTime: lsd.actualEndTime,
+                    actualEndTime: lsd.actualEndTime || undefined,
                     thumbnailUrl: item.snippet?.thumbnails?.maxres?.url
                         || item.snippet?.thumbnails?.high?.url
                         || '',

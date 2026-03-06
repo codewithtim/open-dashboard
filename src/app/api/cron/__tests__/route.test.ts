@@ -113,7 +113,7 @@ describe('Cron API Route GET', () => {
         });
 
         (YouTubeStreamsProvider as jest.Mock).mockImplementation(() => ({
-            getCompletedStreams: jest.fn().mockResolvedValue([]),
+            getStreams: jest.fn().mockResolvedValue([]),
         }));
 
         const response = await GET(authReq as any);
@@ -151,7 +151,7 @@ describe('Cron API Route GET', () => {
             },
         ]);
         (YouTubeStreamsProvider as jest.Mock).mockImplementation(() => ({
-            getCompletedStreams: mockGetCompletedStreams,
+            getStreams: mockGetCompletedStreams,
         }));
 
         const mockGetCommitsInWindow = jest.fn().mockResolvedValue([

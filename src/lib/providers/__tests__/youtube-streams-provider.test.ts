@@ -67,7 +67,7 @@ describe('YouTubeStreamsProvider', () => {
             });
 
         const provider = new YouTubeStreamsProvider();
-        const streams = await provider.getCompletedStreams('UC123');
+        const streams = await provider.getStreams('UC123');
 
         expect(streams).toHaveLength(1);
         expect(streams[0]).toEqual({
@@ -80,6 +80,60 @@ describe('YouTubeStreamsProvider', () => {
             likeCount: 50,
             commentCount: 10,
             duration: 'PT3H',
+        });
+    });
+
+    it('includes live streams that have started but not ended', async () => {
+        (global.fetch as jest.Mock)
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    items: [{ contentDetails: { relatedPlaylists: { uploads: 'UU123' } } }],
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    items: [
+                        { snippet: { resourceId: { videoId: 'live1' }, publishedAt: '2025-01-15T00:00:00Z' } },
+                    ],
+                }),
+            })
+            .mockResolvedValueOnce({
+                ok: true,
+                json: async () => ({
+                    items: [
+                        {
+                            id: 'live1',
+                            snippet: {
+                                title: 'Currently Live',
+                                thumbnails: { high: { url: 'https://live-thumb.jpg' } },
+                            },
+                            liveStreamingDetails: {
+                                actualStartTime: '2025-01-15T14:00:00Z',
+                                // No actualEndTime — stream is still live
+                            },
+                            statistics: { viewCount: '200', likeCount: '10', commentCount: '5' },
+                            contentDetails: { duration: 'P0D' },
+                        },
+                    ],
+                }),
+            });
+
+        const provider = new YouTubeStreamsProvider();
+        const streams = await provider.getStreams('UC123');
+
+        expect(streams).toHaveLength(1);
+        expect(streams[0]).toEqual({
+            videoId: 'live1',
+            title: 'Currently Live',
+            actualStartTime: '2025-01-15T14:00:00Z',
+            actualEndTime: undefined,
+            thumbnailUrl: 'https://live-thumb.jpg',
+            viewCount: 200,
+            likeCount: 10,
+            commentCount: 5,
+            duration: 'P0D',
         });
     });
 
@@ -118,7 +172,7 @@ describe('YouTubeStreamsProvider', () => {
             });
 
         const provider = new YouTubeStreamsProvider();
-        const streams = await provider.getCompletedStreams('UC123', '2025-01-01T00:00:00Z');
+        const streams = await provider.getStreams('UC123', '2025-01-01T00:00:00Z');
 
         // Should only fetch video details for new1
         expect(streams).toHaveLength(0); // No completed streams in the batch
@@ -139,7 +193,7 @@ describe('YouTubeStreamsProvider', () => {
             });
 
         const provider = new YouTubeStreamsProvider();
-        const streams = await provider.getCompletedStreams('UC123');
+        const streams = await provider.getStreams('UC123');
 
         expect(streams).toHaveLength(0);
     });
@@ -173,7 +227,7 @@ describe('YouTubeStreamsProvider', () => {
             });
 
         const provider = new YouTubeStreamsProvider();
-        await provider.getCompletedStreams('UC123');
+        await provider.getStreams('UC123');
 
         // channels + playlistItems + 2 video batches = 4 calls
         expect(global.fetch).toHaveBeenCalledTimes(4);

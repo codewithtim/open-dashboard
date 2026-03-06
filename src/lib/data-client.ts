@@ -84,7 +84,7 @@ export interface Stream {
     name: string;
     videoId: string;
     actualStartTime: string;
-    actualEndTime: string;
+    actualEndTime?: string;
     thumbnailUrl: string;
     viewCount: number;
     likeCount: number;
@@ -99,7 +99,7 @@ export interface StreamSummary {
     name: string;
     videoId: string;
     actualStartTime: string;
-    actualEndTime: string;
+    actualEndTime?: string;
     thumbnailUrl: string;
     viewCount: number;
     likeCount: number;

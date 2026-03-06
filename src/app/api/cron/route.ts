@@ -29,16 +29,16 @@ async function processStreams(projects: Project[]) {
 
     if (youtubeProjects.length === 0) return;
 
-    // Find the most recent stream end time for incremental fetching
+    // Find the most recent stream start time for incremental fetching
     let since: string | undefined;
     try {
         const recent = await db
-            .select({ actualEndTime: streamsTable.actualEndTime })
+            .select({ actualStartTime: streamsTable.actualStartTime })
             .from(streamsTable)
-            .orderBy(desc(streamsTable.actualEndTime))
+            .orderBy(desc(streamsTable.actualStartTime))
             .limit(1);
-        if (recent.length > 0 && recent[0].actualEndTime) {
-            since = recent[0].actualEndTime;
+        if (recent.length > 0 && recent[0].actualStartTime) {
+            since = recent[0].actualStartTime;
         }
     } catch {
         // If query fails, do a full fetch
@@ -55,17 +55,19 @@ async function processStreams(projects: Project[]) {
 
     for (const ytProject of youtubeProjects) {
         try {
-            const ytStreams = await streamsProvider.getCompletedStreams(ytProject.platformAccountId!, since);
+            const ytStreams = await streamsProvider.getStreams(ytProject.platformAccountId!, since);
 
             for (const stream of ytStreams) {
                 // Fetch commits from all GitHub repos within the stream window
+                // For live streams without an end time, use current time
+                const commitWindowEnd = stream.actualEndTime || new Date().toISOString();
                 const allCommits: StreamCommit[] = [];
                 for (const ghProject of githubProjects) {
                     try {
                         const ghCommits = await commitsProvider.getCommitsInWindow(
                             ghProject.platformAccountId!,
                             stream.actualStartTime,
-                            stream.actualEndTime,
+                            commitWindowEnd,
                         );
                         for (const c of ghCommits) {
                             allCommits.push({
@@ -95,7 +97,7 @@ async function processStreams(projects: Project[]) {
                     await db.update(streamsTable).set({
                         name: stream.title,
                         actualStartTime: stream.actualStartTime,
-                        actualEndTime: stream.actualEndTime,
+                        actualEndTime: stream.actualEndTime || null,
                         thumbnailUrl: stream.thumbnailUrl || null,
                         viewCount: stream.viewCount,
                         likeCount: stream.likeCount,
@@ -108,7 +110,7 @@ async function processStreams(projects: Project[]) {
                         name: stream.title,
                         videoId: stream.videoId,
                         actualStartTime: stream.actualStartTime,
-                        actualEndTime: stream.actualEndTime,
+                        actualEndTime: stream.actualEndTime || null,
                         thumbnailUrl: stream.thumbnailUrl || null,
                         viewCount: stream.viewCount,
                         likeCount: stream.likeCount,
