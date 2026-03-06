@@ -6,10 +6,6 @@ jest.mock('@/lib/client-factory', () => ({
     getDataClient: jest.fn(),
 }));
 
-jest.mock('next/link', () => {
-    return ({ children, href }: any) => <a href={href}>{children}</a>;
-});
-
 const mockExpenses = [
     {
         id: 'e1', amount: 20, vendor: 'Vercel', category: 'infrastructure',

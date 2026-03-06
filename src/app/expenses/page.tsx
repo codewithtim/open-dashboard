@@ -1,5 +1,4 @@
 import { getDataClient } from '@/lib/client-factory';
-import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,15 +14,7 @@ export default async function ExpensesPage() {
 
     return (
         <main className="min-h-[60vh] py-10 space-y-8 max-w-5xl mx-auto">
-            <div className="flex items-center justify-between">
-                <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Expenses</h1>
-                <Link
-                    href="/expenses/new"
-                    className="px-4 py-2 rounded-lg bg-accent text-black text-sm font-semibold hover:bg-accent/90 transition-colors"
-                >
-                    Add Expense
-                </Link>
-            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Expenses</h1>
 
             {/* Summary Cards */}
             <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
