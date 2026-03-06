@@ -8,6 +8,9 @@ import {
     streamProjects,
     streamCommits,
     activityEvents,
+    agents as agentsTable,
+    agentRepos as agentReposTable,
+    agentCommits as agentCommitsTable,
 } from '@/lib/db/schema';
 import { getDataClient } from '@/lib/client-factory';
 import { getMetricsProvider } from '@/lib/providers';
@@ -289,6 +292,66 @@ async function processActivity(projects: Project[]) {
     }
 }
 
+async function processAgentCommits() {
+    const db = getDb();
+
+    // Load all agents and their repos
+    const allAgents = await db.select().from(agentsTable);
+    const allRepos = await db.select().from(agentReposTable);
+
+    if (allAgents.length === 0 || allRepos.length === 0) return;
+
+    // Build identifier→agent map
+    const identifierToAgent = new Map<string, typeof allAgents[0]>();
+    for (const agent of allAgents) {
+        identifierToAgent.set(agent.identifier, agent);
+    }
+
+    // Find most recent agent commit timestamp for incremental fetching
+    let since: string;
+    try {
+        const recent = await db
+            .select({ timestamp: agentCommitsTable.timestamp })
+            .from(agentCommitsTable)
+            .orderBy(desc(agentCommitsTable.timestamp))
+            .limit(1);
+        since = recent.length > 0 && recent[0].timestamp
+            ? recent[0].timestamp
+            : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    } catch {
+        since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    // Collect unique repos
+    const uniqueRepos = [...new Set(allRepos.map(r => r.repoFullName))];
+    const commitsProvider = new GitHubCommitsProvider();
+
+    for (const repoFullName of uniqueRepos) {
+        try {
+            const commits = await commitsProvider.getRecentCommits(repoFullName, since);
+
+            for (const commit of commits) {
+                const agent = identifierToAgent.get(commit.author);
+                if (!agent) continue;
+
+                const extId = `agent_commit:${commit.sha}`;
+                await db.insert(agentCommitsTable).values({
+                    agentId: agent.id,
+                    repoFullName,
+                    sha: commit.sha,
+                    message: commit.message,
+                    author: commit.author,
+                    timestamp: commit.timestamp,
+                    htmlUrl: commit.htmlUrl,
+                    externalId: extId,
+                }).onConflictDoNothing();
+            }
+        } catch (err) {
+            console.error(`Failed to process agent commits for ${repoFullName}:`, err);
+        }
+    }
+}
+
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -336,8 +399,15 @@ export async function GET(request: Request) {
         await processStreams(projects);
         await processActivity(projects);
 
+        try {
+            await processAgentCommits();
+        } catch (err) {
+            console.error('Failed to process agent commits:', err);
+        }
+
         revalidatePath('/');
         revalidatePath('/streams');
+        revalidatePath('/1hnai');
 
         return NextResponse.json({ success: true, message: 'Updated metrics successfully.' });
     } catch (error) {

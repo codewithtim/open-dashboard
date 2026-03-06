@@ -16,4 +16,9 @@ describe('Header', () => {
         expect(screen.getByText('Tim Knight')).toBeInTheDocument();
         expect(screen.getByText('Blog')).toBeInTheDocument();
     });
+
+    it('renders 1H:NAI nav link', () => {
+        render(<Header />);
+        expect(screen.getByText('1H:NAI')).toBeInTheDocument();
+    });
 });

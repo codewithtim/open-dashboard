@@ -9,6 +9,8 @@ import {
     streamProjects,
     streamCommits,
     activityEvents,
+    agents as agentsTable,
+    agentCommits as agentCommitsTable,
 } from './db/schema';
 import {
     DataClient,
@@ -22,6 +24,8 @@ import {
     ActivityEvent,
     ActivityEventType,
     ActivityEventPayload,
+    Agent,
+    AgentCommit,
 } from './data-client';
 
 function normalizeType(raw: string): string {
@@ -319,5 +323,49 @@ export class TursoClient implements DataClient {
                 payload,
             };
         });
+    }
+
+    async getAgents(): Promise<Agent[]> {
+        const db = getDb();
+        const rows = await db.select().from(agentsTable);
+        return rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            identifier: row.identifier,
+            description: row.description || undefined,
+            createdAt: row.createdAt,
+        }));
+    }
+
+    async getAgentCommits(limit: number = 50): Promise<AgentCommit[]> {
+        const db = getDb();
+        const rows = await db
+            .select({
+                id: agentCommitsTable.id,
+                agentId: agentCommitsTable.agentId,
+                repoFullName: agentCommitsTable.repoFullName,
+                sha: agentCommitsTable.sha,
+                message: agentCommitsTable.message,
+                author: agentCommitsTable.author,
+                timestamp: agentCommitsTable.timestamp,
+                htmlUrl: agentCommitsTable.htmlUrl,
+                agentName: agentsTable.name,
+            })
+            .from(agentCommitsTable)
+            .leftJoin(agentsTable, eq(agentCommitsTable.agentId, agentsTable.id))
+            .orderBy(desc(agentCommitsTable.timestamp))
+            .limit(limit);
+
+        return rows.map(row => ({
+            id: row.id,
+            agentId: row.agentId,
+            repoFullName: row.repoFullName,
+            sha: row.sha,
+            message: row.message || '',
+            author: row.author || '',
+            timestamp: row.timestamp || '',
+            htmlUrl: row.htmlUrl || '',
+            agentName: row.agentName || undefined,
+        }));
     }
 }

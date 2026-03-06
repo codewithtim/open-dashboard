@@ -109,6 +109,31 @@ export interface StreamSummary {
     projectIds: string[];
 }
 
+export interface Agent {
+    id: string;
+    name: string;
+    identifier: string;
+    description?: string;
+    createdAt: string;
+}
+
+export interface AgentRepo {
+    agentId: string;
+    repoFullName: string;
+}
+
+export interface AgentCommit {
+    id: number;
+    agentId: string;
+    repoFullName: string;
+    sha: string;
+    message: string;
+    author: string;
+    timestamp: string;
+    htmlUrl: string;
+    agentName?: string;
+}
+
 export interface DataClient {
     getProjects(): Promise<Project[]>;
     getAllProjects(): Promise<Project[]>;
@@ -119,4 +144,6 @@ export interface DataClient {
     getStreamById(id: string): Promise<Stream | null>;
     getStreamCountForProject(projectId: string): Promise<number>;
     getRecentActivity(limit?: number): Promise<ActivityEvent[]>;
+    getAgents(): Promise<Agent[]>;
+    getAgentCommits(limit?: number): Promise<AgentCommit[]>;
 }

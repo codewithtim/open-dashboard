@@ -83,3 +83,35 @@ export const activityEvents = sqliteTable('activity_events', {
 }, (table) => [
     index('idx_activity_timestamp').on(table.timestamp),
 ]);
+
+export const agents = sqliteTable('agents', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    identifier: text('identifier').notNull(),
+    description: text('description'),
+    createdAt: text('created_at').notNull(),
+}, (table) => [
+    uniqueIndex('idx_agents_identifier').on(table.identifier),
+]);
+
+export const agentRepos = sqliteTable('agent_repos', {
+    agentId: text('agent_id').notNull().references(() => agents.id),
+    repoFullName: text('repo_full_name').notNull(),
+}, (table) => [
+    primaryKey({ columns: [table.agentId, table.repoFullName] }),
+]);
+
+export const agentCommits = sqliteTable('agent_commits', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    agentId: text('agent_id').notNull().references(() => agents.id),
+    repoFullName: text('repo_full_name').notNull(),
+    sha: text('sha').notNull(),
+    message: text('message'),
+    author: text('author'),
+    timestamp: text('timestamp'),
+    htmlUrl: text('html_url'),
+    externalId: text('external_id').notNull().unique(),
+}, (table) => [
+    index('idx_agent_commits_agent').on(table.agentId),
+    index('idx_agent_commits_timestamp').on(table.timestamp),
+]);

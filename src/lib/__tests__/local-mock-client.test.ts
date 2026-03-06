@@ -113,4 +113,35 @@ describe('LocalMockClient', () => {
             expect(count).toBe(0);
         });
     });
+
+    describe('getAgents', () => {
+        it('returns mock agents', async () => {
+            const agents = await client.getAgents();
+            expect(agents.length).toBeGreaterThan(0);
+            expect(agents[0]).toHaveProperty('id');
+            expect(agents[0]).toHaveProperty('name');
+            expect(agents[0]).toHaveProperty('identifier');
+        });
+    });
+
+    describe('getAgentCommits', () => {
+        it('returns mock agent commits sorted by timestamp desc', async () => {
+            const commits = await client.getAgentCommits();
+            expect(commits.length).toBeGreaterThan(0);
+            expect(commits[0]).toHaveProperty('sha');
+            expect(commits[0]).toHaveProperty('agentName');
+            expect(commits[0]).toHaveProperty('repoFullName');
+
+            // Verify descending order
+            for (let i = 1; i < commits.length; i++) {
+                expect(new Date(commits[i - 1].timestamp).getTime())
+                    .toBeGreaterThanOrEqual(new Date(commits[i].timestamp).getTime());
+            }
+        });
+
+        it('respects limit parameter', async () => {
+            const commits = await client.getAgentCommits(1);
+            expect(commits).toHaveLength(1);
+        });
+    });
 });

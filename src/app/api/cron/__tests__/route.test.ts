@@ -127,6 +127,19 @@ describe('Cron API Route GET', () => {
         expect(mockInsertValues).toHaveBeenCalled();
     });
 
+    it('handles agent commit processing gracefully when no agents configured', async () => {
+        const mockClient = {
+            getProjects: jest.fn().mockResolvedValue([]),
+        };
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+        (getMetricsProvider as jest.Mock).mockImplementation(() => { throw new Error('Not implemented'); });
+
+        // processAgentCommits will fail since the mock DB doesn't return arrays,
+        // but the try/catch in GET should handle it gracefully
+        const response = await GET(authReq as any);
+        expect(response.status).toBe(200);
+    });
+
     it('discovers YouTube streams and correlates GitHub commits', async () => {
         const mockClient = {
             getProjects: jest.fn().mockResolvedValue([

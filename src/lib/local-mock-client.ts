@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Agent, AgentCommit } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', description: 'Live coding streams and tech tutorials on YouTube.', type: 'content', status: 'active', platform: 'youtube' },
@@ -365,6 +365,52 @@ const mockStreams: Stream[] = [
     },
 ];
 
+const mockAgents: Agent[] = [
+    {
+        id: 'agent-operator',
+        name: 'Operator',
+        identifier: 'Operator',
+        description: 'OpenClaw autonomous coding agent',
+        createdAt: '2025-01-01T00:00:00Z',
+    },
+];
+
+const mockAgentCommits: AgentCommit[] = [
+    {
+        id: 1,
+        agentId: 'agent-operator',
+        repoFullName: 'codewithtim/insider_trading_tracker',
+        sha: 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
+        message: 'feat: add SEC Form 4 filing parser for real-time insider trade detection',
+        author: 'Operator',
+        timestamp: '2025-01-16T06:30:00Z',
+        htmlUrl: 'https://github.com/codewithtim/insider_trading_tracker/commit/a1b2c3d',
+        agentName: 'Operator',
+    },
+    {
+        id: 2,
+        agentId: 'agent-operator',
+        repoFullName: 'codewithtim/insider_trading_tracker',
+        sha: 'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1',
+        message: 'fix: handle edge case in filing date parsing for amended filings',
+        author: 'Operator',
+        timestamp: '2025-01-16T04:15:00Z',
+        htmlUrl: 'https://github.com/codewithtim/insider_trading_tracker/commit/b2c3d4e',
+        agentName: 'Operator',
+    },
+    {
+        id: 3,
+        agentId: 'agent-operator',
+        repoFullName: 'codewithtim/insider_trading_tracker',
+        sha: 'c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2',
+        message: 'feat: add notification system for large insider transactions over $1M',
+        author: 'Operator',
+        timestamp: '2025-01-15T22:00:00Z',
+        htmlUrl: 'https://github.com/codewithtim/insider_trading_tracker/commit/c3d4e5f',
+        agentName: 'Operator',
+    },
+];
+
 export class LocalMockClient implements DataClient {
     async getProjects(): Promise<Project[]> {
         return mockProjects.filter(p => p.status === 'active');
@@ -413,6 +459,16 @@ export class LocalMockClient implements DataClient {
 
     async getRecentActivity(limit: number = 20): Promise<ActivityEvent[]> {
         return [...mockActivityEvents]
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, limit);
+    }
+
+    async getAgents(): Promise<Agent[]> {
+        return mockAgents;
+    }
+
+    async getAgentCommits(limit: number = 50): Promise<AgentCommit[]> {
+        return [...mockAgentCommits]
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, limit);
     }
