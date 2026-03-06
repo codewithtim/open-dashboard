@@ -87,14 +87,35 @@ const mockStreams = [
     },
 ];
 
+const mockProjectExpenses = [
+    {
+        id: 'e1', amount: 20, vendor: 'Vercel', category: 'infrastructure',
+        date: '2025-01-01', source: 'manual', recurring: true, currency: 'USD',
+        createdAt: '2025-01-01T00:00:00Z',
+        allocations: [{ projectId: 'proj-1', projectName: 'SaaS App', allocation: 1 }],
+    },
+];
+
+const mockProjectServices = [
+    { id: 'ps-1', projectId: 'proj-1', vendor: 'Vercel', exclusive: true },
+    { id: 'ps-2', projectId: 'proj-1', vendor: 'GitHub', exclusive: false },
+];
+
+function createMockClient(overrides: Record<string, any> = {}) {
+    return {
+        getProjectDetails: jest.fn().mockResolvedValue(mockProjectDetails),
+        getRecentActivity: jest.fn().mockResolvedValue(mockActivity),
+        getStreams: jest.fn().mockResolvedValue(mockStreams),
+        getAllProjects: jest.fn().mockResolvedValue(mockProjects),
+        getExpensesByProject: jest.fn().mockResolvedValue(mockProjectExpenses),
+        getProjectServices: jest.fn().mockResolvedValue(mockProjectServices),
+        ...overrides,
+    };
+}
+
 describe('Project Detail Page', () => {
     it('renders project name, description, financials, and metrics', async () => {
-        const mockClient = {
-            getProjectDetails: jest.fn().mockResolvedValue(mockProjectDetails),
-            getRecentActivity: jest.fn().mockResolvedValue(mockActivity),
-            getStreams: jest.fn().mockResolvedValue(mockStreams),
-            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
-        };
+        const mockClient = createMockClient();
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
         const page = await ProjectDetailPage({ params: Promise.resolve({ id: 'proj-1' }) });
@@ -113,12 +134,9 @@ describe('Project Detail Page', () => {
     });
 
     it('calls notFound when project does not exist', async () => {
-        const mockClient = {
+        const mockClient = createMockClient({
             getProjectDetails: jest.fn().mockResolvedValue(null),
-            getRecentActivity: jest.fn().mockResolvedValue([]),
-            getStreams: jest.fn().mockResolvedValue([]),
-            getAllProjects: jest.fn().mockResolvedValue([]),
-        };
+        });
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
         await expect(
@@ -127,12 +145,9 @@ describe('Project Detail Page', () => {
     });
 
     it('filters activity to only show events for this project', async () => {
-        const mockClient = {
-            getProjectDetails: jest.fn().mockResolvedValue(mockProjectDetails),
-            getRecentActivity: jest.fn().mockResolvedValue(mockActivity),
+        const mockClient = createMockClient({
             getStreams: jest.fn().mockResolvedValue([]),
-            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
-        };
+        });
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
         const page = await ProjectDetailPage({ params: Promise.resolve({ id: 'proj-1' }) });
@@ -145,12 +160,9 @@ describe('Project Detail Page', () => {
     });
 
     it('shows related streams that include this project', async () => {
-        const mockClient = {
-            getProjectDetails: jest.fn().mockResolvedValue(mockProjectDetails),
+        const mockClient = createMockClient({
             getRecentActivity: jest.fn().mockResolvedValue([]),
-            getStreams: jest.fn().mockResolvedValue(mockStreams),
-            getAllProjects: jest.fn().mockResolvedValue(mockProjects),
-        };
+        });
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
         const page = await ProjectDetailPage({ params: Promise.resolve({ id: 'proj-1' }) });
@@ -160,5 +172,27 @@ describe('Project Detail Page', () => {
         expect(screen.getByText('Building Auth Live')).toBeInTheDocument();
         // Unrelated stream should not appear
         expect(screen.queryByText('Unrelated Stream')).not.toBeInTheDocument();
+    });
+
+    it('shows expenses section with allocated expenses', async () => {
+        const mockClient = createMockClient();
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+
+        const page = await ProjectDetailPage({ params: Promise.resolve({ id: 'proj-1' }) });
+        render(page);
+
+        expect(screen.getByText('Expenses')).toBeInTheDocument();
+        expect(screen.getAllByText('Vercel').length).toBeGreaterThan(0);
+    });
+
+    it('shows services section with vendor declarations', async () => {
+        const mockClient = createMockClient();
+        (getDataClient as jest.Mock).mockReturnValue(mockClient);
+
+        const page = await ProjectDetailPage({ params: Promise.resolve({ id: 'proj-1' }) });
+        render(page);
+
+        expect(screen.getByText('Services')).toBeInTheDocument();
+        expect(screen.getByText('GitHub')).toBeInTheDocument();
     });
 });

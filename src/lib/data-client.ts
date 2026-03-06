@@ -134,6 +134,18 @@ export interface AgentCommit {
     agentName?: string;
 }
 
+export type {
+    ExpenseCategory,
+    ExpenseSource,
+    CostAllocation,
+    Expense,
+    ExpenseSummary,
+    ProjectService,
+    CreateExpenseInput,
+} from './domain/expense-types';
+
+import type { Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './domain/expense-types';
+
 export interface DataClient {
     getProjects(): Promise<Project[]>;
     getAllProjects(): Promise<Project[]>;
@@ -146,4 +158,15 @@ export interface DataClient {
     getRecentActivity(limit?: number): Promise<ActivityEvent[]>;
     getAgents(): Promise<Agent[]>;
     getAgentCommits(limit?: number): Promise<AgentCommit[]>;
+
+    // Expenses
+    getExpenses(): Promise<Expense[]>;
+    getExpensesByProject(projectId: string): Promise<Expense[]>;
+    createExpense(input: CreateExpenseInput, allocations: CostAllocation[]): Promise<Expense>;
+    getExpenseSummary(): Promise<ExpenseSummary>;
+
+    // Project services
+    getProjectServices(projectId: string): Promise<ProjectService[]>;
+    getAllProjectServices(): Promise<ProjectService[]>;
+    updateProjectServices(projectId: string, services: { vendor: string; exclusive: boolean }[]): Promise<void>;
 }

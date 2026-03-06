@@ -115,3 +115,44 @@ export const agentCommits = sqliteTable('agent_commits', {
     index('idx_agent_commits_agent').on(table.agentId),
     index('idx_agent_commits_timestamp').on(table.timestamp),
 ]);
+
+export const expenses = sqliteTable('expenses', {
+    id: text('id').primaryKey(),
+    amount: real('amount').notNull(),
+    vendor: text('vendor').notNull(),
+    category: text('category').notNull(),
+    note: text('note'),
+    date: text('date').notNull(),
+    periodStart: text('period_start'),
+    periodEnd: text('period_end'),
+    source: text('source').notNull().default('manual'),
+    sourceRef: text('source_ref'),
+    recurring: integer('recurring', { mode: 'boolean' }).notNull().default(false),
+    currency: text('currency').notNull().default('USD'),
+    createdAt: text('created_at').notNull(),
+}, (table) => [
+    index('idx_expenses_vendor').on(table.vendor),
+    index('idx_expenses_date').on(table.date),
+    index('idx_expenses_category').on(table.category),
+]);
+
+export const costProjects = sqliteTable('cost_projects', {
+    id: text('id').primaryKey(),
+    costId: text('cost_id').notNull().references(() => expenses.id),
+    projectId: text('project_id').notNull().references(() => projects.id),
+    allocation: real('allocation').notNull(),
+}, (table) => [
+    uniqueIndex('idx_cost_projects_cost_project').on(table.costId, table.projectId),
+    index('idx_cost_projects_cost').on(table.costId),
+    index('idx_cost_projects_project').on(table.projectId),
+]);
+
+export const projectServices = sqliteTable('project_services', {
+    id: text('id').primaryKey(),
+    projectId: text('project_id').notNull().references(() => projects.id),
+    vendor: text('vendor').notNull(),
+    exclusive: integer('exclusive', { mode: 'boolean' }).notNull().default(false),
+}, (table) => [
+    uniqueIndex('idx_project_services_project_vendor').on(table.projectId, table.vendor),
+    index('idx_project_services_project').on(table.projectId),
+]);

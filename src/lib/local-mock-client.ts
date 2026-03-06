@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Agent, AgentCommit } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', description: 'Live coding streams and tech tutorials on YouTube.', type: 'content', status: 'active', platform: 'youtube' },
@@ -411,7 +411,80 @@ const mockAgentCommits: AgentCommit[] = [
     },
 ];
 
+const mockExpenses: Expense[] = [
+    {
+        id: 'exp-1',
+        amount: 20,
+        vendor: 'Vercel',
+        category: 'infrastructure',
+        note: 'Pro plan hosting',
+        date: '2025-01-01',
+        source: 'manual',
+        recurring: true,
+        currency: 'USD',
+        createdAt: '2025-01-01T00:00:00Z',
+        allocations: [{ projectId: 'saas-starter', allocation: 1 }],
+    },
+    {
+        id: 'exp-2',
+        amount: 4,
+        vendor: 'GitHub',
+        category: 'tooling',
+        note: 'Team plan',
+        date: '2025-01-01',
+        source: 'manual',
+        recurring: true,
+        currency: 'USD',
+        createdAt: '2025-01-01T00:00:00Z',
+        allocations: [
+            { projectId: 'saas-starter', allocation: 0.5 },
+            { projectId: 'npm-pkg', allocation: 0.5 },
+        ],
+    },
+    {
+        id: 'exp-3',
+        amount: 20,
+        vendor: 'Claude Code',
+        category: 'tooling',
+        note: 'Max plan subscription',
+        date: '2025-01-01',
+        source: 'manual',
+        recurring: true,
+        currency: 'USD',
+        createdAt: '2025-01-01T00:00:00Z',
+        allocations: [
+            { projectId: 'saas-starter', allocation: 0.25 },
+            { projectId: 'npm-pkg', allocation: 0.25 },
+            { projectId: 'youtube-main', allocation: 0.25 },
+            { projectId: 'consulting', allocation: 0.25 },
+        ],
+    },
+    {
+        id: 'exp-4',
+        amount: 150,
+        vendor: 'Office Supplies',
+        category: 'other',
+        date: '2025-02-15',
+        source: 'manual',
+        recurring: false,
+        currency: 'USD',
+        createdAt: '2025-02-15T00:00:00Z',
+        allocations: [],
+    },
+];
+
+const mockProjectServicesList: ProjectService[] = [
+    { id: 'ps-1', projectId: 'saas-starter', vendor: 'Vercel', exclusive: true },
+    { id: 'ps-2', projectId: 'saas-starter', vendor: 'GitHub', exclusive: false },
+    { id: 'ps-3', projectId: 'npm-pkg', vendor: 'GitHub', exclusive: false },
+    { id: 'ps-4', projectId: 'youtube-main', vendor: 'Claude Code', exclusive: false },
+    { id: 'ps-5', projectId: 'consulting', vendor: 'Claude Code', exclusive: false },
+];
+
 export class LocalMockClient implements DataClient {
+    private expenses: Expense[] = [...mockExpenses.map(e => ({ ...e, allocations: [...e.allocations] }))];
+    private projectServicesList: ProjectService[] = [...mockProjectServicesList.map(s => ({ ...s }))];
+
     async getProjects(): Promise<Project[]> {
         return mockProjects.filter(p => p.status === 'active');
     }
@@ -471,5 +544,72 @@ export class LocalMockClient implements DataClient {
         return [...mockAgentCommits]
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, limit);
+    }
+
+    async getExpenses(): Promise<Expense[]> {
+        return [...this.expenses.map(e => ({ ...e, allocations: [...e.allocations] }))];
+    }
+
+    async getExpensesByProject(projectId: string): Promise<Expense[]> {
+        return this.expenses
+            .filter(e => e.allocations.some(a => a.projectId === projectId))
+            .map(e => ({ ...e, allocations: [...e.allocations] }));
+    }
+
+    async createExpense(input: CreateExpenseInput, allocations: CostAllocation[]): Promise<Expense> {
+        const expense: Expense = {
+            id: crypto.randomUUID(),
+            amount: input.amount,
+            vendor: input.vendor,
+            category: input.category,
+            note: input.note,
+            date: input.date,
+            periodStart: input.periodStart,
+            periodEnd: input.periodEnd,
+            source: input.source ?? 'manual',
+            sourceRef: input.sourceRef,
+            recurring: input.recurring ?? false,
+            currency: input.currency ?? 'USD',
+            createdAt: new Date().toISOString(),
+            allocations: [...allocations],
+        };
+        this.expenses.push(expense);
+        return { ...expense, allocations: [...allocations] };
+    }
+
+    async getExpenseSummary(): Promise<ExpenseSummary> {
+        const byCategory: Record<string, number> = {};
+        const byVendor: Record<string, number> = {};
+        let totalAmount = 0;
+
+        for (const e of this.expenses) {
+            totalAmount += e.amount;
+            byCategory[e.category] = (byCategory[e.category] ?? 0) + e.amount;
+            byVendor[e.vendor] = (byVendor[e.vendor] ?? 0) + e.amount;
+        }
+
+        return { totalAmount, count: this.expenses.length, byCategory, byVendor };
+    }
+
+    async getProjectServices(projectId: string): Promise<ProjectService[]> {
+        return this.projectServicesList
+            .filter(s => s.projectId === projectId)
+            .map(s => ({ ...s }));
+    }
+
+    async getAllProjectServices(): Promise<ProjectService[]> {
+        return [...this.projectServicesList.map(s => ({ ...s }))];
+    }
+
+    async updateProjectServices(projectId: string, services: { vendor: string; exclusive: boolean }[]): Promise<void> {
+        this.projectServicesList = this.projectServicesList.filter(s => s.projectId !== projectId);
+        for (const svc of services) {
+            this.projectServicesList.push({
+                id: crypto.randomUUID(),
+                projectId,
+                vendor: svc.vendor,
+                exclusive: svc.exclusive,
+            });
+        }
     }
 }

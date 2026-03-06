@@ -21,4 +21,9 @@ describe('Header', () => {
         render(<Header />);
         expect(screen.getByText('1H:NAI')).toBeInTheDocument();
     });
+
+    it('renders Expenses nav link', () => {
+        render(<Header />);
+        expect(screen.getByText('Expenses')).toBeInTheDocument();
+    });
 });

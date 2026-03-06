@@ -11,6 +11,7 @@ export function Header() {
 
     const navItems = [
         { name: 'Projects', path: '/projects' },
+        { name: 'Expenses', path: '/expenses' },
         { name: 'Streams', path: '/streams' },
         { name: '1H:NAI', path: '/1hnai' },
         { name: 'Blog', path: '/blog' },

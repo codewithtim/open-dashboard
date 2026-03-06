@@ -11,6 +11,9 @@ import {
     activityEvents,
     agents as agentsTable,
     agentCommits as agentCommitsTable,
+    expenses as expensesTable,
+    costProjects as costProjectsTable,
+    projectServices as projectServicesTable,
 } from './db/schema';
 import {
     DataClient,
@@ -26,6 +29,11 @@ import {
     ActivityEventPayload,
     Agent,
     AgentCommit,
+    Expense,
+    ExpenseSummary,
+    ProjectService,
+    CreateExpenseInput,
+    CostAllocation,
 } from './data-client';
 
 function normalizeType(raw: string): string {
@@ -90,14 +98,15 @@ export class TursoClient implements DataClient {
             return { totalRevenue: 0, totalCosts: 0, netProfit: 0, totalSubscribers: 0, totalViews: 0, totalActiveUsers: 0 };
         }
 
-        const [revenueResult, costsResult, metricsRows] = await Promise.all([
+        const [revenueResult, costsResult, expensesResult, metricsRows] = await Promise.all([
             db.select({ total: sql<number>`coalesce(sum(${revenueTable.amount}), 0)` }).from(revenueTable),
             db.select({ total: sql<number>`coalesce(sum(${costsTable.amount}), 0)` }).from(costsTable),
+            db.select({ total: sql<number>`coalesce(sum(${expensesTable.amount}), 0)` }).from(expensesTable),
             db.select().from(metricsTable).where(inArray(metricsTable.projectId, activeIds)),
         ]);
 
         const totalRevenue = revenueResult[0]?.total ?? 0;
-        const totalCosts = costsResult[0]?.total ?? 0;
+        const totalCosts = (costsResult[0]?.total ?? 0) + (expensesResult[0]?.total ?? 0);
 
         let totalSubscribers = 0;
         let totalViews = 0;
@@ -127,17 +136,21 @@ export class TursoClient implements DataClient {
     async getProjectDetails(projectId: string): Promise<ProjectDetails | null> {
         const db = getDb();
 
-        const [projectRows, costRows, revenueRows, metricRows] = await Promise.all([
+        const [projectRows, costRows, revenueRows, expenseCostRows, metricRows] = await Promise.all([
             db.select().from(projectsTable).where(eq(projectsTable.id, projectId)),
             db.select({ total: sql<number>`coalesce(sum(${costsTable.amount}), 0)` }).from(costsTable).where(eq(costsTable.projectId, projectId)),
             db.select({ total: sql<number>`coalesce(sum(${revenueTable.amount}), 0)` }).from(revenueTable).where(eq(revenueTable.projectId, projectId)),
+            db.select({ total: sql<number>`coalesce(sum(${expensesTable.amount} * ${costProjectsTable.allocation}), 0)` })
+                .from(costProjectsTable)
+                .leftJoin(expensesTable, eq(expensesTable.id, costProjectsTable.costId))
+                .where(eq(costProjectsTable.projectId, projectId)),
             db.select().from(metricsTable).where(eq(metricsTable.projectId, projectId)),
         ]);
 
         if (projectRows.length === 0) return null;
 
         const project = rowToProject(projectRows[0]);
-        const totalCosts = costRows[0]?.total ?? 0;
+        const totalCosts = (costRows[0]?.total ?? 0) + (expenseCostRows[0]?.total ?? 0);
         const totalRevenue = revenueRows[0]?.total ?? 0;
         const projectMetrics: Metric[] = metricRows.map(m => ({ name: m.name, value: m.value }));
 
@@ -155,7 +168,7 @@ export class TursoClient implements DataClient {
 
         const db = getDb();
 
-        const [projectRows, costRows, revenueRows, metricRows] = await Promise.all([
+        const [projectRows, costRows, revenueRows, expenseCostRows, metricRows] = await Promise.all([
             db.select().from(projectsTable).where(inArray(projectsTable.id, ids)),
             db.select({ projectId: costsTable.projectId, total: sql<number>`coalesce(sum(${costsTable.amount}), 0)` })
                 .from(costsTable)
@@ -165,10 +178,16 @@ export class TursoClient implements DataClient {
                 .from(revenueTable)
                 .where(inArray(revenueTable.projectId, ids))
                 .groupBy(revenueTable.projectId),
+            db.select({ projectId: costProjectsTable.projectId, total: sql<number>`coalesce(sum(${expensesTable.amount} * ${costProjectsTable.allocation}), 0)` })
+                .from(costProjectsTable)
+                .leftJoin(expensesTable, eq(expensesTable.id, costProjectsTable.costId))
+                .where(inArray(costProjectsTable.projectId, ids))
+                .groupBy(costProjectsTable.projectId),
             db.select().from(metricsTable).where(inArray(metricsTable.projectId, ids)),
         ]);
 
         const costsMap = new Map(costRows.map(r => [r.projectId, r.total]));
+        const expenseCostsMap = new Map(expenseCostRows.map(r => [r.projectId, r.total]));
         const revenueMap = new Map(revenueRows.map(r => [r.projectId, r.total]));
         const metricsMap = new Map<string, Metric[]>();
         for (const m of metricRows) {
@@ -178,7 +197,7 @@ export class TursoClient implements DataClient {
 
         return projectRows.map(row => {
             const project = rowToProject(row);
-            const totalCosts = costsMap.get(row.id) ?? 0;
+            const totalCosts = (costsMap.get(row.id) ?? 0) + (expenseCostsMap.get(row.id) ?? 0);
             const totalRevenue = revenueMap.get(row.id) ?? 0;
             return {
                 ...project,
@@ -367,5 +386,208 @@ export class TursoClient implements DataClient {
             htmlUrl: row.htmlUrl || '',
             agentName: row.agentName || undefined,
         }));
+    }
+
+    async getExpenses(): Promise<Expense[]> {
+        const db = getDb();
+        const rows = await db
+            .select({
+                id: expensesTable.id,
+                amount: expensesTable.amount,
+                vendor: expensesTable.vendor,
+                category: expensesTable.category,
+                note: expensesTable.note,
+                date: expensesTable.date,
+                periodStart: expensesTable.periodStart,
+                periodEnd: expensesTable.periodEnd,
+                source: expensesTable.source,
+                sourceRef: expensesTable.sourceRef,
+                recurring: expensesTable.recurring,
+                currency: expensesTable.currency,
+                createdAt: expensesTable.createdAt,
+                allocationProjectId: costProjectsTable.projectId,
+                allocation: costProjectsTable.allocation,
+                projectName: projectsTable.name,
+            })
+            .from(expensesTable)
+            .leftJoin(costProjectsTable, eq(costProjectsTable.costId, expensesTable.id))
+            .leftJoin(projectsTable, eq(projectsTable.id, costProjectsTable.projectId));
+
+        return this.assembleExpenses(rows);
+    }
+
+    async getExpensesByProject(projectId: string): Promise<Expense[]> {
+        const db = getDb();
+        const rows = await db
+            .select({
+                id: expensesTable.id,
+                amount: expensesTable.amount,
+                vendor: expensesTable.vendor,
+                category: expensesTable.category,
+                note: expensesTable.note,
+                date: expensesTable.date,
+                periodStart: expensesTable.periodStart,
+                periodEnd: expensesTable.periodEnd,
+                source: expensesTable.source,
+                sourceRef: expensesTable.sourceRef,
+                recurring: expensesTable.recurring,
+                currency: expensesTable.currency,
+                createdAt: expensesTable.createdAt,
+                allocationProjectId: costProjectsTable.projectId,
+                allocation: costProjectsTable.allocation,
+                projectName: projectsTable.name,
+            })
+            .from(expensesTable)
+            .leftJoin(costProjectsTable, eq(costProjectsTable.costId, expensesTable.id))
+            .leftJoin(projectsTable, eq(projectsTable.id, costProjectsTable.projectId))
+            .where(eq(costProjectsTable.projectId, projectId));
+
+        return this.assembleExpenses(rows);
+    }
+
+    async createExpense(input: CreateExpenseInput, allocations: CostAllocation[]): Promise<Expense> {
+        const db = getDb();
+        const id = crypto.randomUUID();
+        const now = new Date().toISOString();
+
+        await db.insert(expensesTable).values({
+            id,
+            amount: input.amount,
+            vendor: input.vendor,
+            category: input.category,
+            note: input.note ?? null,
+            date: input.date,
+            periodStart: input.periodStart ?? null,
+            periodEnd: input.periodEnd ?? null,
+            source: input.source ?? 'manual',
+            sourceRef: input.sourceRef ?? null,
+            recurring: input.recurring ?? false,
+            currency: input.currency ?? 'USD',
+            createdAt: now,
+        });
+
+        for (const alloc of allocations) {
+            await db.insert(costProjectsTable).values({
+                id: crypto.randomUUID(),
+                costId: id,
+                projectId: alloc.projectId,
+                allocation: alloc.allocation,
+            });
+        }
+
+        return {
+            id,
+            amount: input.amount,
+            vendor: input.vendor,
+            category: input.category,
+            note: input.note,
+            date: input.date,
+            periodStart: input.periodStart,
+            periodEnd: input.periodEnd,
+            source: input.source ?? 'manual',
+            sourceRef: input.sourceRef,
+            recurring: input.recurring ?? false,
+            currency: input.currency ?? 'USD',
+            createdAt: now,
+            allocations,
+        };
+    }
+
+    async getExpenseSummary(): Promise<ExpenseSummary> {
+        const db = getDb();
+        const rows = await db
+            .select({
+                id: expensesTable.id,
+                amount: expensesTable.amount,
+                category: expensesTable.category,
+                vendor: expensesTable.vendor,
+            })
+            .from(expensesTable);
+
+        const byCategory: Record<string, number> = {};
+        const byVendor: Record<string, number> = {};
+        let totalAmount = 0;
+
+        for (const row of rows) {
+            totalAmount += row.amount;
+            byCategory[row.category] = (byCategory[row.category] ?? 0) + row.amount;
+            byVendor[row.vendor] = (byVendor[row.vendor] ?? 0) + row.amount;
+        }
+
+        return { totalAmount, count: rows.length, byCategory, byVendor };
+    }
+
+    async getProjectServices(projectId: string): Promise<ProjectService[]> {
+        const db = getDb();
+        const rows = await db
+            .select()
+            .from(projectServicesTable)
+            .where(eq(projectServicesTable.projectId, projectId));
+
+        return rows.map(r => ({
+            id: r.id,
+            projectId: r.projectId,
+            vendor: r.vendor,
+            exclusive: r.exclusive,
+        }));
+    }
+
+    async getAllProjectServices(): Promise<ProjectService[]> {
+        const db = getDb();
+        const rows = await db.select().from(projectServicesTable);
+        return rows.map(r => ({
+            id: r.id,
+            projectId: r.projectId,
+            vendor: r.vendor,
+            exclusive: r.exclusive,
+        }));
+    }
+
+    async updateProjectServices(projectId: string, services: { vendor: string; exclusive: boolean }[]): Promise<void> {
+        const db = getDb();
+        await db.delete(projectServicesTable).where(eq(projectServicesTable.projectId, projectId));
+
+        for (const svc of services) {
+            await db.insert(projectServicesTable).values({
+                id: crypto.randomUUID(),
+                projectId,
+                vendor: svc.vendor,
+                exclusive: svc.exclusive,
+            });
+        }
+    }
+
+    private assembleExpenses(rows: any[]): Expense[] {
+        const map = new Map<string, Expense>();
+
+        for (const row of rows) {
+            if (!map.has(row.id)) {
+                map.set(row.id, {
+                    id: row.id,
+                    amount: row.amount,
+                    vendor: row.vendor,
+                    category: row.category,
+                    note: row.note || undefined,
+                    date: row.date,
+                    periodStart: row.periodStart || undefined,
+                    periodEnd: row.periodEnd || undefined,
+                    source: row.source,
+                    sourceRef: row.sourceRef || undefined,
+                    recurring: row.recurring,
+                    currency: row.currency,
+                    createdAt: row.createdAt,
+                    allocations: [],
+                });
+            }
+            if (row.allocationProjectId) {
+                map.get(row.id)!.allocations.push({
+                    projectId: row.allocationProjectId,
+                    projectName: row.projectName || undefined,
+                    allocation: row.allocation,
+                });
+            }
+        }
+
+        return Array.from(map.values());
     }
 }

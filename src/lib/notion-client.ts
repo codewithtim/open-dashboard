@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import { PageObjectResponse, PartialPageObjectResponse, PartialDatabaseObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit, ActivityEvent, ActivityEventType, ActivityEventPayload, Agent, AgentCommit } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit, ActivityEvent, ActivityEventType, ActivityEventPayload, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
 
 export const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -447,4 +447,41 @@ export class NotionClient implements DataClient {
     async getAgentCommits(): Promise<AgentCommit[]> {
         return [];
     }
+
+    async getExpenses(): Promise<Expense[]> {
+        return [];
+    }
+
+    async getExpensesByProject(): Promise<Expense[]> {
+        return [];
+    }
+
+    async createExpense(input: CreateExpenseInput, allocations: CostAllocation[]): Promise<Expense> {
+        return {
+            id: crypto.randomUUID(),
+            amount: input.amount,
+            vendor: input.vendor,
+            category: input.category,
+            date: input.date,
+            source: input.source ?? 'manual',
+            recurring: input.recurring ?? false,
+            currency: input.currency ?? 'USD',
+            createdAt: new Date().toISOString(),
+            allocations,
+        };
+    }
+
+    async getExpenseSummary(): Promise<ExpenseSummary> {
+        return { totalAmount: 0, count: 0, byCategory: {}, byVendor: {} };
+    }
+
+    async getProjectServices(): Promise<ProjectService[]> {
+        return [];
+    }
+
+    async getAllProjectServices(): Promise<ProjectService[]> {
+        return [];
+    }
+
+    async updateProjectServices(): Promise<void> {}
 }

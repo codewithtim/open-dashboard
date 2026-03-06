@@ -15,11 +15,13 @@ interface ProjectDetailPageProps {
 export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     const { id } = await params;
     const client = getDataClient();
-    const [project, activity, streams, allProjects] = await Promise.all([
+    const [project, activity, streams, allProjects, projectExpenses, projectServices] = await Promise.all([
         client.getProjectDetails(id),
         client.getRecentActivity(50),
         client.getStreams(),
         client.getAllProjects(),
+        client.getExpensesByProject(id),
+        client.getProjectServices(id),
     ]);
 
     if (!project) return notFound();
@@ -104,6 +106,63 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             {projectActivity.length > 0 && (
                 <section>
                     <ActivityFeed events={projectActivity} />
+                </section>
+            )}
+
+            {/* Expenses */}
+            {projectExpenses.length > 0 && (
+                <section>
+                    <h2 className="text-xl font-bold text-white mb-4">Expenses</h2>
+                    <div className="bg-surface-raised border border-surface-border rounded-2xl overflow-hidden">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-surface-border text-left">
+                                    <th className="px-5 py-3 text-slate-500 font-medium text-xs uppercase tracking-wider">Date</th>
+                                    <th className="px-5 py-3 text-slate-500 font-medium text-xs uppercase tracking-wider">Vendor</th>
+                                    <th className="px-5 py-3 text-slate-500 font-medium text-xs uppercase tracking-wider text-right">Amount</th>
+                                    <th className="px-5 py-3 text-slate-500 font-medium text-xs uppercase tracking-wider text-right">Allocation</th>
+                                    <th className="px-5 py-3 text-slate-500 font-medium text-xs uppercase tracking-wider text-right">Effective Cost</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {projectExpenses.map((expense) => {
+                                    const alloc = expense.allocations.find(a => a.projectId === id);
+                                    const pct = alloc?.allocation ?? 0;
+                                    return (
+                                        <tr key={expense.id} className="border-b border-surface-border/50">
+                                            <td className="px-5 py-3 text-slate-300">{expense.date}</td>
+                                            <td className="px-5 py-3 text-white font-medium">{expense.vendor}</td>
+                                            <td className="px-5 py-3 text-right text-slate-400">${expense.amount.toLocaleString()}</td>
+                                            <td className="px-5 py-3 text-right text-slate-400">{Math.round(pct * 100)}%</td>
+                                            <td className="px-5 py-3 text-right text-rose-400 font-medium">
+                                                ${(expense.amount * pct).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            )}
+
+            {/* Services */}
+            {projectServices.length > 0 && (
+                <section>
+                    <h2 className="text-xl font-bold text-white mb-4">Services</h2>
+                    <div className="flex flex-wrap gap-2">
+                        {projectServices.map((svc) => (
+                            <span
+                                key={svc.id}
+                                className="text-sm px-3 py-1.5 rounded-lg bg-surface-raised border border-surface-border text-slate-300"
+                            >
+                                {svc.vendor}
+                                {svc.exclusive && (
+                                    <span className="ml-1.5 text-xs text-accent">(exclusive)</span>
+                                )}
+                            </span>
+                        ))}
+                    </div>
                 </section>
             )}
 
