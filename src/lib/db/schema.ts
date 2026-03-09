@@ -85,17 +85,33 @@ export const activityEvents = sqliteTable('activity_events', {
     index('idx_activity_timestamp').on(table.timestamp),
 ]);
 
+export const companies = sqliteTable('companies', {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    slug: text('slug').notNull(),
+    website: text('website'),
+    description: text('description'),
+    logoUrl: text('logo_url'),
+    parentId: text('parent_id'),
+    createdAt: text('created_at').notNull(),
+}, (table) => [
+    uniqueIndex('idx_companies_slug').on(table.slug),
+    index('idx_companies_parent').on(table.parentId),
+]);
+
 export const agents = sqliteTable('agents', {
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     identifier: text('identifier').notNull(),
     description: text('description'),
+    companyId: text('company_id').references(() => companies.id),
     status: text('status').notNull().default('idle'),
     currentTask: text('current_task'),
     lastSeenAt: text('last_seen_at'),
     createdAt: text('created_at').notNull(),
 }, (table) => [
     uniqueIndex('idx_agents_identifier').on(table.identifier),
+    index('idx_agents_company').on(table.companyId),
 ]);
 
 export const agentRepos = sqliteTable('agent_repos', {

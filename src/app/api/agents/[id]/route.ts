@@ -27,6 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         name: agent.name,
         identifier: agent.identifier,
         description: agent.description || null,
+        companyId: agent.companyId || null,
         status: agent.status,
         currentTask: agent.currentTask || null,
         lastSeenAt: agent.lastSeenAt || null,
@@ -57,6 +58,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const updates: Record<string, any> = { lastSeenAt: new Date().toISOString() };
     if (parsed.data.name !== undefined) updates.name = parsed.data.name;
     if (parsed.data.description !== undefined) updates.description = parsed.data.description;
+    if ('companyId' in parsed.data) updates.companyId = parsed.data.companyId ?? null;
     if (parsed.data.status !== undefined) updates.status = parsed.data.status;
     if ('currentTask' in parsed.data) updates.currentTask = parsed.data.currentTask ?? null;
 
@@ -70,6 +72,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         name: agent.name,
         identifier: agent.identifier,
         description: agent.description || null,
+        companyId: agent.companyId || null,
         status: agent.status,
         currentTask: agent.currentTask || null,
         lastSeenAt: agent.lastSeenAt || null,

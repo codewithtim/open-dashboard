@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Company, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', description: 'Live coding streams and tech tutorials on YouTube.', type: 'content', status: 'active', platform: 'youtube' },
@@ -365,12 +365,25 @@ const mockStreams: Stream[] = [
     },
 ];
 
+const mockCompanies: Company[] = [
+    {
+        id: 'comp_openai',
+        name: 'OpenAI',
+        slug: 'openai',
+        website: 'https://openai.com',
+        description: 'AI research and deployment company',
+        createdAt: '2025-01-01T00:00:00Z',
+    },
+];
+
 const mockAgents: Agent[] = [
     {
         id: 'agent-operator',
         name: 'Operator',
         identifier: 'Operator',
         description: 'OpenClaw autonomous coding agent',
+        companyId: 'comp_openai',
+        companyName: 'OpenAI',
         status: 'idle',
         createdAt: '2025-01-01T00:00:00Z',
     },
@@ -535,6 +548,10 @@ export class LocalMockClient implements DataClient {
         return [...mockActivityEvents]
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, limit);
+    }
+
+    async getCompanies(): Promise<Company[]> {
+        return mockCompanies;
     }
 
     async getAgents(): Promise<Agent[]> {

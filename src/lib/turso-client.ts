@@ -9,6 +9,7 @@ import {
     streamProjects,
     streamCommits,
     activityEvents,
+    companies as companiesTable,
     agents as agentsTable,
     agentCommits as agentCommitsTable,
     expenses as expensesTable,
@@ -27,6 +28,7 @@ import {
     ActivityEvent,
     ActivityEventType,
     ActivityEventPayload,
+    Company,
     Agent,
     AgentCommit,
     Expense,
@@ -345,14 +347,45 @@ export class TursoClient implements DataClient {
         });
     }
 
+    async getCompanies(): Promise<Company[]> {
+        const db = getDb();
+        const rows = await db.select().from(companiesTable);
+        return rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            slug: row.slug,
+            website: row.website || undefined,
+            description: row.description || undefined,
+            logoUrl: row.logoUrl || undefined,
+            parentId: row.parentId || undefined,
+            createdAt: row.createdAt,
+        }));
+    }
+
     async getAgents(): Promise<Agent[]> {
         const db = getDb();
-        const rows = await db.select().from(agentsTable);
+        const rows = await db
+            .select({
+                id: agentsTable.id,
+                name: agentsTable.name,
+                identifier: agentsTable.identifier,
+                description: agentsTable.description,
+                companyId: agentsTable.companyId,
+                companyName: companiesTable.name,
+                status: agentsTable.status,
+                currentTask: agentsTable.currentTask,
+                lastSeenAt: agentsTable.lastSeenAt,
+                createdAt: agentsTable.createdAt,
+            })
+            .from(agentsTable)
+            .leftJoin(companiesTable, eq(agentsTable.companyId, companiesTable.id));
         return rows.map(row => ({
             id: row.id,
             name: row.name,
             identifier: row.identifier,
             description: row.description || undefined,
+            companyId: row.companyId || undefined,
+            companyName: row.companyName || undefined,
             status: row.status,
             currentTask: row.currentTask || undefined,
             lastSeenAt: row.lastSeenAt || undefined,

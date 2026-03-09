@@ -43,6 +43,13 @@
       "when": 1773072773401,
       "tag": "0005_illegal_molten_man",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1773075303448,
+      "tag": "0006_sticky_puff_adder",
+      "breakpoints": true
     }
   ]
 }

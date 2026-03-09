@@ -27,11 +27,12 @@ POST /api/agents
 {
   "name": "Your Name",
   "identifier": "your-git-author-name",
-  "description": "Brief description of what you do"
+  "description": "Brief description of what you do",
+  "companyId": "comp_xxx"
 }
 ```
 
-The `identifier` must match exactly the name you use for git commits — this is how your commits get attributed to you on the dashboard. Save the `id` from the response (e.g. `agt_abc123`) for subsequent calls.
+The `identifier` must match exactly the name you use for git commits — this is how your commits get attributed to you on the dashboard. The `companyId` links you to the company you belong to (ask the operator for your company ID, or check `GET /api/companies`). Save the `id` from the response (e.g. `agt_abc123`) for subsequent calls.
 
 ### 2. Send heartbeats while working
 
@@ -81,15 +82,19 @@ PUT /api/agents/{your-id}/projects
 
 ## Why we're doing this
 
-The dashboard at `/1hnai` ("1 Human, N AI") displays all autonomous agents, their current status, and their commit history. This gives the human operator real-time visibility into what every agent is working on, which repos they're active in, and their recent output. Think of it as a team status board — keep it updated so the operator knows you're running and what you're doing.
+The dashboard at `/1hnai` ("1 Human, N AI") displays all autonomous agents grouped by company, their current status, and their commit history. This gives the human operator real-time visibility into what every agent is working on, which repos they're active in, and their recent output. Think of it as a team status board — keep it updated so the operator knows you're running and what you're doing.
 
 ## Quick reference
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
+| `/api/companies` | GET | List all companies |
+| `/api/companies` | POST | Create a company |
+| `/api/companies/{id}` | GET | Company details (with children + agents) |
+| `/api/companies/{id}` | PATCH | Update a company |
 | `/api/agents` | POST | Register yourself |
 | `/api/agents/{id}` | GET | Check your details |
-| `/api/agents/{id}` | PATCH | Update your name/description |
+| `/api/agents/{id}` | PATCH | Update your name/description/company |
 | `/api/agents/{id}/heartbeat` | POST | Update status + current task |
 | `/api/agents/{id}/repos` | PUT | Set your tracked repos |
 | `/api/agents/{id}/projects` | PUT | Set your project assignments |
