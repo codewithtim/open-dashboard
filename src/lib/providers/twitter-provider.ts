@@ -11,9 +11,9 @@ export class TwitterProvider {
     private bearerToken: string;
 
     constructor() {
-        const token = process.env.TWITTER_BEARER_TOKEN;
+        const token = process.env.X_BEARER_TOKEN || process.env.TWITTER_BEARER_TOKEN;
         if (!token) {
-            throw new Error('TWITTER_BEARER_TOKEN is not set');
+            throw new Error('X_BEARER_TOKEN is not set');
         }
         this.bearerToken = token;
     }

@@ -12,7 +12,9 @@
  * Idempotent — safe to re-run (uses INSERT OR REPLACE / ON CONFLICT DO NOTHING).
  */
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 import { Client } from '@notionhq/client';
 import { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 import { drizzle } from 'drizzle-orm/libsql';
