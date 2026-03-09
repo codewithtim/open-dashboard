@@ -319,7 +319,8 @@ async function processAgentCommits() {
 
     // Collect unique repos
     const uniqueRepos = [...new Set(allRepos.map(r => r.repoFullName))];
-    const commitsProvider = new GitHubCommitsProvider();
+    const agentToken = process.env.AGENT_GITHUB_TOKEN;
+    const commitsProvider = new GitHubCommitsProvider(agentToken);
 
     for (const repoFullName of uniqueRepos) {
         try {

@@ -7,13 +7,23 @@ export interface GitHubCommitData {
 }
 
 export class GitHubCommitsProvider {
+    private tokenOverride?: string;
+
+    constructor(tokenOverride?: string) {
+        this.tokenOverride = tokenOverride;
+    }
+
+    private getToken(): string | undefined {
+        return this.tokenOverride ?? process.env.GITHUB_TOKEN;
+    }
+
     async getCommitsInWindow(repoFullName: string, since: string, until: string): Promise<GitHubCommitData[]> {
         const url = `https://api.github.com/repos/${repoFullName}/commits?since=${since}&until=${until}&per_page=100`;
         const headers: Record<string, string> = {
             'Accept': 'application/vnd.github.v3+json',
         };
 
-        const token = process.env.GITHUB_TOKEN;
+        const token = this.getToken();
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
@@ -34,7 +44,7 @@ export class GitHubCommitsProvider {
             'Accept': 'application/vnd.github.v3+json',
         };
 
-        const token = process.env.GITHUB_TOKEN;
+        const token = this.getToken();
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
