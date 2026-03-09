@@ -66,6 +66,7 @@ function rowToProject(row: typeof projectsTable.$inferSelect): Project {
         platform: row.platform?.toLowerCase() || undefined,
         platformAccountId: row.platformAccountId || undefined,
         link: buildLink(row.platform, row.platformAccountId, row.link),
+        visibility: row.visibility,
     };
 }
 

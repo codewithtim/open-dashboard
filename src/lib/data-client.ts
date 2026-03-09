@@ -7,6 +7,7 @@ export interface Project {
     platform?: string;
     platformAccountId?: string;
     link?: string;
+    visibility?: string;
 }
 
 export interface Metric {
@@ -48,6 +49,7 @@ export interface ActivityEventCommitPayload {
     author: string;
     htmlUrl: string;
     repo: string;
+    isPrivate?: boolean;
 }
 
 export interface ActivityEventTweetPayload {

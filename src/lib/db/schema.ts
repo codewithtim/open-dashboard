@@ -9,6 +9,7 @@ export const projects = sqliteTable('projects', {
     platform: text('platform'),
     platformAccountId: text('platform_account_id'),
     link: text('link'),
+    visibility: text('visibility').notNull().default('public'),
 });
 
 export const revenue = sqliteTable('revenue', {

@@ -23,6 +23,17 @@ function timeAgo(dateStr: string): string {
 }
 
 function CommitRow({ payload, projectName }: { payload: ActivityEventCommitPayload; projectName?: string }) {
+    if (payload.isPrivate) {
+        return (
+            <div className="min-w-0 flex-1">
+                <p className="text-white text-sm truncate">commit to private repository</p>
+                <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                    {projectName && <span>{projectName}</span>}
+                </div>
+            </div>
+        );
+    }
+
     const firstLine = payload.message.split('\n')[0];
     return (
         <div className="min-w-0 flex-1">

@@ -176,8 +176,17 @@ async function processActivity(projects: Project[]) {
     for (const project of githubProjects) {
         try {
             const commits = await commitsProvider.getRecentCommits(project.platformAccountId!, since);
+            const isPrivate = project.visibility === 'private';
             for (const commit of commits) {
                 const extId = `commit:${commit.sha}`;
+                const payload = JSON.stringify({
+                    sha: commit.sha,
+                    message: commit.message,
+                    author: commit.author,
+                    htmlUrl: commit.htmlUrl,
+                    repo: project.platformAccountId,
+                    isPrivate,
+                });
                 await db.insert(activityEvents).values({
                     id: generateId(),
                     type: 'commit',
@@ -185,24 +194,10 @@ async function processActivity(projects: Project[]) {
                     projectId: project.id,
                     projectName: project.name,
                     externalId: extId,
-                    payload: JSON.stringify({
-                        sha: commit.sha,
-                        message: commit.message,
-                        author: commit.author,
-                        htmlUrl: commit.htmlUrl,
-                        repo: project.platformAccountId,
-                    }),
+                    payload,
                 }).onConflictDoUpdate({
                     target: activityEvents.externalId,
-                    set: {
-                        payload: JSON.stringify({
-                            sha: commit.sha,
-                            message: commit.message,
-                            author: commit.author,
-                            htmlUrl: commit.htmlUrl,
-                            repo: project.platformAccountId,
-                        }),
-                    },
+                    set: { payload },
                 });
             }
         } catch (err) {
