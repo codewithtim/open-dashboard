@@ -371,6 +371,7 @@ const mockAgents: Agent[] = [
         name: 'Operator',
         identifier: 'Operator',
         description: 'OpenClaw autonomous coding agent',
+        status: 'idle',
         createdAt: '2025-01-01T00:00:00Z',
     },
 ];

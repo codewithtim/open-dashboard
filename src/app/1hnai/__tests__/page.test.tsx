@@ -11,8 +11,8 @@ describe('1H:NAI Page', () => {
     it('renders stats and agent commit feed', async () => {
         const mockClient = {
             getAgents: jest.fn().mockResolvedValue([
-                { id: 'agent-1', name: 'Operator', identifier: 'Operator', createdAt: '2025-01-01T00:00:00Z' },
-                { id: 'agent-2', name: 'Devin', identifier: 'Devin', createdAt: '2025-02-01T00:00:00Z' },
+                { id: 'agent-1', name: 'Operator', identifier: 'Operator', status: 'working', currentTask: 'Building feature', createdAt: '2025-01-01T00:00:00Z' },
+                { id: 'agent-2', name: 'Devin', identifier: 'Devin', status: 'idle', createdAt: '2025-02-01T00:00:00Z' },
             ]),
             getAgentCommits: jest.fn().mockResolvedValue([
                 {

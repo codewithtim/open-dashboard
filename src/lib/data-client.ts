@@ -116,6 +116,9 @@ export interface Agent {
     name: string;
     identifier: string;
     description?: string;
+    status: string;
+    currentTask?: string;
+    lastSeenAt?: string;
     createdAt: string;
 }
 

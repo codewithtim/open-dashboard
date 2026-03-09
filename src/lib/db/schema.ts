@@ -90,6 +90,9 @@ export const agents = sqliteTable('agents', {
     name: text('name').notNull(),
     identifier: text('identifier').notNull(),
     description: text('description'),
+    status: text('status').notNull().default('idle'),
+    currentTask: text('current_task'),
+    lastSeenAt: text('last_seen_at'),
     createdAt: text('created_at').notNull(),
 }, (table) => [
     uniqueIndex('idx_agents_identifier').on(table.identifier),
@@ -100,6 +103,13 @@ export const agentRepos = sqliteTable('agent_repos', {
     repoFullName: text('repo_full_name').notNull(),
 }, (table) => [
     primaryKey({ columns: [table.agentId, table.repoFullName] }),
+]);
+
+export const agentProjects = sqliteTable('agent_projects', {
+    agentId: text('agent_id').notNull().references(() => agents.id),
+    projectId: text('project_id').notNull().references(() => projects.id),
+}, (table) => [
+    primaryKey({ columns: [table.agentId, table.projectId] }),
 ]);
 
 export const agentCommits = sqliteTable('agent_commits', {

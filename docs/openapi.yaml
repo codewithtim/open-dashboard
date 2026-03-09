@@ -1,0 +1,449 @@
+openapi: 3.1.0
+info:
+  title: Open Dashboard Agent API
+  version: 1.0.0
+  description: API for AI agents to self-register, report status, and manage repos/projects.
+
+servers:
+  - url: /api
+
+security:
+  - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    Agent:
+      type: object
+      required: [id, name, identifier, status, createdAt]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        identifier:
+          type: string
+        description:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [idle, working, offline]
+        currentTask:
+          type: string
+          nullable: true
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    AgentDetail:
+      allOf:
+        - $ref: '#/components/schemas/Agent'
+        - type: object
+          required: [repos, projectIds]
+          properties:
+            repos:
+              type: array
+              items:
+                type: string
+            projectIds:
+              type: array
+              items:
+                type: string
+
+    CreateAgentRequest:
+      type: object
+      required: [name, identifier]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        identifier:
+          type: string
+          minLength: 1
+        description:
+          type: string
+
+    UpdateAgentRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          type: string
+          enum: [idle, working, offline]
+        currentTask:
+          type: string
+          nullable: true
+
+    HeartbeatRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [idle, working, offline]
+        currentTask:
+          type: string
+          nullable: true
+
+    HeartbeatResponse:
+      type: object
+      required: [id, status, lastSeenAt]
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+        currentTask:
+          type: string
+          nullable: true
+        lastSeenAt:
+          type: string
+          format: date-time
+
+    SetReposRequest:
+      type: object
+      required: [repos]
+      properties:
+        repos:
+          type: array
+          items:
+            type: string
+            pattern: ^[^/]+/[^/]+$
+
+    ReposResponse:
+      type: object
+      required: [repos]
+      properties:
+        repos:
+          type: array
+          items:
+            type: string
+
+    SetProjectsRequest:
+      type: object
+      required: [projectIds]
+      properties:
+        projectIds:
+          type: array
+          items:
+            type: string
+
+    ProjectsResponse:
+      type: object
+      required: [projectIds]
+      properties:
+        projectIds:
+          type: array
+          items:
+            type: string
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+
+paths:
+  /agents:
+    get:
+      operationId: listAgents
+      summary: List all agents
+      responses:
+        '200':
+          description: List of agents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Agent'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      operationId: createAgent
+      summary: Register a new agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAgentRequest'
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Identifier already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getAgent
+      summary: Get agent details with repos and projects
+      responses:
+        '200':
+          description: Agent details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentDetail'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    patch:
+      operationId: updateAgent
+      summary: Update agent fields
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAgentRequest'
+      responses:
+        '200':
+          description: Updated agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agent'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{id}/heartbeat:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: heartbeat
+      summary: Update agent status and current task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Heartbeat acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeartbeatResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{id}/repos:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: listAgentRepos
+      summary: List repos tracked by this agent
+      responses:
+        '200':
+          description: List of repos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReposResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      operationId: setAgentRepos
+      summary: Replace the list of repos for this agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetReposRequest'
+      responses:
+        '200':
+          description: Updated repos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReposResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{id}/projects:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: listAgentProjects
+      summary: List projects assigned to this agent
+      responses:
+        '200':
+          description: List of project IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      operationId: setAgentProjects
+      summary: Replace project assignments for this agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetProjectsRequest'
+      responses:
+        '200':
+          description: Updated projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectsResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/openapi:
+    get:
+      operationId: getOpenApiSpec
+      summary: Get the OpenAPI specification
+      security: []
+      responses:
+        '200':
+          description: OpenAPI spec as JSON
+          content:
+            application/json:
+              schema:
+                type: object

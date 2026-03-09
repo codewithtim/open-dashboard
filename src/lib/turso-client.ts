@@ -353,6 +353,9 @@ export class TursoClient implements DataClient {
             name: row.name,
             identifier: row.identifier,
             description: row.description || undefined,
+            status: row.status,
+            currentTask: row.currentTask || undefined,
+            lastSeenAt: row.lastSeenAt || undefined,
             createdAt: row.createdAt,
         }));
     }

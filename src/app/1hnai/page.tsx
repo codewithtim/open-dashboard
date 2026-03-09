@@ -47,6 +47,30 @@ export default async function OneHumanNAIPage() {
                 </div>
             </div>
 
+            {agents.length > 0 && (
+                <div className="w-full max-w-2xl">
+                    <div className="bg-surface-raised border border-surface-border rounded-2xl p-5">
+                        <h2 className="text-white text-lg font-semibold mb-3">Agent Status</h2>
+                        <div className="space-y-2">
+                            {agents.map((agent) => (
+                                <div key={agent.id} className="flex items-center gap-3">
+                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                        agent.status === 'working' ? 'bg-accent' :
+                                        agent.status === 'offline' ? 'bg-red-400' :
+                                        'bg-slate-500'
+                                    }`} />
+                                    <span className="text-white text-sm font-medium">{agent.name}</span>
+                                    <span className="text-xs text-slate-500">{agent.status}</span>
+                                    {agent.currentTask && (
+                                        <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="w-full max-w-2xl">
                 <AgentCommitFeed commits={commits} />
             </div>
