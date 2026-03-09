@@ -115,7 +115,10 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
                                                     'bg-slate-500'
                                                 }`} />
                                                 <span className="text-white text-sm font-medium">{agent.name}</span>
-                                                <span className="text-xs text-slate-500">{agent.status}</span>
+                                                {agent.model && (
+                                                        <span className="text-xs text-slate-600">{agent.model}</span>
+                                                    )}
+                                                    <span className="text-xs text-slate-500">{agent.status}</span>
                                                 {agent.currentTask && (
                                                     <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
                                                 )}

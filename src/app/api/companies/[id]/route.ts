@@ -46,6 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             identifier: a.identifier,
             description: a.description || null,
             companyId: a.companyId || null,
+            model: a.model || null,
             status: a.status,
             currentTask: a.currentTask || null,
             lastSeenAt: a.lastSeenAt || null,

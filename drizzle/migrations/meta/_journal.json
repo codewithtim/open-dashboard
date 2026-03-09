@@ -50,6 +50,13 @@
       "when": 1773075303448,
       "tag": "0006_sticky_puff_adder",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1773076671803,
+      "tag": "0007_cute_ultragirl",
+      "breakpoints": true
     }
   ]
 }

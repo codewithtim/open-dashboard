@@ -129,6 +129,7 @@ export interface Agent {
     description?: string;
     companyId?: string;
     companyName?: string;
+    model?: string;
     status: string;
     currentTask?: string;
     lastSeenAt?: string;

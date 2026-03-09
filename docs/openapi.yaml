@@ -110,6 +110,9 @@ components:
         companyId:
           type: string
           nullable: true
+        model:
+          type: string
+          nullable: true
         status:
           type: string
           enum: [idle, working, offline]
@@ -153,6 +156,8 @@ components:
           type: string
         companyId:
           type: string
+        model:
+          type: string
 
     UpdateAgentRequest:
       type: object
@@ -165,6 +170,8 @@ components:
         companyId:
           type: string
           nullable: true
+        model:
+          type: string
         status:
           type: string
           enum: [idle, working, offline]

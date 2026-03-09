@@ -28,6 +28,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         identifier: agent.identifier,
         description: agent.description || null,
         companyId: agent.companyId || null,
+        model: agent.model || null,
         status: agent.status,
         currentTask: agent.currentTask || null,
         lastSeenAt: agent.lastSeenAt || null,
@@ -59,6 +60,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (parsed.data.name !== undefined) updates.name = parsed.data.name;
     if (parsed.data.description !== undefined) updates.description = parsed.data.description;
     if ('companyId' in parsed.data) updates.companyId = parsed.data.companyId ?? null;
+    if (parsed.data.model !== undefined) updates.model = parsed.data.model;
     if (parsed.data.status !== undefined) updates.status = parsed.data.status;
     if ('currentTask' in parsed.data) updates.currentTask = parsed.data.currentTask ?? null;
 
@@ -73,6 +75,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         identifier: agent.identifier,
         description: agent.description || null,
         companyId: agent.companyId || null,
+        model: agent.model || null,
         status: agent.status,
         currentTask: agent.currentTask || null,
         lastSeenAt: agent.lastSeenAt || null,

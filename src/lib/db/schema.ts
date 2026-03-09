@@ -105,6 +105,7 @@ export const agents = sqliteTable('agents', {
     identifier: text('identifier').notNull(),
     description: text('description'),
     companyId: text('company_id').references(() => companies.id),
+    model: text('model'),
     status: text('status').notNull().default('idle'),
     currentTask: text('current_task'),
     lastSeenAt: text('last_seen_at'),

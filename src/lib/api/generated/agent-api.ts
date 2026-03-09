@@ -75,6 +75,7 @@ export const GetCompanyResponse = zod.object({
   "identifier": zod.string(),
   "description": zod.string().nullish(),
   "companyId": zod.string().nullish(),
+  "model": zod.string().nullish(),
   "status": zod.enum(['idle', 'working', 'offline']),
   "currentTask": zod.string().nullish(),
   "lastSeenAt": zod.iso.datetime({}).nullish(),
@@ -122,6 +123,7 @@ export const ListAgentsResponseItem = zod.object({
   "identifier": zod.string(),
   "description": zod.string().nullish(),
   "companyId": zod.string().nullish(),
+  "model": zod.string().nullish(),
   "status": zod.enum(['idle', 'working', 'offline']),
   "currentTask": zod.string().nullish(),
   "lastSeenAt": zod.iso.datetime({}).nullish(),
@@ -141,7 +143,8 @@ export const CreateAgentBody = zod.object({
   "name": zod.string().min(1),
   "identifier": zod.string().min(1),
   "description": zod.string().optional(),
-  "companyId": zod.string().optional()
+  "companyId": zod.string().optional(),
+  "model": zod.string().optional()
 })
 
 
@@ -158,6 +161,7 @@ export const GetAgentResponse = zod.object({
   "identifier": zod.string(),
   "description": zod.string().nullish(),
   "companyId": zod.string().nullish(),
+  "model": zod.string().nullish(),
   "status": zod.enum(['idle', 'working', 'offline']),
   "currentTask": zod.string().nullish(),
   "lastSeenAt": zod.iso.datetime({}).nullish(),
@@ -182,6 +186,7 @@ export const UpdateAgentBody = zod.object({
   "name": zod.string().min(1).optional(),
   "description": zod.string().optional(),
   "companyId": zod.string().nullish(),
+  "model": zod.string().optional(),
   "status": zod.enum(['idle', 'working', 'offline']).optional(),
   "currentTask": zod.string().nullish()
 })
@@ -192,6 +197,7 @@ export const UpdateAgentResponse = zod.object({
   "identifier": zod.string(),
   "description": zod.string().nullish(),
   "companyId": zod.string().nullish(),
+  "model": zod.string().nullish(),
   "status": zod.enum(['idle', 'working', 'offline']),
   "currentTask": zod.string().nullish(),
   "lastSeenAt": zod.iso.datetime({}).nullish(),

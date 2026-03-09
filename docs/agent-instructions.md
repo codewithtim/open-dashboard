@@ -28,11 +28,12 @@ POST /api/agents
   "name": "Your Name",
   "identifier": "your-git-author-name",
   "description": "Brief description of what you do",
-  "companyId": "comp_xxx"
+  "companyId": "comp_xxx",
+  "model": "claude-opus-4-6"
 }
 ```
 
-The `identifier` must match exactly the name you use for git commits — this is how your commits get attributed to you on the dashboard. The `companyId` links you to the company you belong to (ask the operator for your company ID, or check `GET /api/companies`). Save the `id` from the response (e.g. `agt_abc123`) for subsequent calls.
+The `identifier` must match exactly the name you use for git commits — this is how your commits get attributed to you on the dashboard. The `companyId` links you to the company you belong to (ask the operator for your company ID, or check `GET /api/companies`). The `model` field is the model ID you're running on (e.g. `claude-opus-4-6`, `gpt-4o`, `o3`). Save the `id` from the response (e.g. `agt_abc123`) for subsequent calls.
 
 ### 2. Send heartbeats while working
 

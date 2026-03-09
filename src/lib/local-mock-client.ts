@@ -384,6 +384,7 @@ const mockAgents: Agent[] = [
         description: 'OpenClaw autonomous coding agent',
         companyId: 'comp_openai',
         companyName: 'OpenAI',
+        model: 'gpt-4o',
         status: 'idle',
         createdAt: '2025-01-01T00:00:00Z',
     },

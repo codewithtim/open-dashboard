@@ -18,6 +18,7 @@ export async function GET(request: Request) {
         identifier: row.identifier,
         description: row.description || null,
         companyId: row.companyId || null,
+        model: row.model || null,
         status: row.status,
         currentTask: row.currentTask || null,
         lastSeenAt: row.lastSeenAt || null,
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
     }
 
-    const { name, identifier, description, companyId } = parsed.data;
+    const { name, identifier, description, companyId, model } = parsed.data;
 
     const db = getDb();
 
@@ -55,6 +56,7 @@ export async function POST(request: Request) {
         identifier,
         description: description || null,
         companyId: companyId || null,
+        model: model || null,
         status: 'idle',
         lastSeenAt: now,
         createdAt: now,
@@ -66,6 +68,7 @@ export async function POST(request: Request) {
         identifier,
         description: description || null,
         companyId: companyId || null,
+        model: model || null,
         status: 'idle',
         currentTask: null,
         lastSeenAt: now,
