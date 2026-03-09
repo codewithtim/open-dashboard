@@ -5,7 +5,10 @@ describe('TwitterProvider', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        process.env = { ...originalEnv, TWITTER_BEARER_TOKEN: 'test-token' };
+        process.env = { ...originalEnv };
+        delete process.env.X_BEARER_TOKEN;
+        delete process.env.TWITTER_BEARER_TOKEN;
+        process.env.X_BEARER_TOKEN = 'test-token';
         global.fetch = jest.fn();
     });
 
@@ -13,9 +16,10 @@ describe('TwitterProvider', () => {
         process.env = originalEnv;
     });
 
-    it('throws if TWITTER_BEARER_TOKEN is not set', () => {
+    it('throws if X_BEARER_TOKEN is not set', () => {
+        delete process.env.X_BEARER_TOKEN;
         delete process.env.TWITTER_BEARER_TOKEN;
-        expect(() => new TwitterProvider()).toThrow('TWITTER_BEARER_TOKEN is not set');
+        expect(() => new TwitterProvider()).toThrow('X_BEARER_TOKEN is not set');
     });
 
     it('fetches recent tweets for a user', async () => {
