@@ -290,11 +290,15 @@ async function processActivity(projects: Project[]) {
 async function processAgentCommits() {
     const db = getDb();
 
-    // Load all agents and their repos
     const allAgents = await db.select().from(agentsTable);
     const allRepos = await db.select().from(agentReposTable);
 
-    if (allAgents.length === 0 || allRepos.length === 0) return;
+    console.log(`[agent-commits] ${allAgents.length} agents, ${allRepos.length} repo links`);
+
+    if (allAgents.length === 0 || allRepos.length === 0) {
+        console.log('[agent-commits] No agents or repos registered, skipping');
+        return;
+    }
 
     // Build identifier→agent map
     const identifierToAgent = new Map<string, typeof allAgents[0]>();
@@ -317,18 +321,29 @@ async function processAgentCommits() {
         since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     }
 
-    // Collect unique repos
     const uniqueRepos = [...new Set(allRepos.map(r => r.repoFullName))];
     const agentToken = process.env.AGENT_GITHUB_TOKEN;
+    if (!agentToken) {
+        console.warn('[agent-commits] AGENT_GITHUB_TOKEN is not set — private repo fetches will fail');
+    }
     const commitsProvider = new GitHubCommitsProvider(agentToken);
+
+    console.log(`[agent-commits] Fetching commits from ${uniqueRepos.length} repos since ${since}`);
+    console.log(`[agent-commits] Known identifiers: ${[...identifierToAgent.keys()].join(', ')}`);
 
     for (const repoFullName of uniqueRepos) {
         try {
             const commits = await commitsProvider.getRecentCommits(repoFullName, since);
+            console.log(`[agent-commits] ${repoFullName}: ${commits.length} commits fetched`);
 
+            let matched = 0;
             for (const commit of commits) {
                 const agent = identifierToAgent.get(commit.author);
-                if (!agent) continue;
+                if (!agent) {
+                    console.log(`[agent-commits] Skipping commit by "${commit.author}" — no matching agent identifier`);
+                    continue;
+                }
+                matched++;
 
                 const extId = `agent_commit:${commit.sha}`;
                 await db.insert(agentCommitsTable).values({
@@ -342,8 +357,9 @@ async function processAgentCommits() {
                     externalId: extId,
                 }).onConflictDoNothing();
             }
+            console.log(`[agent-commits] ${repoFullName}: ${matched}/${commits.length} commits matched to agents`);
         } catch (err) {
-            console.error(`Failed to process agent commits for ${repoFullName}:`, err);
+            console.error(`[agent-commits] Failed to fetch ${repoFullName}:`, err);
         }
     }
 }
