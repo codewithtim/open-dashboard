@@ -10,9 +10,13 @@ jest.mock('@/lib/client-factory', () => ({
 describe('1H:NAI Page', () => {
     it('renders stats and agent commit feed', async () => {
         const mockClient = {
+            getCompanies: jest.fn().mockResolvedValue([
+                { id: 'comp_openai', name: 'OpenAI', slug: 'openai', website: 'https://openai.com', createdAt: '2025-01-01T00:00:00Z' },
+                { id: 'comp_cognition', name: 'Cognition', slug: 'cognition', website: 'https://cognition.ai', createdAt: '2025-01-01T00:00:00Z' },
+            ]),
             getAgents: jest.fn().mockResolvedValue([
-                { id: 'agent-1', name: 'Operator', identifier: 'Operator', status: 'working', currentTask: 'Building feature', createdAt: '2025-01-01T00:00:00Z' },
-                { id: 'agent-2', name: 'Devin', identifier: 'Devin', status: 'idle', createdAt: '2025-02-01T00:00:00Z' },
+                { id: 'agent-1', name: 'Operator', identifier: 'Operator', companyId: 'comp_openai', status: 'working', currentTask: 'Building feature', createdAt: '2025-01-01T00:00:00Z' },
+                { id: 'agent-2', name: 'Devin', identifier: 'Devin', companyId: 'comp_cognition', status: 'idle', createdAt: '2025-02-01T00:00:00Z' },
             ]),
             getAgentCommits: jest.fn().mockResolvedValue([
                 {
@@ -55,18 +59,19 @@ describe('1H:NAI Page', () => {
         const page = await OneHumanNAIPage();
         render(page);
 
-        expect(screen.getByText('N AI')).toBeInTheDocument();
         expect(screen.getByText('Agents')).toBeInTheDocument();
         expect(screen.getByText('Commits')).toBeInTheDocument();
         expect(screen.getByText('Repos')).toBeInTheDocument();
-        // 2 agents, 3 commits, 2 repos — use getAllByText since '2' appears for both agents and repos
         expect(screen.getAllByText('2')).toHaveLength(2);
         expect(screen.getByText('3')).toBeInTheDocument();
         expect(screen.getByText('feat: add SEC Form 4 parser')).toBeInTheDocument();
+        expect(screen.getByText('OpenAI')).toBeInTheDocument();
+        expect(screen.getByText('Cognition')).toBeInTheDocument();
     });
 
     it('shows empty state when no commits', async () => {
         const mockClient = {
+            getCompanies: jest.fn().mockResolvedValue([]),
             getAgents: jest.fn().mockResolvedValue([]),
             getAgentCommits: jest.fn().mockResolvedValue([]),
         };
