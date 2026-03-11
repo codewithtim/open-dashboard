@@ -113,20 +113,27 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
                                 {companyAgents.length > 0 && (
                                     <div className="space-y-2 mb-3">
                                         {companyAgents.map((agent) => (
-                                            <div key={agent.id} className="flex items-center gap-3">
-                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                            <div key={agent.id} className="flex items-start gap-3">
+                                                <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${
                                                     agent.status === 'working' ? 'bg-accent' :
                                                     agent.status === 'offline' ? 'bg-red-400' :
                                                     'bg-slate-500'
                                                 }`} />
-                                                <span className="text-white text-sm font-medium">{agent.name}</span>
-                                                {agent.model && (
-                                                        <span className="text-xs text-slate-600">{agent.model}</span>
+                                                <div className="min-w-0">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-white text-sm font-medium">{agent.name}</span>
+                                                        {agent.model && (
+                                                            <span className="text-xs text-slate-600">{agent.model}</span>
+                                                        )}
+                                                        <span className="text-xs text-slate-500">{agent.status}</span>
+                                                        {agent.currentTask && (
+                                                            <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
+                                                        )}
+                                                    </div>
+                                                    {agent.description && (
+                                                        <p className="text-xs text-slate-500 mt-0.5">{agent.description}</p>
                                                     )}
-                                                    <span className="text-xs text-slate-500">{agent.status}</span>
-                                                {agent.currentTask && (
-                                                    <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
-                                                )}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -163,17 +170,24 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
                         <h2 className="text-white text-lg font-semibold mb-3">Independent Agents</h2>
                         <div className="space-y-2">
                             {agents.filter(a => !a.companyId).map((agent) => (
-                                <div key={agent.id} className="flex items-center gap-3">
-                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                <div key={agent.id} className="flex items-start gap-3">
+                                    <span className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${
                                         agent.status === 'working' ? 'bg-accent' :
                                         agent.status === 'offline' ? 'bg-red-400' :
                                         'bg-slate-500'
                                     }`} />
-                                    <span className="text-white text-sm font-medium">{agent.name}</span>
-                                    <span className="text-xs text-slate-500">{agent.status}</span>
-                                    {agent.currentTask && (
-                                        <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
-                                    )}
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-white text-sm font-medium">{agent.name}</span>
+                                            <span className="text-xs text-slate-500">{agent.status}</span>
+                                            {agent.currentTask && (
+                                                <span className="text-xs text-slate-400 truncate">&mdash; {agent.currentTask}</span>
+                                            )}
+                                        </div>
+                                        {agent.description && (
+                                            <p className="text-xs text-slate-500 mt-0.5">{agent.description}</p>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>
