@@ -62,7 +62,7 @@ describe('1H:NAI Page', () => {
         expect(screen.getByText('Agents')).toBeInTheDocument();
         expect(screen.getByText('Commits')).toBeInTheDocument();
         expect(screen.getByText('Repos')).toBeInTheDocument();
-        expect(screen.getAllByText('2')).toHaveLength(2);
+        expect(screen.getAllByText('2')).toHaveLength(3);
         expect(screen.getByText('3')).toBeInTheDocument();
         expect(screen.getByText('feat: add SEC Form 4 parser')).toBeInTheDocument();
         expect(screen.getByText('OpenAI')).toBeInTheDocument();
@@ -81,6 +81,6 @@ describe('1H:NAI Page', () => {
         render(page);
 
         expect(screen.getByText('No agent commits yet.')).toBeInTheDocument();
-        expect(screen.getAllByText('0')).toHaveLength(3);
+        expect(screen.getAllByText('0')).toHaveLength(4);
     });
 });
