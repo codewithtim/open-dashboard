@@ -68,7 +68,12 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
                 </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 w-full max-w-2xl">
+            <div className="grid grid-cols-4 gap-4 w-full max-w-2xl">
+                <div className="bg-surface-raised border border-surface-border rounded-2xl p-4 text-center">
+                    <Building2 className="w-5 h-5 text-accent mx-auto mb-1" />
+                    <p className="text-2xl font-bold text-white">{companies.length}</p>
+                    <p className="text-xs text-slate-500">Companies</p>
+                </div>
                 <div className="bg-surface-raised border border-surface-border rounded-2xl p-4 text-center">
                     <Bot className="w-5 h-5 text-accent mx-auto mb-1" />
                     <p className="text-2xl font-bold text-white">{agents.length}</p>
