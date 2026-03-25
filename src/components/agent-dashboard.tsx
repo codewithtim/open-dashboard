@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Bot, GitCommitHorizontal, FolderGit2, Globe, Building2 } from 'lucide-react';
-import { AgentCommitFeed } from '@/components/agent-commit-feed';
-import type { Company, Agent, AgentCommit } from '@/lib/data-client';
+import { AgentActivityFeed } from '@/components/agent-activity-feed';
+import type { Company, Agent, AgentCommit, AgentActivity } from '@/lib/data-client';
 
 const POLL_INTERVAL = 5 * 60 * 1000;
 
@@ -11,6 +11,7 @@ interface AgentDashboardProps {
     initialCompanies: Company[];
     initialAgents: Agent[];
     initialCommits: AgentCommit[];
+    initialActivities: AgentActivity[];
 }
 
 function AnimatedCount({ target }: { target: number }) {
@@ -31,10 +32,11 @@ function AnimatedCount({ target }: { target: number }) {
     return <>{count}</>;
 }
 
-export function AgentDashboard({ initialCompanies, initialAgents, initialCommits }: AgentDashboardProps) {
+export function AgentDashboard({ initialCompanies, initialAgents, initialCommits, initialActivities }: AgentDashboardProps) {
     const [companies, setCompanies] = useState(initialCompanies);
     const [agents, setAgents] = useState(initialAgents);
     const [commits, setCommits] = useState(initialCommits);
+    const [activities, setActivities] = useState(initialActivities);
 
     useEffect(() => {
         const interval = setInterval(async () => {
@@ -45,6 +47,7 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
                     setCompanies(data.companies);
                     setAgents(data.agents);
                     setCommits(data.commits);
+                    setActivities(data.activities);
                 }
             } catch {
                 // silently ignore polling failures
@@ -196,7 +199,7 @@ export function AgentDashboard({ initialCompanies, initialAgents, initialCommits
             )}
 
             <div className="w-full max-w-2xl">
-                <AgentCommitFeed commits={commits} />
+                <AgentActivityFeed commits={commits} activities={activities} />
             </div>
         </>
     );

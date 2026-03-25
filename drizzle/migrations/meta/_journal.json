@@ -57,6 +57,13 @@
       "when": 1773076671803,
       "tag": "0007_cute_ultragirl",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1774362640798,
+      "tag": "0008_stiff_night_nurse",
+      "breakpoints": true
     }
   ]
 }

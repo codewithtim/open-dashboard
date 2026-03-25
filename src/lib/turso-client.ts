@@ -12,6 +12,7 @@ import {
     companies as companiesTable,
     agents as agentsTable,
     agentCommits as agentCommitsTable,
+    agentActivities as agentActivitiesTable,
     expenses as expensesTable,
     costProjects as costProjectsTable,
     projectServices as projectServicesTable,
@@ -31,6 +32,7 @@ import {
     Company,
     Agent,
     AgentCommit,
+    AgentActivity,
     Expense,
     ExpenseSummary,
     ProjectService,
@@ -423,6 +425,34 @@ export class TursoClient implements DataClient {
             author: row.author || '',
             timestamp: row.timestamp || '',
             htmlUrl: row.htmlUrl || '',
+            agentName: row.agentName || undefined,
+        }));
+    }
+
+    async getAgentActivities(limit: number = 50): Promise<AgentActivity[]> {
+        const db = getDb();
+        const rows = await db
+            .select({
+                id: agentActivitiesTable.id,
+                agentId: agentActivitiesTable.agentId,
+                action: agentActivitiesTable.action,
+                description: agentActivitiesTable.description,
+                metadata: agentActivitiesTable.metadata,
+                timestamp: agentActivitiesTable.timestamp,
+                agentName: agentsTable.name,
+            })
+            .from(agentActivitiesTable)
+            .leftJoin(agentsTable, eq(agentActivitiesTable.agentId, agentsTable.id))
+            .orderBy(desc(agentActivitiesTable.timestamp))
+            .limit(limit);
+
+        return rows.map(row => ({
+            id: row.id,
+            agentId: row.agentId,
+            action: row.action,
+            description: row.description || undefined,
+            metadata: row.metadata || undefined,
+            timestamp: row.timestamp,
             agentName: row.agentName || undefined,
         }));
     }

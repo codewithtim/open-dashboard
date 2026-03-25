@@ -241,6 +241,41 @@ components:
           items:
             type: string
 
+    LogActivityRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          minLength: 1
+          description: The type of activity (e.g. orchestrator_run, code_review, deploy, test_run)
+        description:
+          type: string
+          description: Human-readable description of what happened
+        metadata:
+          type: string
+          description: Optional JSON string with extra context
+
+    ActivityResponse:
+      type: object
+      required: [id, agentId, action, timestamp]
+      properties:
+        id:
+          type: integer
+        agentId:
+          type: string
+        action:
+          type: string
+        description:
+          type: string
+          nullable: true
+        metadata:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+
     Error:
       type: object
       required: [error]
@@ -515,6 +550,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HeartbeatResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agents/{id}/activities:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+
+    post:
+      operationId: logAgentActivity
+      summary: Log an activity event for this agent
+      description: Append-only log of agent actions such as orchestrator runs, code reviews, deploys, and other non-commit activity.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogActivityRequest'
+      responses:
+        '201':
+          description: Activity logged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
           content:

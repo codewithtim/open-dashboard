@@ -53,6 +53,16 @@ describe('1H:NAI Page', () => {
                     agentName: 'Devin',
                 },
             ]),
+            getAgentActivities: jest.fn().mockResolvedValue([
+                {
+                    id: 1,
+                    agentId: 'agent-1',
+                    action: 'orchestrator_run',
+                    description: 'Started scheduled orchestrator run',
+                    timestamp: '2025-01-16T06:25:00Z',
+                    agentName: 'Operator',
+                },
+            ]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
@@ -74,13 +84,14 @@ describe('1H:NAI Page', () => {
             getCompanies: jest.fn().mockResolvedValue([]),
             getAgents: jest.fn().mockResolvedValue([]),
             getAgentCommits: jest.fn().mockResolvedValue([]),
+            getAgentActivities: jest.fn().mockResolvedValue([]),
         };
         (getDataClient as jest.Mock).mockReturnValue(mockClient);
 
         const page = await OneHumanNAIPage();
         render(page);
 
-        expect(screen.getByText('No agent commits yet.')).toBeInTheDocument();
+        expect(screen.getByText('No agent activity yet.')).toBeInTheDocument();
         expect(screen.getAllByText('0')).toHaveLength(4);
     });
 });

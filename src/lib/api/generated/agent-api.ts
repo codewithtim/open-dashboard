@@ -285,6 +285,29 @@ export const SetAgentProjectsResponse = zod.object({
 
 
 /**
+ * @summary Log an activity event for this agent
+ */
+export const LogAgentActivityParams = zod.object({
+  "id": zod.string()
+})
+
+export const LogAgentActivityBody = zod.object({
+  "action": zod.string().min(1),
+  "description": zod.string().optional(),
+  "metadata": zod.string().optional()
+})
+
+export const LogAgentActivityResponse = zod.object({
+  "id": zod.number(),
+  "agentId": zod.string(),
+  "action": zod.string(),
+  "description": zod.string().nullish(),
+  "metadata": zod.string().nullish(),
+  "timestamp": zod.iso.datetime({})
+})
+
+
+/**
  * @summary Get the OpenAPI specification
  */
 export const GetOpenApiSpecResponse = zod.looseObject({

@@ -153,6 +153,16 @@ export interface AgentCommit {
     agentName?: string;
 }
 
+export interface AgentActivity {
+    id: number;
+    agentId: string;
+    action: string;
+    description?: string;
+    metadata?: string;
+    timestamp: string;
+    agentName?: string;
+}
+
 export type {
     ExpenseCategory,
     ExpenseSource,
@@ -178,6 +188,7 @@ export interface DataClient {
     getCompanies(): Promise<Company[]>;
     getAgents(): Promise<Agent[]>;
     getAgentCommits(limit?: number): Promise<AgentCommit[]>;
+    getAgentActivities(limit?: number): Promise<AgentActivity[]>;
 
     // Expenses
     getExpenses(): Promise<Expense[]>;

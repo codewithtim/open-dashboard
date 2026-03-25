@@ -144,6 +144,19 @@ export const agentCommits = sqliteTable('agent_commits', {
     index('idx_agent_commits_timestamp').on(table.timestamp),
 ]);
 
+export const agentActivities = sqliteTable('agent_activities', {
+    id: integer('id').primaryKey({ autoIncrement: true }),
+    agentId: text('agent_id').notNull().references(() => agents.id),
+    action: text('action').notNull(),
+    description: text('description'),
+    metadata: text('metadata'),
+    timestamp: text('timestamp').notNull(),
+    externalId: text('external_id').notNull().unique(),
+}, (table) => [
+    index('idx_agent_activities_agent').on(table.agentId),
+    index('idx_agent_activities_timestamp').on(table.timestamp),
+]);
+
 export const expenses = sqliteTable('expenses', {
     id: text('id').primaryKey(),
     amount: real('amount').notNull(),

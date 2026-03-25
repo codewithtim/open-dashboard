@@ -10,10 +10,11 @@ export const metadata = {
 
 export default async function OneHumanNAIPage() {
     const client = getDataClient();
-    const [companies, agents, commits] = await Promise.all([
+    const [companies, agents, commits, activities] = await Promise.all([
         client.getCompanies(),
         client.getAgents(),
         client.getAgentCommits(100),
+        client.getAgentActivities(100),
     ]);
 
     return (
@@ -22,6 +23,7 @@ export default async function OneHumanNAIPage() {
                 initialCompanies={companies}
                 initialAgents={agents}
                 initialCommits={commits}
+                initialActivities={activities}
             />
         </main>
     );

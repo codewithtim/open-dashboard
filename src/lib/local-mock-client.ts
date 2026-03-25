@@ -1,4 +1,4 @@
-import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Company, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, StreamSummary, Stream, StreamCommit, ActivityEvent, Company, Agent, AgentCommit, AgentActivity, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
 
 const mockProjects: Project[] = [
     { id: 'youtube-main', name: 'Main YouTube Channel', description: 'Live coding streams and tech tutorials on YouTube.', type: 'content', status: 'active', platform: 'youtube' },
@@ -426,6 +426,33 @@ const mockAgentCommits: AgentCommit[] = [
     },
 ];
 
+const mockAgentActivities: AgentActivity[] = [
+    {
+        id: 1,
+        agentId: 'agent-operator',
+        action: 'orchestrator_run',
+        description: 'Started scheduled orchestrator run for insider_trading_tracker',
+        timestamp: '2025-01-16T06:25:00Z',
+        agentName: 'Operator',
+    },
+    {
+        id: 2,
+        agentId: 'agent-operator',
+        action: 'code_review',
+        description: 'Reviewed PR #42: SEC filing parser improvements',
+        timestamp: '2025-01-16T05:00:00Z',
+        agentName: 'Operator',
+    },
+    {
+        id: 3,
+        agentId: 'agent-operator',
+        action: 'orchestrator_run',
+        description: 'Completed nightly dependency audit — no vulnerabilities found',
+        timestamp: '2025-01-15T20:00:00Z',
+        agentName: 'Operator',
+    },
+];
+
 const mockExpenses: Expense[] = [
     {
         id: 'exp-1',
@@ -561,6 +588,12 @@ export class LocalMockClient implements DataClient {
 
     async getAgentCommits(limit: number = 50): Promise<AgentCommit[]> {
         return [...mockAgentCommits]
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .slice(0, limit);
+    }
+
+    async getAgentActivities(limit: number = 50): Promise<AgentActivity[]> {
+        return [...mockAgentActivities]
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
             .slice(0, limit);
     }
