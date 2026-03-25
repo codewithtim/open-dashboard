@@ -1,7 +1,7 @@
 import { Client } from '@notionhq/client';
 import { PageObjectResponse, PartialPageObjectResponse, PartialDatabaseObjectResponse, DatabaseObjectResponse } from '@notionhq/client/build/src/api-endpoints';
 
-import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit, ActivityEvent, ActivityEventType, ActivityEventPayload, Company, Agent, AgentCommit, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
+import { DataClient, Project, DashboardStats, ProjectDetails, Metric, StreamSummary, Stream, StreamCommit, ActivityEvent, ActivityEventType, ActivityEventPayload, Company, Agent, AgentCommit, AgentActivity, Expense, ExpenseSummary, ProjectService, CreateExpenseInput, CostAllocation } from './data-client';
 
 export const notion = new Client({
     auth: process.env.NOTION_TOKEN,
@@ -449,6 +449,10 @@ export class NotionClient implements DataClient {
     }
 
     async getAgentCommits(): Promise<AgentCommit[]> {
+        return [];
+    }
+
+    async getAgentActivities(): Promise<AgentActivity[]> {
         return [];
     }
 
